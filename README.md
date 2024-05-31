@@ -1,6 +1,6 @@
 # Citymapper
 
-Citymapper is an application designed to optimize travel times within the Parisian transport network. This project focuses on reducing CO2 emissions by providing the most efficient routes for users, leveraging advanced algorithms and modern web technologies.
+Citymapper is an application designed to optimize travel times within the Parisian transport network. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
 
 ## TODO
 
@@ -17,19 +17,11 @@ Citymapper is an application designed to optimize travel times within the Parisi
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Setup and Installation](#setup-and-installation)
-- [Development](#development)
-- [Testing](#testing)
-- [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
-
-## Project Overview
-
-The primary objective of Citymapper is to provide an efficient route planning solution for users in Paris. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
 
 ## Features
 

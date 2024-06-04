@@ -4,6 +4,9 @@ extern crate rocket;
 use rocket::response::stream::TextStream;
 use rocket::tokio::time::{interval, Duration};
 use rocket::Request;
+pub mod models;
+pub mod schema;
+mod services;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -32,5 +35,6 @@ fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![index])
         .mount("/", routes![hello])
+        .mount("/", routes![services::list])
         .register("/", catchers![not_found])
 }

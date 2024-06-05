@@ -26,3 +26,13 @@ pub fn list() -> Json<Vec<models::Agency>> {
         .expect("Error loading agencies");
     Json(results)
 }
+
+// add a new agency to the database
+pub fn add(document: models::Agency) -> Result<(), diesel::result::Error> {
+    use schema::agency::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(agency)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}

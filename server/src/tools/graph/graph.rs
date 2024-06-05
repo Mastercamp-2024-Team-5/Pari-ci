@@ -1,5 +1,5 @@
-use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Debug, Clone)]
 pub struct Edge {
@@ -7,6 +7,7 @@ pub struct Edge {
     pub weight: u32,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Node {
     pub id: usize,
@@ -31,7 +32,14 @@ impl Graph {
         }
     }
 
-    pub fn add_node(&mut self, id: usize, name: &str, terminus: bool, branchement: u32, lines: Vec<u32>) {
+    pub fn add_node(
+        &mut self,
+        id: usize,
+        name: &str,
+        terminus: bool,
+        branchement: u32,
+        lines: Vec<u32>,
+    ) {
         let index = self.nodes.len();
         self.nodes.push(Node {
             id,
@@ -119,4 +127,3 @@ impl PartialOrd for State {
         Some(self.cmp(other))
     }
 }
-

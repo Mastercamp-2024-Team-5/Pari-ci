@@ -2,10 +2,15 @@
 name = "citymapper-server"
 version = "0.1.0"
 edition = "2021"
+default-run = "citymapper-server"
 
 [[bin]]
 name = "graph_test"
 path = "src/tools/graph/graph_test.rs"
+
+[[bin]]
+name = "setup_db"
+path = "src/setup_db.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

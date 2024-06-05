@@ -18,7 +18,7 @@ pub fn establish_connection_pg() -> PgConnection {
 
 // return a list of agencies in JSON format
 #[get("/agencies")]
-pub fn list() -> Json<Vec<models::Agency>> {
+pub fn list_agency() -> Json<Vec<models::Agency>> {
     use schema::agency::dsl::*;
     let connection = &mut establish_connection_pg();
     let results = agency
@@ -28,10 +28,31 @@ pub fn list() -> Json<Vec<models::Agency>> {
 }
 
 // add a new agency to the database
-pub fn add(document: models::Agency) -> Result<(), diesel::result::Error> {
+pub fn add_agency(document: models::Agency) -> Result<(), diesel::result::Error> {
     use schema::agency::dsl::*;
     let connection = &mut establish_connection_pg();
     diesel::insert_into(agency)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+// return a list of routes in JSON format
+#[get("/routes")]
+pub fn list_routes() -> Json<Vec<models::Route>> {
+    use schema::routes::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = routes
+        .load::<models::Route>(connection)
+        .expect("Error loading routes");
+    Json(results)
+}
+
+// add a new route to the database
+pub fn add_route(document: models::Route) -> Result<(), diesel::result::Error> {
+    use schema::routes::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(routes)
         .values(&document)
         .execute(connection)?;
     Ok(())

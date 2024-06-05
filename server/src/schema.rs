@@ -30,8 +30,7 @@ diesel::table! {
         short_name -> Varchar,
         long_name -> Text,
         description -> Nullable<Text>,
-        #[sql_name = "type"]
-        type_ -> Int4,
+        route_type -> Int4,
         #[max_length = 255]
         url -> Nullable<Varchar>,
         #[max_length = 255]

@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 import LeftSearch from './components/LeftSearch';
 import { ChakraProvider } from '@chakra-ui/react';
+import Map from './components/Map';
 
 function App() {
   return (
@@ -23,7 +24,9 @@ function App() {
         <Container flex="1" bg="F6FBF9" maxW="33vw">
           <LeftSearch />
         </Container>
-        <Container flex="1" bg="red.400" maxW="67vw"></Container>
+        <Container flex="1" bg="red.400" maxW="67vw" margin={0} padding={0}>
+          <Map />
+        </Container>
       </Container>
     </ChakraProvider>
   );

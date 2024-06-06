@@ -35,6 +35,7 @@ fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![index])
         .mount("/", routes![hello])
-        .mount("/", routes![services::list])
+        .mount("/", routes![services::list_agency])
+        .mount("/", routes![services::list_routes])
         .register("/", catchers![not_found])
 }

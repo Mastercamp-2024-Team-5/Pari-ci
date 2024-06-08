@@ -61,6 +61,35 @@ diesel::table! {
 }
 
 diesel::table! {
+    stops (stop_id) {
+        #[max_length = 255]
+        stop_id -> Varchar,
+        #[max_length = 255]
+        stop_code -> Nullable<Varchar>,
+        #[max_length = 255]
+        stop_name -> Varchar,
+        #[max_length = 255]
+        stop_desc -> Nullable<Varchar>,
+        stop_lat -> Float8,
+        stop_lon -> Float8,
+        #[max_length = 255]
+        zone_id -> Varchar,
+        #[max_length = 255]
+        stop_url -> Nullable<Varchar>,
+        location_type -> Int4,
+        #[max_length = 255]
+        parent_station -> Varchar,
+        #[max_length = 255]
+        stop_timezone -> Nullable<Varchar>,
+        #[max_length = 255]
+        level_id -> Nullable<Varchar>,
+        wheelchair_boarding -> Int4,
+        #[max_length = 255]
+        platform_code -> Nullable<Varchar>,
+    }
+}
+
+diesel::table! {
     trips (trip_id) {
         #[max_length = 255]
         route_id -> Varchar,
@@ -90,5 +119,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     calendar,
     calendar_dates,
     routes,
+    stops,
     trips,
 );

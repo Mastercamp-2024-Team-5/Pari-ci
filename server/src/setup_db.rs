@@ -1,4 +1,7 @@
-use services::{add_agencies, add_calendar_dates, add_calendars, add_routes, add_trips};
+use std::str::FromStr;
+
+use models::{Agency, Calendar, CalendarDate, Route, Stop, Trip};
+use services::{add_agencies, add_calendar_dates, add_calendars, add_routes, add_stops, add_trips};
 
 extern crate diesel;
 extern crate rocket;
@@ -6,22 +9,6 @@ pub mod models;
 pub mod schema;
 mod services;
 pub mod tools;
-
-// // macro for adding and matching errors
-// macro_rules! add_ignore_unique {
-//     ($document:expr, $function:ident) => {
-//         match services::$function($document) {
-//             Ok(_) => (),
-//             Err(e) => match e {
-//                 diesel::result::Error::DatabaseError(
-//                     diesel::result::DatabaseErrorKind::UniqueViolation,
-//                     _,
-//                 ) => (),
-//                 _ => panic!("Error inserting document: {:?}", e),
-//             },
-//         }
-//     };
-// }
 
 // macro for opening a file and getting the contents
 macro_rules! get_entries {
@@ -35,83 +22,118 @@ macro_rules! get_entries {
     };
 }
 
+#[derive(PartialEq)]
+enum Task {
+    AddAgencies,
+    AddRoutes,
+    AddTrips,
+    AddCalendars,
+    AddCalendarDates,
+    AddStops,
+    AddAll,
+    Invalid,
+}
+
+const CHUNK_SIZE: usize = 4096;
+
 fn main() {
+    // get arguments of the command line
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() != 2 {
+        println!("Usage: cargo run --bin setup_db <task>");
+        std::process::exit(1);
+    }
+    let task = match args[1].as_str() {
+        "AddAgencies" => Task::AddAgencies,
+        "AddRoutes" => Task::AddRoutes,
+        "AddTrips" => Task::AddTrips,
+        "AddCalendars" => Task::AddCalendars,
+        "AddCalendarDates" => Task::AddCalendarDates,
+        "AddStops" => Task::AddStops,
+        "AddAll" => Task::AddAll,
+        _ => Task::Invalid,
+    };
     let t1 = std::time::Instant::now();
-    // read the agency.txt file from the data folder
-    let path = "src/data/agency.txt";
-    let mut agencies: Vec<models::Agency> = Vec::new();
 
-    // iterate over the lines
-    for line in get_entries!(path) {
-        agencies.push(line.parse().unwrap());
-
-        if agencies.len() == 1000 {
-            print!(".");
-            add_agencies(&agencies).unwrap();
-            agencies.clear();
-        }
+    if task == Task::Invalid {
+        println!("Invalid task");
+        std::process::exit(1);
     }
-    add_agencies(&agencies).unwrap();
 
-    // read the routes.txt file from the data folder
-    let path = "src/data/routes.txt";
-    let mut routes: Vec<models::Route> = Vec::new();
+    if task == Task::AddAgencies || task == Task::AddAll {
+        let path = "src/data/agencies.txt";
 
-    // iterate over the lines
-    for line in get_entries!(path) {
-        // parse the line into a Route struct
-        routes.push(line.parse().unwrap());
-
-        // if the vector has 1000 elements, add them to the database
-        if routes.len() == 1000 {
-            print!(".");
-            add_routes(&routes).unwrap();
-            routes.clear();
-        }
+        // add tasks to the database by batch of 1000
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_agencies(
+                &chunk
+                    .iter()
+                    .map(|line| Agency::from_str(line).unwrap())
+                    .collect::<Vec<Agency>>(),
+            )
+            .unwrap()
+        })
     }
-    add_routes(&routes).unwrap();
-
-    let path = "src/data/trips.txt";
-    let mut trips: Vec<models::Trip> = Vec::new();
-
-    for line in get_entries!(path) {
-        trips.push(line.parse().unwrap());
-
-        if trips.len() == 1000 {
-            print!(".");
-            add_trips(&trips).unwrap();
-            trips.clear();
-        }
+    if task == Task::AddRoutes || task == Task::AddAll {
+        let path = "src/data/routes.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_routes(
+                &chunk
+                    .iter()
+                    .map(|line| Route::from_str(line).unwrap())
+                    .collect::<Vec<Route>>(),
+            )
+            .unwrap()
+        })
     }
-    add_trips(&trips).unwrap();
-
-    let path = "src/data/calendar.txt";
-    let mut calendars: Vec<models::Calendar> = Vec::new();
-
-    for line in get_entries!(path) {
-        calendars.push(line.parse().unwrap());
-
-        if calendars.len() == 1000 {
-            print!(".");
-            add_calendars(&calendars).unwrap();
-            calendars.clear();
-        }
+    if task == Task::AddTrips || task == Task::AddAll {
+        let path = "src/data/trips.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_trips(
+                &chunk
+                    .iter()
+                    .map(|line| Trip::from_str(line).unwrap())
+                    .collect::<Vec<Trip>>(),
+            )
+            .unwrap()
+        })
     }
-    add_calendars(&calendars).unwrap();
-
-    let path = "src/data/calendar_dates.txt";
-    let mut calendar_dates: Vec<models::CalendarDate> = Vec::new();
-
-    for line in get_entries!(path) {
-        calendar_dates.push(line.parse().unwrap());
-
-        if calendar_dates.len() == 1000 {
-            print!(".");
-            add_calendar_dates(&calendar_dates).unwrap();
-            calendar_dates.clear();
-        }
+    if task == Task::AddCalendars || task == Task::AddAll {
+        let path = "src/data/calendar.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_calendars(
+                &chunk
+                    .iter()
+                    .map(|line| Calendar::from_str(line).unwrap())
+                    .collect::<Vec<Calendar>>(),
+            )
+            .unwrap()
+        })
     }
-    add_calendar_dates(&calendar_dates).unwrap();
+    if task == Task::AddCalendarDates || task == Task::AddAll {
+        let path = "src/data/calendar_dates.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_calendar_dates(
+                &chunk
+                    .iter()
+                    .map(|line| CalendarDate::from_str(line).unwrap())
+                    .collect::<Vec<CalendarDate>>(),
+            )
+            .unwrap()
+        })
+    }
+    if task == Task::AddStops || task == Task::AddAll {
+        let path = "src/data/stops.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_stops(
+                &chunk
+                    .iter()
+                    .map(|line| Stop::from_str(line).unwrap())
+                    .collect::<Vec<Stop>>(),
+            )
+            .unwrap()
+        })
+    }
 
     println!("Done!");
     println!("Elapsed time: {:?}", t1.elapsed());

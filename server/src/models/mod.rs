@@ -4,6 +4,7 @@ use super::schema::agency;
 use super::schema::calendar;
 use super::schema::calendar_dates;
 use super::schema::routes;
+use super::schema::stops;
 use super::schema::trips;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -253,6 +254,88 @@ impl FromStr for CalendarDate {
             service_id: parts[0].parse().unwrap(),
             date,
             exception_type: parts[2].parse().unwrap(),
+        })
+    }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = stops)]
+pub struct Stop {
+    pub stop_id: String,
+    pub stop_code: Option<String>,
+    pub stop_name: String,
+    pub stop_desc: Option<String>,
+    pub stop_lat: f64,
+    pub stop_lon: f64,
+    pub zone_id: String,
+    pub stop_url: Option<String>,
+    pub location_type: i32,
+    pub parent_station: String,
+    pub stop_timezone: Option<String>,
+    pub level_id: Option<String>,
+    pub wheelchair_boarding: i32,
+    pub platform_code: Option<String>,
+}
+
+impl FromStr for Stop {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        let parts = combine_parts(parts);
+        if parts.len() != 14 {
+            println!("Invalid number of fields: {}", parts.len());
+            println!("{:?}", parts);
+            return Err(());
+        }
+
+        // if field is empty, set it to None
+        let stop_code = if parts[1].is_empty() {
+            None
+        } else {
+            Some(parts[1].to_string())
+        };
+        let stop_desc = if parts[3].is_empty() {
+            None
+        } else {
+            Some(parts[3].to_string())
+        };
+        let stop_url = if parts[7].is_empty() {
+            None
+        } else {
+            Some(parts[7].to_string())
+        };
+        let stop_timezone = if parts[10].is_empty() {
+            None
+        } else {
+            Some(parts[10].to_string())
+        };
+        let level_id = if parts[11].is_empty() {
+            None
+        } else {
+            Some(parts[11].to_string())
+        };
+        let platform_code = if parts[12].is_empty() {
+            None
+        } else {
+            Some(parts[12].to_string())
+        };
+
+        Ok(Self {
+            stop_id: parts[0].parse().unwrap(),
+            stop_code,
+            stop_name: parts[2].to_string(),
+            stop_desc,
+            stop_lat: parts[4].parse().unwrap(),
+            stop_lon: parts[5].parse().unwrap(),
+            zone_id: parts[6].to_string(),
+            stop_url,
+            location_type: parts[8].parse().unwrap(),
+            parent_station: parts[9].to_string(),
+            stop_timezone,
+            level_id,
+            wheelchair_boarding: parts[12].parse().unwrap(),
+            platform_code,
         })
     }
 }

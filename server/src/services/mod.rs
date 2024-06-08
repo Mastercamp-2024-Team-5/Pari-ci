@@ -169,3 +169,32 @@ pub fn add_calendar_dates(
         .execute(connection)?;
     Ok(())
 }
+
+#[get("/stops")]
+pub fn list_stops() -> Json<Vec<models::Stop>> {
+    use schema::stops::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = stops
+        .load::<models::Stop>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}
+
+pub fn add_stop(document: models::Stop) -> Result<(), diesel::result::Error> {
+    use schema::stops::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(stops)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_stops(documents: &Vec<models::Stop>) -> Result<(), diesel::result::Error> {
+    use schema::stops::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(stops)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}

@@ -37,5 +37,6 @@ fn rocket() -> _ {
         .mount("/", routes![hello])
         .mount("/", routes![services::list_agency])
         .mount("/", routes![services::list_routes])
+        .mount("/", routes![services::list_trips])
         .register("/", catchers![not_found])
 }

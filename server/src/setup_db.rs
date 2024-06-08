@@ -1,24 +1,26 @@
+use services::{add_agencies, add_routes, add_trips};
+
 extern crate diesel;
 extern crate rocket;
 pub mod models;
 pub mod schema;
 mod services;
 
-// macro for adding and matching errors
-macro_rules! add_ignore_unique {
-    ($document:expr, $function:ident) => {
-        match services::$function($document) {
-            Ok(_) => (),
-            Err(e) => match e {
-                diesel::result::Error::DatabaseError(
-                    diesel::result::DatabaseErrorKind::UniqueViolation,
-                    _,
-                ) => (),
-                _ => panic!("Error inserting document: {:?}", e),
-            },
-        }
-    };
-}
+// // macro for adding and matching errors
+// macro_rules! add_ignore_unique {
+//     ($document:expr, $function:ident) => {
+//         match services::$function($document) {
+//             Ok(_) => (),
+//             Err(e) => match e {
+//                 diesel::result::Error::DatabaseError(
+//                     diesel::result::DatabaseErrorKind::UniqueViolation,
+//                     _,
+//                 ) => (),
+//                 _ => panic!("Error inserting document: {:?}", e),
+//             },
+//         }
+//     };
+// }
 
 // macro for opening a file and getting the contents
 macro_rules! get_entries {
@@ -33,28 +35,55 @@ macro_rules! get_entries {
 }
 
 fn main() {
+    let t1 = std::time::Instant::now();
     // read the agency.txt file from the data folder
     let path = "src/data/agency.txt";
+    let mut agencies: Vec<models::Agency> = Vec::new();
 
     // iterate over the lines
     for line in get_entries!(path) {
-        // parse the line into an Agency struct
-        let agency: models::Agency = line.parse().unwrap();
+        agencies.push(line.parse().unwrap());
 
-        add_ignore_unique!(agency, add_agency);
+        if agencies.len() == 1000 {
+            print!(".");
+            add_agencies(&agencies).unwrap();
+            agencies.clear();
+        }
     }
+    add_agencies(&agencies).unwrap();
 
     // read the routes.txt file from the data folder
     let path = "src/data/routes.txt";
+    let mut routes: Vec<models::Route> = Vec::new();
 
     // iterate over the lines
     for line in get_entries!(path) {
         // parse the line into a Route struct
-        let route: models::Route = line.parse().unwrap();
+        routes.push(line.parse().unwrap());
 
-        // insert the route into the database
-        add_ignore_unique!(route, add_route);
+        // if the vector has 1000 elements, add them to the database
+        if routes.len() == 1000 {
+            print!(".");
+            add_routes(&routes).unwrap();
+            routes.clear();
+        }
     }
+    add_routes(&routes).unwrap();
+
+    let path = "src/data/trips.txt";
+    let mut trips: Vec<models::Trip> = Vec::new();
+
+    for line in get_entries!(path) {
+        trips.push(line.parse().unwrap());
+
+        if trips.len() == 1000 {
+            print!(".");
+            add_trips(&trips).unwrap();
+            trips.clear();
+        }
+    }
+    add_trips(&trips).unwrap();
 
     println!("Done!");
+    println!("Elapsed time: {:?}", t1.elapsed());
 }

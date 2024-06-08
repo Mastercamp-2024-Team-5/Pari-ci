@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 extern crate diesel;
 extern crate rocket;
 use crate::models;
@@ -37,6 +38,16 @@ pub fn add_agency(document: models::Agency) -> Result<(), diesel::result::Error>
     Ok(())
 }
 
+pub fn add_agencies(documents: &Vec<models::Agency>) -> Result<(), diesel::result::Error> {
+    use schema::agency::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(agency)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}
+
 // return a list of routes in JSON format
 #[get("/routes")]
 pub fn list_routes() -> Json<Vec<models::Route>> {
@@ -54,6 +65,47 @@ pub fn add_route(document: models::Route) -> Result<(), diesel::result::Error> {
     let connection = &mut establish_connection_pg();
     diesel::insert_into(routes)
         .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_routes(documents: &Vec<models::Route>) -> Result<(), diesel::result::Error> {
+    use schema::routes::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(routes)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}
+
+// return a list of trips in JSON format
+#[get("/trips")]
+pub fn list_trips() -> Json<Vec<models::Trip>> {
+    use schema::trips::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = trips
+        .load::<models::Trip>(connection)
+        .expect("Error loading trips");
+    Json(results)
+}
+
+// add a new trip to the database
+pub fn add_trip(document: models::Trip) -> Result<(), diesel::result::Error> {
+    use schema::trips::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(trips)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_trips(documents: &Vec<models::Trip>) -> Result<(), diesel::result::Error> {
+    use schema::trips::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(trips)
+        .values(documents)
+        .on_conflict_do_nothing()
         .execute(connection)?;
     Ok(())
 }

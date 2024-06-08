@@ -1,10 +1,14 @@
 use std::str::FromStr;
 
 use super::schema::agency;
+use super::schema::calendar;
+use super::schema::calendar_dates;
 use super::schema::routes;
 use super::schema::trips;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use time::format_description;
+use time::Date;
 
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = agency)]
@@ -182,6 +186,73 @@ impl FromStr for Trip {
             shape_id,
             wheelchair_accessible: parts[8].parse().unwrap(),
             bikes_allowed: parts[9].parse().unwrap(),
+        })
+    }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = calendar)]
+pub struct Calendar {
+    pub service_id: String,
+    pub days: i32,
+    pub start_date: Date,
+    pub end_date: Date,
+}
+
+impl FromStr for Calendar {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        let format = format_description::parse("[year][month][day]").unwrap();
+
+        if parts.len() != 10 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        let start_date = Date::parse(parts[8], &format).unwrap();
+        let end_date = Date::parse(parts[9], &format).unwrap();
+
+        let days: i32 = parts[1..8].iter().enumerate().fold(0, |acc, (i, day)| {
+            acc + day.parse::<i32>().unwrap() * 2_i32.pow(i as u32)
+        });
+
+        Ok(Self {
+            service_id: parts[0].parse().unwrap(),
+            days,
+            start_date,
+            end_date,
+        })
+    }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = calendar_dates)]
+pub struct CalendarDate {
+    pub service_id: String,
+    pub date: Date,
+    pub exception_type: i32,
+}
+
+impl FromStr for CalendarDate {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        let format = format_description::parse("[year][month][day]").unwrap();
+
+        if parts.len() != 3 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        let date = Date::parse(parts[1], &format).unwrap();
+
+        Ok(Self {
+            service_id: parts[0].parse().unwrap(),
+            date,
+            exception_type: parts[2].parse().unwrap(),
         })
     }
 }

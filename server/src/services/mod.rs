@@ -109,3 +109,63 @@ pub fn add_trips(documents: &Vec<models::Trip>) -> Result<(), diesel::result::Er
         .execute(connection)?;
     Ok(())
 }
+
+#[get("/calendar")]
+pub fn list_calendar() -> Json<Vec<models::Calendar>> {
+    use schema::calendar::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = calendar
+        .load::<models::Calendar>(connection)
+        .expect("Error loading calendar");
+    Json(results)
+}
+
+pub fn add_calendar(document: models::Calendar) -> Result<(), diesel::result::Error> {
+    use schema::calendar::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(calendar)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_calendars(documents: &Vec<models::Calendar>) -> Result<(), diesel::result::Error> {
+    use schema::calendar::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(calendar)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}
+
+#[get("/calendar_dates")]
+pub fn list_calendar_dates() -> Json<Vec<models::CalendarDate>> {
+    use schema::calendar_dates::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = calendar_dates
+        .load::<models::CalendarDate>(connection)
+        .expect("Error loading calendar_dates");
+    Json(results)
+}
+
+pub fn add_calendar_date(document: models::CalendarDate) -> Result<(), diesel::result::Error> {
+    use schema::calendar_dates::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(calendar_dates)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_calendar_dates(
+    documents: &Vec<models::CalendarDate>,
+) -> Result<(), diesel::result::Error> {
+    use schema::calendar_dates::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(calendar_dates)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}

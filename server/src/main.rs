@@ -7,6 +7,7 @@ use rocket::Request;
 pub mod models;
 pub mod schema;
 mod services;
+pub mod tools;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -38,5 +39,7 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_agency])
         .mount("/", routes![services::list_routes])
         .mount("/", routes![services::list_trips])
+        .mount("/", routes![services::list_calendar_dates])
+        .mount("/", routes![services::list_calendar])
         .register("/", catchers![not_found])
 }

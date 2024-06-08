@@ -1,10 +1,11 @@
-use services::{add_agencies, add_routes, add_trips};
+use services::{add_agencies, add_calendar_dates, add_calendars, add_routes, add_trips};
 
 extern crate diesel;
 extern crate rocket;
 pub mod models;
 pub mod schema;
 mod services;
+pub mod tools;
 
 // // macro for adding and matching errors
 // macro_rules! add_ignore_unique {
@@ -83,6 +84,34 @@ fn main() {
         }
     }
     add_trips(&trips).unwrap();
+
+    let path = "src/data/calendar.txt";
+    let mut calendars: Vec<models::Calendar> = Vec::new();
+
+    for line in get_entries!(path) {
+        calendars.push(line.parse().unwrap());
+
+        if calendars.len() == 1000 {
+            print!(".");
+            add_calendars(&calendars).unwrap();
+            calendars.clear();
+        }
+    }
+    add_calendars(&calendars).unwrap();
+
+    let path = "src/data/calendar_dates.txt";
+    let mut calendar_dates: Vec<models::CalendarDate> = Vec::new();
+
+    for line in get_entries!(path) {
+        calendar_dates.push(line.parse().unwrap());
+
+        if calendar_dates.len() == 1000 {
+            print!(".");
+            add_calendar_dates(&calendar_dates).unwrap();
+            calendar_dates.clear();
+        }
+    }
+    add_calendar_dates(&calendar_dates).unwrap();
 
     println!("Done!");
     println!("Elapsed time: {:?}", t1.elapsed());

@@ -4,12 +4,13 @@ import "../assets/font/fontello/css/fontello.css";
 import data from "../assets/font/fontello/config.json";
 
 interface IconProps {
-  item: string;
-  size?: string;
-  style?: React.CSSProperties;
+  item: string; // Icon name (can be found in the config.json file in the glyphs[].css field)
+  size?: string; // Icon size (optional)
+  style?: React.CSSProperties; // Icon style (optional)
+  color?: string; // Icon color (if specifies a metro or RER number, color is set to the metro or RER color) (optional)
 }
 
-const Icon: React.FC<IconProps> = ({ item, size = "30px", style }) => {
+const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="" }) => {
   //Check if icon is in the css component of config.json data in the glyphs[].css
   if (!data.glyphs.some(glyph => glyph.css === item)) {
     return <Text style={{ color: "red"}}>Icon {item} not found</Text>;
@@ -73,9 +74,17 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style }) => {
     );
   }
 
+  let color_chosen = color;
+  if (color in colors_others === true) {
+    color_chosen = colors_others[color][0];
+  }
+  if (color in colors_metro === true) {
+    color_chosen = colors_metro[color][0];
+  }
+
   return (
     <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
-      <i className={`icon-${item}`} style={{ fontSize: size }}></i>
+      <i className={`icon-${item}`} style={{ fontSize: size, color: color_chosen }}></i>
     </Box>
   );
 };

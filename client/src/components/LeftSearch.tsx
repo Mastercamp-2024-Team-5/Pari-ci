@@ -13,7 +13,7 @@ const LeftSearch = () => {
           <Text fontFamily="Karla" fontSize="lg" color="32403B" mb={4} marginBottom="15%">
             Subtitle
           </Text>
-          <Icon item="8" />
+          <Icon item="barre" color="a" />
         </Stack>
         <VStack spacing={15} w="90%" alignSelf="center">
           <FormControl>

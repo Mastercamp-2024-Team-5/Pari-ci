@@ -23,3 +23,5 @@ target/
 # Environment file
 .env
 **/*/.env
+data.ms
+meilisearch

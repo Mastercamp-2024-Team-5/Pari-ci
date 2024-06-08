@@ -1,21 +1,7 @@
-import {
-  Container,
-  FormControl,
-  Input,
-  Stack,
-  Button,
-  Heading,
-  useColorModeValue,
-  VStack,
-  Center,
-  InputGroup,
-  Grid,
-  GridItem,
-  Text
-} from '@chakra-ui/react';
-import LeftSearch from './components/LeftSearch';
-import { ChakraProvider } from '@chakra-ui/react';
-import Map from './components/Map';
+import { Container } from "@chakra-ui/react";
+import LeftSearch from "./components/LeftSearch";
+import { ChakraProvider } from "@chakra-ui/react";
+import Map from "./components/Map";
 
 function App() {
   return (

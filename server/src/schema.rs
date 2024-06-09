@@ -1,9 +1,9 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    agency (id) {
+    agency (agency_id) {
         #[max_length = 255]
-        id -> Varchar,
+        agency_id -> Varchar,
         name -> Text,
         #[max_length = 255]
         url -> Varchar,
@@ -40,9 +40,9 @@ diesel::table! {
 }
 
 diesel::table! {
-    routes (id) {
+    routes (route_id) {
         #[max_length = 255]
-        id -> Varchar,
+        route_id -> Varchar,
         #[max_length = 255]
         agency_id -> Varchar,
         #[max_length = 255]

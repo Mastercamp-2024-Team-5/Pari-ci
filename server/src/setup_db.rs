@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use models::{Agency, Calendar, CalendarDate, Route, Stop, StopTime, Trip};
 use services::{
-    add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_time, add_stop_times,
-    add_stops, add_trips,
+    add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_times, add_stops,
+    add_trips,
 };
 
 extern crate diesel;

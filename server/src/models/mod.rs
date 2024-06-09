@@ -16,7 +16,7 @@ use time::Date;
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = agency)]
 pub struct Agency {
-    pub id: String,
+    pub agency_id: String,
     pub name: String,
     pub url: String,
     pub timezone: String,
@@ -60,7 +60,7 @@ impl FromStr for Agency {
         };
 
         Ok(Self {
-            id: parts[0].parse().unwrap(),
+            agency_id: parts[0].parse().unwrap(),
             name: parts[1].to_string(),
             url: parts[2].to_string(),
             timezone: parts[3].to_string(),
@@ -75,7 +75,7 @@ impl FromStr for Agency {
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = routes)]
 pub struct Route {
-    pub id: String,
+    pub route_id: String,
     pub agency_id: String,
     pub short_name: String,
     pub long_name: String,
@@ -125,7 +125,7 @@ impl FromStr for Route {
         };
 
         Ok(Self {
-            id: parts[0].parse().unwrap(),
+            route_id: parts[0].parse().unwrap(),
             agency_id: parts[1].parse().unwrap(),
             short_name: parts[2].to_string(),
             long_name: parts[3].to_string(),
@@ -139,7 +139,7 @@ impl FromStr for Route {
     }
 }
 
-#[derive(Queryable, Insertable, Serialize, Deserialize, Debug, AsChangeset)]
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = trips)]
 pub struct Trip {
     pub route_id: String,

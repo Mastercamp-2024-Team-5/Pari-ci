@@ -2,7 +2,7 @@
 CREATE TABLE
     trips (
         route_id VARCHAR(255) NOT NULL,
-        service_id VARCHAR(255) NOT NULL UNIQUE,
+        service_id VARCHAR(255) NOT NULL,
         trip_id VARCHAR(255) NOT NULL,
         headsign VARCHAR(255) NOT NULL,
         short_name VARCHAR(255),
@@ -13,4 +13,5 @@ CREATE TABLE
         bikes_allowed INT NOT NULL,
         PRIMARY KEY (trip_id),
         FOREIGN KEY (route_id) REFERENCES routes (id)
+        -- FOREIGN KEY (service_id) REFERENCES calendar (service_id)
     );

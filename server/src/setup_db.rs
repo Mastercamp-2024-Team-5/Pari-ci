@@ -1,7 +1,10 @@
 use std::str::FromStr;
 
-use models::{Agency, Calendar, CalendarDate, Route, Stop, Trip};
-use services::{add_agencies, add_calendar_dates, add_calendars, add_routes, add_stops, add_trips};
+use models::{Agency, Calendar, CalendarDate, Route, Stop, StopTime, Trip};
+use services::{
+    add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_time, add_stop_times,
+    add_stops, add_trips,
+};
 
 extern crate diesel;
 extern crate rocket;
@@ -30,6 +33,7 @@ enum Task {
     AddCalendars,
     AddCalendarDates,
     AddStops,
+    AddStopTimes,
     AddAll,
     Invalid,
 }
@@ -50,6 +54,7 @@ fn main() {
         "AddCalendars" => Task::AddCalendars,
         "AddCalendarDates" => Task::AddCalendarDates,
         "AddStops" => Task::AddStops,
+        "AddStopTimes" => Task::AddStopTimes,
         "AddAll" => Task::AddAll,
         _ => Task::Invalid,
     };
@@ -61,7 +66,7 @@ fn main() {
     }
 
     if task == Task::AddAgencies || task == Task::AddAll {
-        let path = "src/data/agencies.txt";
+        let path = "src/data/agency.txt";
 
         // add tasks to the database by batch of 1000
         get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
@@ -133,6 +138,18 @@ fn main() {
             )
             .unwrap()
         })
+    }
+    if task == Task::AddStopTimes || task == Task::AddAll {
+        let path = "src/data/stop_times.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_stop_times(
+                &chunk
+                    .iter()
+                    .map(|line| StopTime::from_str(line).unwrap())
+                    .collect::<Vec<StopTime>>(),
+            )
+            .unwrap()
+        });
     }
 
     println!("Done!");

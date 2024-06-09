@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use crate::schema::stop_times;
+
 use super::schema::agency;
 use super::schema::calendar;
 use super::schema::calendar_dates;
@@ -137,7 +139,7 @@ impl FromStr for Route {
     }
 }
 
-#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug, AsChangeset)]
 #[diesel(table_name = trips)]
 pub struct Trip {
     pub route_id: String,
@@ -366,4 +368,57 @@ fn combine_parts(parts: Vec<&str>) -> Vec<String> {
         }
     }
     combined_parts
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = stop_times)]
+pub struct StopTime {
+    pub trip_id: String,
+    pub arrival_time: String,
+    pub departure_time: String,
+    pub stop_id: String,
+    pub stop_sequence: i32,
+    pub pickup_type: i32,
+    pub drop_off_type: i32,
+    pub local_zone_id: Option<String>,
+    pub stop_headsign: Option<String>,
+    pub timepoint: i32,
+}
+
+impl FromStr for StopTime {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        let parts = combine_parts(parts);
+        if parts.len() != 10 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        // if field is empty, set it to None
+        let local_zone_id = if parts[7].is_empty() {
+            None
+        } else {
+            Some(parts[7].to_string())
+        };
+        let stop_headsign = if parts[8].is_empty() {
+            None
+        } else {
+            Some(parts[8].to_string())
+        };
+
+        Ok(Self {
+            trip_id: parts[0].parse().unwrap(),
+            arrival_time: parts[1].to_string(),
+            departure_time: parts[2].to_string(),
+            stop_id: parts[3].parse().unwrap(),
+            stop_sequence: parts[4].parse().unwrap(),
+            pickup_type: parts[5].parse().unwrap(),
+            drop_off_type: parts[6].parse().unwrap(),
+            local_zone_id,
+            stop_headsign,
+            timepoint: parts[9].parse().unwrap(),
+        })
+    }
 }

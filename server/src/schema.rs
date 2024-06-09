@@ -61,6 +61,27 @@ diesel::table! {
 }
 
 diesel::table! {
+    stop_times (trip_id, stop_id, stop_sequence, arrival_time, departure_time) {
+        #[max_length = 255]
+        trip_id -> Varchar,
+        #[max_length = 255]
+        arrival_time -> Varchar,
+        #[max_length = 255]
+        departure_time -> Varchar,
+        #[max_length = 255]
+        stop_id -> Varchar,
+        stop_sequence -> Int4,
+        pickup_type -> Int4,
+        drop_off_type -> Int4,
+        #[max_length = 255]
+        local_zone_id -> Nullable<Varchar>,
+        #[max_length = 255]
+        stop_headsign -> Nullable<Varchar>,
+        timepoint -> Int4,
+    }
+}
+
+diesel::table! {
     stops (stop_id) {
         #[max_length = 255]
         stop_id -> Varchar,
@@ -112,6 +133,8 @@ diesel::table! {
 }
 
 diesel::joinable!(routes -> agency (agency_id));
+diesel::joinable!(stop_times -> stops (stop_id));
+diesel::joinable!(stop_times -> trips (trip_id));
 diesel::joinable!(trips -> routes (route_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -119,6 +142,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     calendar,
     calendar_dates,
     routes,
+    stop_times,
     stops,
     trips,
 );

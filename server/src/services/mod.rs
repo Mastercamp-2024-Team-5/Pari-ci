@@ -198,3 +198,31 @@ pub fn add_stops(documents: &Vec<models::Stop>) -> Result<(), diesel::result::Er
         .execute(connection)?;
     Ok(())
 }
+
+#[get("/stop_times")]
+pub fn list_stop_times() -> Json<Vec<models::StopTime>> {
+    use schema::stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = stop_times
+        .load::<models::StopTime>(connection)
+        .expect("Error loading stop_times");
+    Json(results)
+}
+
+pub fn add_stop_time(document: models::StopTime) -> Result<(), diesel::result::Error> {
+    use schema::stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(stop_times)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_stop_times(documents: &Vec<models::StopTime>) -> Result<(), diesel::result::Error> {
+    use schema::stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(stop_times)
+        .values(documents)
+        .execute(connection)?;
+    Ok(())
+}

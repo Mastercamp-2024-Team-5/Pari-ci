@@ -25,3 +25,4 @@ target/
 **/*/.env
 data.ms
 meilisearch
+src/data/*

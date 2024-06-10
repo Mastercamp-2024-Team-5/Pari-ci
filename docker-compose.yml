@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: your_db_name
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - "7700:7700"
+
+  backend:
+    build:
+      context: ./server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - meilisearch
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres/your_db_name
+
+  frontend:
+    build:
+      context: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

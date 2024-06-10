@@ -32,7 +32,7 @@ const LeftSearch = () => {
           <Icon item="barre" color="a" />
         </Stack>
         <VStack spacing={15} w="90%" alignSelf="center">
-          <FormControl>
+          <FormControl isRequired>
             <Input
               focusBorderColor="#5eaf91"
               fontFamily="Karla"
@@ -47,7 +47,7 @@ const LeftSearch = () => {
               bg="white"
             />
           </FormControl>
-          <FormControl>
+          <FormControl isRequired>
             <InputGroup size="md">
               <Input
                 focusBorderColor="#5eaf91"

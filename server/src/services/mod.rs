@@ -10,6 +10,8 @@ use rocket::get;
 use rocket::serde::json::Json;
 use std::env;
 
+pub mod stops;
+
 pub fn establish_connection_pg() -> PgConnection {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -223,6 +225,7 @@ pub fn add_stop_times(documents: &Vec<models::StopTime>) -> Result<(), diesel::r
     let connection = &mut establish_connection_pg();
     diesel::insert_into(stop_times)
         .values(documents)
+        .on_conflict_do_nothing()
         .execute(connection)?;
     Ok(())
 }

@@ -111,6 +111,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    transfers (from_stop_id, to_stop_id) {
+        #[max_length = 255]
+        from_stop_id -> Varchar,
+        #[max_length = 255]
+        to_stop_id -> Varchar,
+        min_transfer_time -> Int4,
+    }
+}
+
+diesel::table! {
     trips (trip_id) {
         #[max_length = 255]
         route_id -> Varchar,
@@ -144,5 +154,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     routes,
     stop_times,
     stops,
+    transfers,
     trips,
 );

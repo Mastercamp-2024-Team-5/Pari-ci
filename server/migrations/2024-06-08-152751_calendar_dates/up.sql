@@ -5,5 +5,5 @@ CREATE TABLE
         date DATE NOT NULL,
         exception_type INT NOT NULL,
         PRIMARY KEY (service_id, date)
-        -- FOREIGN KEY (service_id) REFERENCES calendar (service_id)
+        -- FOREIGN KEY (service_id) REFERENCES calendar (service_id) -- removed because key some times not exists
     );

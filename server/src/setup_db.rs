@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use models::{Agency, Calendar, CalendarDate, Route, Stop, StopTime, Trip};
+use models::{Agency, Calendar, CalendarDate, Route, Stop, StopTime, Transfer, Trip};
 use services::{
     add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_times, add_stops,
-    add_trips,
+    add_transfers, add_trips,
 };
 use views::services::refresh_materialized_view;
 
@@ -36,6 +36,7 @@ enum Task {
     AddCalendarDates,
     AddStops,
     AddStopTimes,
+    AddTransfers,
     AddAll,
     Invalid,
 }
@@ -58,6 +59,7 @@ fn main() {
         "AddStops" => Task::AddStops,
         "AddStopTimes" => Task::AddStopTimes,
         "AddAll" => Task::AddAll,
+        "AddTransfers" => Task::AddTransfers,
         _ => Task::Invalid,
     };
     let t1 = std::time::Instant::now();
@@ -160,10 +162,30 @@ fn main() {
         });
         println!("Stop times added");
     }
+    if task == Task::AddTransfers || task == Task::AddAll {
+        let path = "src/data/transfers.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_transfers(
+                &chunk
+                    .iter()
+                    .map(|line| Transfer::from_str(line).unwrap())
+                    .collect::<Vec<Transfer>>(),
+            )
+            .unwrap()
+        });
+        println!("Transfers added");
+    }
 
-    // refresh the materialized view
-    refresh_materialized_view().unwrap();
-    println!("Materialized view refreshed");
+    if task == Task::AddAll
+        || task == Task::AddRoutes
+        || task == Task::AddTrips
+        || task == Task::AddStops
+        || task == Task::AddStopTimes
+    {
+        // refresh the materialized view
+        refresh_materialized_view().unwrap();
+        println!("Materialized view refreshed");
+    }
 
     println!("Done!");
     println!("Elapsed time: {:?}", t1.elapsed());

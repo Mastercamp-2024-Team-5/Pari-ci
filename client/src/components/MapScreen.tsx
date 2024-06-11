@@ -19,6 +19,20 @@ interface Stop {
   route_type: number;
 }
 
+interface Stop {
+  stop_id: string;
+  stop_name: string;
+  stop_lat: number;
+  stop_lon: number;
+  location_type: number;
+  parent_station: string;
+  wheelchair_boarding: number;
+  route_id: string;
+  route_short_name: string;
+  route_long_name: string;
+  route_type: number;
+}
+
 const MapScreen = () => {
   // const [stops, setStops] = useState<Stop[]>([]);
   const [uniqueMarkers, setUniqueMarkers] = useState<Stop[]>([]);

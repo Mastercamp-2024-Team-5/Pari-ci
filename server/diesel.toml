@@ -6,4 +6,4 @@ file = "src/schema.rs"
 custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
 
 [migrations_directory]
-dir = "/Users/paulmairesse/Code/Project-Factory/Citymapper-Clone/server/migrations"
+dir = "C:\\Users\\axell\\Desktop\\Courses\\L3\\Mastercamp\\Citymapper-Clone\\server\\migrations"

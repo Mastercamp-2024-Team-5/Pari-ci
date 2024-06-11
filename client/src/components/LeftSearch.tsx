@@ -28,7 +28,7 @@ const LeftSearch = () => {
           >
             Subtitle
           </Text>
-          <Icon item="barre" color="a" />
+          <Icon item="marker" color="a" />
         </Stack>
         <VStack spacing={15} w="90%" alignSelf="center">
           <FormControl isRequired>

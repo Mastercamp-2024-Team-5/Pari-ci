@@ -10,7 +10,7 @@ function App() {
         <Container flex="1" bg="F6FBF9" maxW="33vw">
           <LeftSearch />
         </Container>
-        <Container flex="1" bg="red.400" maxW="67vw" margin={0} padding={0}>
+        <Container flex="1" bg="F6FBF9" maxW="67vw" margin={0} padding={0}>
           <MapScreen />
         </Container>
       </Container>

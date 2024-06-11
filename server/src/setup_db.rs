@@ -5,6 +5,7 @@ use services::{
     add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_times, add_stops,
     add_trips,
 };
+use views::services::refresh_materialized_view;
 
 extern crate diesel;
 extern crate rocket;
@@ -12,6 +13,7 @@ pub mod models;
 pub mod schema;
 mod services;
 pub mod tools;
+pub mod views;
 
 // macro for opening a file and getting the contents
 macro_rules! get_entries {
@@ -77,7 +79,8 @@ fn main() {
                     .collect::<Vec<Agency>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Agencies added");
     }
     if task == Task::AddRoutes || task == Task::AddAll {
         let path = "src/data/routes.txt";
@@ -89,7 +92,8 @@ fn main() {
                     .collect::<Vec<Route>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Routes added");
     }
     if task == Task::AddTrips || task == Task::AddAll {
         let path = "src/data/trips.txt";
@@ -101,7 +105,8 @@ fn main() {
                     .collect::<Vec<Trip>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Trips added");
     }
     if task == Task::AddCalendars || task == Task::AddAll {
         let path = "src/data/calendar.txt";
@@ -113,7 +118,8 @@ fn main() {
                     .collect::<Vec<Calendar>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Calendars added");
     }
     if task == Task::AddCalendarDates || task == Task::AddAll {
         let path = "src/data/calendar_dates.txt";
@@ -125,7 +131,8 @@ fn main() {
                     .collect::<Vec<CalendarDate>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Calendar dates added")
     }
     if task == Task::AddStops || task == Task::AddAll {
         let path = "src/data/stops.txt";
@@ -137,7 +144,8 @@ fn main() {
                     .collect::<Vec<Stop>>(),
             )
             .unwrap()
-        })
+        });
+        println!("Stops added");
     }
     if task == Task::AddStopTimes || task == Task::AddAll {
         let path = "src/data/stop_times.txt";
@@ -150,7 +158,12 @@ fn main() {
             )
             .unwrap()
         });
+        println!("Stop times added");
     }
+
+    // refresh the materialized view
+    refresh_materialized_view().unwrap();
+    println!("Materialized view refreshed");
 
     println!("Done!");
     println!("Elapsed time: {:?}", t1.elapsed());

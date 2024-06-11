@@ -1,13 +1,12 @@
 use std::str::FromStr;
 
-use crate::schema::stop_times;
-
 use super::schema::agency;
 use super::schema::calendar;
 use super::schema::calendar_dates;
 use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
+use crate::schema::stop_times;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use time::format_description;

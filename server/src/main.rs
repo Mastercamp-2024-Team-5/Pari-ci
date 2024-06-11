@@ -8,6 +8,7 @@ pub mod models;
 pub mod schema;
 mod services;
 pub mod tools;
+pub mod views;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -43,6 +44,6 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_calendar])
         .mount("/", routes![services::list_stops])
         .mount("/", routes![services::list_stop_times])
-        .mount("/", routes![services::stops::list_metro_stops])
+        .mount("/", routes![views::services::list_metro_stops])
         .register("/", catchers![not_found])
 }

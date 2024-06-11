@@ -1,3 +1,5 @@
+use crate::schema::*;
+
 diesel::table! {
     stop_route_details (stop_id) {
         stop_id -> Varchar,
@@ -13,3 +15,10 @@ diesel::table! {
         route_type -> Int4,
     }
 }
+
+diesel::joinable!(stop_route_details -> routes (route_id));
+diesel::joinable!(stop_route_details -> stops (stop_id));
+diesel::joinable!(stop_route_details -> trips (route_id));
+diesel::joinable!(transfers -> stop_route_details (from_stop_id));
+
+diesel::allow_tables_to_appear_in_same_query!(transfers, stop_route_details);

@@ -180,6 +180,17 @@ pub fn list_stops() -> Json<Vec<models::Stop>> {
     Json(results)
 }
 
+#[get("/stop/<id>")]
+pub fn get_stop(id: String) -> Json<Vec<models::Stop>> {
+    use schema::stops::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = stops
+        .filter(stop_id.eq(id))
+        .load::<models::Stop>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}
+
 pub fn add_stop(document: models::Stop) -> Result<(), diesel::result::Error> {
     use schema::stops::dsl::*;
     let connection = &mut establish_connection_pg();
@@ -222,6 +233,35 @@ pub fn add_stop_times(documents: &Vec<models::StopTime>) -> Result<(), diesel::r
     use schema::stop_times::dsl::*;
     let connection = &mut establish_connection_pg();
     diesel::insert_into(stop_times)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}
+
+#[get("/transfers")]
+pub fn list_transfers() -> Json<Vec<models::Transfer>> {
+    use schema::transfers::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = transfers
+        .load::<models::Transfer>(connection)
+        .expect("Error loading transfers");
+    Json(results)
+}
+
+pub fn add_transfer(document: models::Transfer) -> Result<(), diesel::result::Error> {
+    use schema::transfers::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(transfers)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+pub fn add_transfers(documents: &Vec<models::Transfer>) -> Result<(), diesel::result::Error> {
+    use schema::transfers::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(transfers)
         .values(documents)
         .on_conflict_do_nothing()
         .execute(connection)?;

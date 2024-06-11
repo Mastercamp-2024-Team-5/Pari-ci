@@ -7,6 +7,7 @@ use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
 use crate::schema::stop_times;
+use crate::schema::transfers;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use time::format_description;
@@ -418,6 +419,34 @@ impl FromStr for StopTime {
             local_zone_id,
             stop_headsign,
             timepoint: parts[9].parse().unwrap(),
+        })
+    }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = transfers)]
+pub struct Transfer {
+    pub from_stop_id: String,
+    pub to_stop_id: String,
+    pub min_transfer_time: i32,
+}
+
+impl FromStr for Transfer {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 4 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        // ignore the transfer_type field
+
+        Ok(Self {
+            from_stop_id: parts[0].parse().unwrap(),
+            to_stop_id: parts[1].parse().unwrap(),
+            min_transfer_time: parts[3].parse().unwrap(),
         })
     }
 }

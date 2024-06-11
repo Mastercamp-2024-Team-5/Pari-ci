@@ -13,5 +13,5 @@ CREATE TABLE
         bikes_allowed INT NOT NULL,
         PRIMARY KEY (trip_id),
         FOREIGN KEY (route_id) REFERENCES routes (route_id)
-        -- FOREIGN KEY (service_id) REFERENCES calendar (service_id)
+        -- FOREIGN KEY (service_id) REFERENCES calendar (service_id) -- removed because key some times not exists
     );

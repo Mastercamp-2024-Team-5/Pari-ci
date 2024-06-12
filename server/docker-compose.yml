@@ -1,0 +1,12 @@
+version: '3'
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    restart: always
+    ports:
+      - 7700:7700
+    volumes:
+      - ./meili_data:/meili_data
+
+# command to run 
+# docker-compose up

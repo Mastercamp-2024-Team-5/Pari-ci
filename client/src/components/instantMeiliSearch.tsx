@@ -13,8 +13,8 @@ import {
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 
 const { searchClient } = instantMeiliSearch(
-  "localhost:7700",
-  "disregard-shingle-steadier-nuclear"
+  "http://0.0.0.0:7700/",
+  "YePOxqZUXPhM7eeDfElDNndPFNc2bN98j03YZsQsvtc"
 );
 
 interface StopEntry {

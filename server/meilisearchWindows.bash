@@ -8,3 +8,5 @@ docker run -it --rm \
     -v $(pwd)/meili_data:/meili_data \
     getmeili/meilisearch:v1.8
 # Use ${pwd} instead of $(pwd) in PowerShell
+
+docker run -it --rm -p 7700:7700 -e MEILI_ENV='development' -v $(pwd)/meili_data:/meili_data getmeili/meilisearch:v1.8

@@ -22,7 +22,7 @@ function App() {
               </Container>
             </>
           ):(
-            <AccessibleScreen />  
+            <AccessibleScreen setAccessibleScreen={setAccessibleScreen} setStationAccessibleOnly={setStationAccessibleOnly} stationAccessibleOnly={stationAccessibleOnly}/>  
           )
 
         }

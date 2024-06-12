@@ -29,7 +29,8 @@ pub fn list_metro_stops(stop_type: String) -> Json<Vec<models::StopRouteDetails>
 
 pub fn refresh_materialized_view() -> Result<usize, diesel::result::Error> {
     let conn = &mut establish_connection_pg();
-    diesel::sql_query("REFRESH MATERIALIZED VIEW stop_route_details").execute(conn)
+    diesel::sql_query("REFRESH MATERIALIZED VIEW stop_route_details").execute(conn)?;
+    diesel::sql_query("REFRESH MATERIALIZED VIEW average_stop_times").execute(conn)
 }
 
 #[get("/transfers?<metro>&<rer>&<tram>")]

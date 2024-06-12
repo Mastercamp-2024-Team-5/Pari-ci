@@ -11,7 +11,6 @@ import {
   Snippet,
 } from "react-instantsearch-dom";
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
-import "instantsearch.css/themes/algolia-min.css";
 
 const { searchClient } = instantMeiliSearch(
   "localhost:7700",

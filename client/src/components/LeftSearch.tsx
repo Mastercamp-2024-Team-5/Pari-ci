@@ -10,6 +10,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import Icon from "./Icon";
+import InstantMeiliSearchApp from "./InstantMeiliSearch";
 
 const LeftSearch = () => {
   return (
@@ -30,6 +31,7 @@ const LeftSearch = () => {
           </Text>
           <Icon item="barre" color="a" />
         </Stack>
+        <InstantMeiliSearchApp />
         <VStack spacing={15} w="90%" alignSelf="center">
           <FormControl isRequired>
             <Input

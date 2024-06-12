@@ -76,3 +76,60 @@ pub fn list_metro_stops_transfers(
         .expect("Error loading stops");
     Json(results)
 }
+
+#[get("/average_stop_times/<id>")]
+pub fn get_average_stop_times(id: &str) -> Json<Vec<models::AverageStopTime>> {
+    use schema::average_stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = average_stop_times
+        .filter(
+            stop_id
+                .eq(id)
+                .or(next_stop_id.eq(id))
+                .and(avg_travel_time.gt(0)),
+        )
+        .load::<models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}
+
+#[get("/average_stop_times?<metro>&<rer>&<tram>")]
+pub fn list_average_stop_times(
+    metro: Option<bool>,
+    rer: Option<bool>,
+    tram: Option<bool>,
+) -> Json<Vec<models::AverageStopTime>> {
+    let mut filters = Vec::<i32>::new();
+    if metro.unwrap_or(false) {
+        filters.push(1);
+    }
+    if rer.unwrap_or(false) {
+        filters.push(2);
+    }
+    if tram.unwrap_or(false) {
+        filters.push(0);
+    }
+    use schema::average_stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let (stop1, stop2) = alias!(
+        schema::stop_route_details as stop1,
+        schema::stop_route_details as stop2
+    );
+    let results = average_stop_times
+        .inner_join(stop1.on(stop_id.eq(stop1.fields(schema::stop_route_details::stop_id))))
+        .inner_join(stop2.on(next_stop_id.eq(stop2.fields(schema::stop_route_details::stop_id))))
+        .select(average_stop_times::all_columns())
+        .filter(
+            stop1
+                .fields(schema::stop_route_details::route_type)
+                .eq_any(&filters)
+                .and(
+                    stop2
+                        .fields(schema::stop_route_details::route_type)
+                        .eq_any(&filters),
+                ),
+        )
+        .load::<models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}

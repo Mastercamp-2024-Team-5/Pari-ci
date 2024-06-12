@@ -2,8 +2,8 @@
 CREATE TABLE
     stop_times (
         trip_id VARCHAR(255) NOT NULL,
-        arrival_time VARCHAR(255) NOT NULL,
-        departure_time VARCHAR(255) NOT NULL,
+        arrival_time INT NOT NULL,
+        departure_time INT NOT NULL,
         stop_id VARCHAR(255) NOT NULL,
         stop_sequence INTEGER NOT NULL,
         pickup_type INTEGER NOT NULL,

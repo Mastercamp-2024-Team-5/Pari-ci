@@ -68,5 +68,12 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_stop_times])
         .mount("/", routes![views::services::list_metro_stops])
         .mount("/", routes![views::services::list_metro_stops_transfers])
+        .mount(
+            "/",
+            routes![
+                views::services::get_average_stop_times,
+                views::services::list_average_stop_times
+            ],
+        )
         .register("/", catchers![not_found])
 }

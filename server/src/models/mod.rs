@@ -374,8 +374,8 @@ fn combine_parts(parts: Vec<&str>) -> Vec<String> {
 #[diesel(table_name = stop_times)]
 pub struct StopTime {
     pub trip_id: String,
-    pub arrival_time: String,
-    pub departure_time: String,
+    pub arrival_time: i32,
+    pub departure_time: i32,
     pub stop_id: String,
     pub stop_sequence: i32,
     pub pickup_type: i32,
@@ -408,10 +408,22 @@ impl FromStr for StopTime {
             Some(parts[8].to_string())
         };
 
+        // format is HH:MM:SS, we want to convert it to seconds
+        let arrival_time = parts[1]
+            .split(':')
+            .map(|x| x.parse::<i32>().unwrap())
+            .enumerate()
+            .fold(0, |acc, (i, x)| acc + x * 60_i32.pow((2 - i) as u32));
+        let departure_time = parts[2]
+            .split(':')
+            .map(|x| x.parse::<i32>().unwrap())
+            .enumerate()
+            .fold(0, |acc, (i, x)| acc + x * 60_i32.pow((2 - i) as u32));
+
         Ok(Self {
             trip_id: parts[0].parse().unwrap(),
-            arrival_time: parts[1].to_string(),
-            departure_time: parts[2].to_string(),
+            arrival_time,
+            departure_time,
             stop_id: parts[3].parse().unwrap(),
             stop_sequence: parts[4].parse().unwrap(),
             pickup_type: parts[5].parse().unwrap(),

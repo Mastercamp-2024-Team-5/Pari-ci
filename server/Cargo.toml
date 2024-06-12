@@ -6,7 +6,7 @@ default-run = "citymapper-server"
 
 [[bin]]
 name = "graph_test"
-path = "src/tools/graph/graph_test.rs"
+path = "src/graph_test.rs"
 
 [[bin]]
 name = "setup_db"

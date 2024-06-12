@@ -58,8 +58,6 @@ pub fn get_stopentries() -> Vec<StopEntry> {
         .load::<(String, String, String, String)>(conn)
         .expect("Error loading stops");
 
-    println!("{:?}", result[0]);
-
     let mut output_stops: Vec<StopEntry> = Vec::new();
     for stop in result {
         // id is a base64 encoding of the stop_id

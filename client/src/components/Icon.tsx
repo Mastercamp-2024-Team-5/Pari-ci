@@ -8,9 +8,11 @@ interface IconProps {
   size?: string; // Icon size (optional)
   style?: React.CSSProperties; // Icon style (optional)
   color?: string; // Icon color (if specifies a metro or RER number, color is set to the metro or RER color) (optional)
+  onMouseEnter?: () => void; // Function to call when the mouse enters the icon (optional)
+  onMouseLeave?: () => void; // Function to call when the mouse leaves the icon (optional)
 }
 
-const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="" }) => {
+const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="", onMouseEnter, onMouseLeave }) => {
   //Check if icon is in the css component of config.json data in the glyphs[].css
   if (!data.glyphs.some(glyph => glyph.css === item)) {
     return <Text style={{ color: "red"}}>Icon {item} not found</Text>;
@@ -83,7 +85,7 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="" }) => 
   }
 
   return (
-    <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
+    <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <i className={`icon-${item}`} style={{ fontSize: size, color: color_chosen }}></i>
     </Box>
   );

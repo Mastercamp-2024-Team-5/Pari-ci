@@ -2,7 +2,6 @@ use crate::diesel::*;
 use base64::{engine::general_purpose, Engine as _};
 use diesel::RunQueryDsl;
 use meilisearch_sdk::client::Client;
-use schema::{routes::short_name, trips::route_id};
 use serde::{Deserialize, Serialize};
 use services::establish_connection_pg;
 
@@ -19,8 +18,8 @@ pub struct StopEntry {
     id: String,
     stop_id: String,
     stop_name: String,
-    route_id: String,
-    route_short_name: String,
+    route_ids: String,
+    route_short_names: String,
 }
 
 pub fn get_stopentries() -> Vec<StopEntry> {
@@ -45,10 +44,21 @@ pub fn get_stopentries() -> Vec<StopEntry> {
                 .eq(1)
                 .or(schema::routes::route_type.eq(2)),
         )
-        .select((stop_id, stop_name, route_id, short_name))
-        .distinct_on(stop_id)
+        .select((
+            parent_station,
+            stop_name,
+            diesel::dsl::sql::<diesel::sql_types::Text>(
+                format!("string_agg(DISTINCT routes.route_id, ', ')").as_str(),
+            ),
+            diesel::dsl::sql::<diesel::sql_types::Text>(
+                format!("string_agg(DISTINCT routes.short_name, ', ')").as_str(),
+            ),
+        ))
+        .group_by((parent_station, stop_name))
         .load::<(String, String, String, String)>(conn)
         .expect("Error loading stops");
+
+    println!("{:?}", result[0]);
 
     let mut output_stops: Vec<StopEntry> = Vec::new();
     for stop in result {
@@ -58,8 +68,8 @@ pub fn get_stopentries() -> Vec<StopEntry> {
             id,
             stop_id: stop.0.clone(),
             stop_name: stop.1.clone(),
-            route_id: stop.2.clone(),
-            route_short_name: stop.3.clone(),
+            route_ids: stop.2.clone(),
+            route_short_names: stop.3.clone(),
         };
         output_stops.push(stop_result);
     }

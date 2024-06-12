@@ -7,7 +7,6 @@
 .icon-1:before { content: '\e805'; } /* '' */
 .icon-carre:before { content: '\e806'; } /* '' */
 .icon-8:before { content: '\e807'; } /* '' */
-.icon-wheelchair:before { content: '\e808'; } /* '' */
 .icon-lapin:before { content: '\e809'; } /* '' */
 .icon-tortue:before { content: '\e80a'; } /* '' */
 .icon-train:before { content: '\e80b'; } /* '' */
@@ -42,3 +41,4 @@
 .icon-5:before { content: '\e828'; } /* '' */
 .icon-barre:before { content: '\e82a'; } /* '' */
 .icon-back:before { content: '\e82b'; } /* '' */
+.icon-wheelchair:before { content: '\e82c'; } /* '' */

@@ -134,3 +134,30 @@ pub fn list_average_stop_times(
         .expect("Error loading stops");
     Json(results)
 }
+
+pub fn get_average_times() -> Vec<models::AverageStopTime> {
+    use schema::average_stop_times::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let (stop1, stop2) = alias!(
+        crate::views::schema::stop_route_details as stop1,
+        crate::views::schema::stop_route_details as stop2
+    );
+    let results = average_stop_times
+        .inner_join(stop1.on(stop_id.eq(stop1.fields(schema::stop_route_details::stop_id))))
+        .inner_join(stop2.on(next_stop_id.eq(stop2.fields(schema::stop_route_details::stop_id))))
+        .select(average_stop_times::all_columns())
+        .filter(
+            stop1
+                .fields(crate::views::schema::stop_route_details::route_type)
+                .eq(1)
+                .and(
+                    stop2
+                        .fields(crate::views::schema::stop_route_details::route_type)
+                        .eq(1),
+                ),
+        )
+        .load::<models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+
+    results
+}

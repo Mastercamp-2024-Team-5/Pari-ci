@@ -1,20 +1,20 @@
 import {
   InstantSearch,
   Hits,
-  SortBy,
+  //   SortBy,
   SearchBox,
   Pagination,
   Highlight,
-  ClearRefinements,
-  RefinementList,
-  Configure,
+  //   ClearRefinements,
+  //   RefinementList,
+  //   Configure,
   Snippet,
 } from "react-instantsearch-dom";
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 
 const { searchClient } = instantMeiliSearch(
-  "http://0.0.0.0:7700/",
-  "YePOxqZUXPhM7eeDfElDNndPFNc2bN98j03YZsQsvtc"
+  "localhost:7700",
+  "GlRqSoAk_G37mKtt2JMiEd_qcNdC36uQLK9Y6ib26fc"
 );
 
 interface StopEntry {
@@ -33,21 +33,28 @@ const Hit = ({ hit }: { hit: StopEntry }) => (
     <div>
       <Snippet attribute="route_short_name" hit={hit} />
     </div>
+    {/* <div>ID: {hit.id}</div>
+    <div>Stop ID: {hit.stop_id}</div>
+    <div>Stop Name: {hit.stop_name}</div>
+    <div>Route ID: {hit.route_id}</div>
+    <div>Route Short Name: {hit.route_short_name}</div> */}
   </div>
 );
 
 const InstantMeiliSearchApp = () => (
   <InstantSearch indexName="stops" searchClient={searchClient}>
-    <div className="filter">
+    {/* <div className="filter">
       <ClearRefinements />
       <SortBy
         defaultRefinement="stops"
-        items={[{ value: "routes", label: "Sort by routes" }]}
+        items={[
+          { value: "routes:asc", label: "Routes asc." },
+          { value: "routes:desc", label: "Routes desc." },
+        ]}
       />
-      <h2>Refinement List</h2>
-      <RefinementList attribute="route_short_name" />
+      <h2>Route Filter</h2>
       <Configure hitsPerPage={8} />
-    </div>
+    </div> */}
     <div className="result-from-search">
       <SearchBox />
       <Hits hitComponent={Hit} />

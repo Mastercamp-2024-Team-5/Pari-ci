@@ -15,3 +15,10 @@ pub struct StopRouteDetails {
     pub route_long_name: String,
     pub route_type: i32,
 }
+
+#[derive(Queryable, Debug, Serialize, Deserialize)]
+pub struct AverageStopTime {
+    pub stop_id: String,
+    pub next_stop_id: String,
+    pub avg_travel_time: i32,
+}

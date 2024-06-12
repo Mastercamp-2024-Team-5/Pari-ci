@@ -64,10 +64,8 @@ diesel::table! {
     stop_times (trip_id, stop_id, stop_sequence, arrival_time, departure_time) {
         #[max_length = 255]
         trip_id -> Varchar,
-        #[max_length = 255]
-        arrival_time -> Varchar,
-        #[max_length = 255]
-        departure_time -> Varchar,
+        arrival_time -> Int4,
+        departure_time -> Int4,
         #[max_length = 255]
         stop_id -> Varchar,
         stop_sequence -> Int4,

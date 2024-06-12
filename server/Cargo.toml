@@ -4,18 +4,18 @@ version = "0.1.0"
 edition = "2021"
 default-run = "citymapper-server"
 
-[[bin]]
-name = "graph_test"
-path = "src/tools/graph/graph_test.rs"
-
-[[bin]]
-name = "setup_db"
-path = "src/setup_db.rs"
-
-[[bin]]
-name = "setup_meilisearch"
-path = "src/meilisearch.rs"
-
+#[[bin]]
+#name = "graph_test"
+#path = "src/tools/graph/graph_test.rs"
+#
+#[[bin]]
+#name = "setup_db"
+#path = "src/setup_db.rs"
+#
+#[[bin]]
+#name = "setup_meilisearch"
+#path = "src/meilisearch.rs"
+#
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -29,8 +29,3 @@ futures = "0.3"
 serde_json = "1.0"
 tokio = "1.38.0"
 base64 = "0.22.1"
-
-[dependencies.rocket_contrib]
-version = "0.4.4"
-default-features = false
-features = ["json"]

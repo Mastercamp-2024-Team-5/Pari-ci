@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
+    "@meilisearch/instant-meilisearch": "^0.18.1",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-instantsearch": "^7.11.1",
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {

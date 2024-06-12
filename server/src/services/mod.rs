@@ -170,16 +170,6 @@ pub fn add_calendar_dates(
     Ok(())
 }
 
-#[get("/stops")]
-pub fn list_stops() -> Json<Vec<models::Stop>> {
-    use schema::stops::dsl::*;
-    let connection = &mut establish_connection_pg();
-    let results = stops
-        .load::<models::Stop>(connection)
-        .expect("Error loading stops");
-    Json(results)
-}
-
 #[get("/stop/<id>")]
 pub fn get_stop(id: &str) -> Json<Vec<models::Stop>> {
     use schema::stops::dsl::*;

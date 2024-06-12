@@ -20,7 +20,9 @@ fn main() {
 
     let t1 = time::Instant::now();
     let starts = get_first_child_stop("IDFM:70143");
-    let ends = get_first_child_stop("IDFM:70488");
+    // let ends = get_first_child_stop("IDFM:61727"); bois le roi
+    // let ends = get_first_child_stop("IDFM:71591"); // Porte dorée (Tram 3a)
+    let ends = get_first_child_stop("IDFM:70604"); // Porte de Choisy (Tram 3a)
 
     println!("{:?}", starts);
     println!("{:?}", ends);

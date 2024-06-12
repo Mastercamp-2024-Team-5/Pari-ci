@@ -10,18 +10,41 @@ use diesel::prelude::*;
 use rocket::get;
 use rocket::serde::json::Json;
 
-#[get("/stops/<stop_type>")]
-pub fn list_metro_stops(stop_type: String) -> Json<Vec<models::StopRouteDetails>> {
-    let filter = match stop_type.as_str() {
-        "metro" => 1,
-        "rer" => 2,
-        "tram" => 0,
-        _ => 0,
-    };
+#[get("/stops?<metro>&<rer>&<tram>")]
+pub fn list_stops(
+    metro: Option<bool>,
+    rer: Option<bool>,
+    tram: Option<bool>,
+) -> Json<Vec<models::StopRouteDetails>> {
+    let mut filters = Vec::<i32>::new();
+    if metro.unwrap_or(false) {
+        filters.push(1);
+    }
+    if rer.unwrap_or(false) {
+        filters.push(2);
+    }
+    if tram.unwrap_or(false) {
+        filters.push(0);
+    }
+    if filters.is_empty() {
+        // send everything
+        return Json(Vec::new());
+    }
     use schema::stop_route_details::dsl::*;
     let connection = &mut establish_connection_pg();
     let results = stop_route_details
-        .filter(schema::stop_route_details::route_type.eq(filter))
+        .filter(route_type.eq_any(&filters))
+        .load::<models::StopRouteDetails>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}
+
+#[get("/stop/<id>?details")]
+pub fn get_stop_details(id: &str) -> Json<Vec<models::StopRouteDetails>> {
+    use schema::stop_route_details::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = stop_route_details
+        .filter(stop_id.eq(id))
         .load::<models::StopRouteDetails>(connection)
         .expect("Error loading stops");
     Json(results)
@@ -78,7 +101,7 @@ pub fn list_metro_stops_transfers(
     Json(results)
 }
 
-#[get("/average_stop_times/<id>")]
+#[get("/average_stop_time/<id>")]
 pub fn get_average_stop_times(id: &str) -> Json<Vec<models::AverageStopTime>> {
     use schema::average_stop_times::dsl::*;
     let connection = &mut establish_connection_pg();
@@ -149,11 +172,11 @@ pub fn get_average_times() -> Vec<models::AverageStopTime> {
         .filter(
             stop1
                 .fields(crate::views::schema::stop_route_details::route_type)
-                .eq(1)
+                .eq_any([1, 2, 0])
                 .and(
                     stop2
                         .fields(crate::views::schema::stop_route_details::route_type)
-                        .eq(1),
+                        .eq_any([1, 2, 0]),
                 ),
         )
         .load::<models::AverageStopTime>(connection)

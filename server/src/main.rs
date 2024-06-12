@@ -42,9 +42,15 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_trips])
         .mount("/", routes![services::list_calendar_dates])
         .mount("/", routes![services::list_calendar])
-        .mount("/", routes![services::list_stops, services::get_stop])
+        .mount("/", routes![services::get_stop])
         .mount("/", routes![services::list_stop_times])
-        .mount("/", routes![views::services::list_metro_stops])
+        .mount(
+            "/",
+            routes![
+                views::services::list_stops,
+                views::services::get_stop_details
+            ],
+        )
         .mount("/", routes![views::services::list_metro_stops_transfers])
         .mount(
             "/",

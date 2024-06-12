@@ -111,7 +111,7 @@ const MapScreen = () => {
           properties: {route_id: line.map((stop: Stop) => stop.route_id)[0]},
           geometry: {
             type: 'LineString',
-            coordinates: line.map((stop: Stop) => [stop.stop_lat, stop.stop_lon]) // Corrected coordinates order
+            coordinates: line.map((stop: Stop) => [stop.stop_lon, stop.stop_lat]) // Corrected coordinates order
           }
         };
         newLines.push(lineFeatures);
@@ -136,8 +136,8 @@ const MapScreen = () => {
         uniqueMarkers.map((stop, index) => (
           <Marker
             key={index}
-            longitude={stop.stop_lat}
-            latitude={stop.stop_lon}
+            longitude={stop.stop_lon}
+            latitude={stop.stop_lat}
           >
             <Icon item="marker" color={colors[stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
           </Marker>
@@ -145,8 +145,8 @@ const MapScreen = () => {
       }
       {
         <Popup
-          longitude={selectedStop?.stop_lat || 0}
-          latitude={selectedStop?.stop_lon || 0}
+          longitude={selectedStop?.stop_lon || 0}
+          latitude={selectedStop?.stop_lat || 0}
           closeButton={false}
           onClose={() => setSelectedStop(null)}
         >

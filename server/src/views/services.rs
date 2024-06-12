@@ -2,6 +2,7 @@ extern crate diesel;
 extern crate rocket;
 use crate::models::Transfer;
 use crate::services::establish_connection_pg;
+use crate::services::list_transfers;
 use crate::views::models;
 use crate::views::schema;
 use diesel::alias;
@@ -48,7 +49,8 @@ pub fn list_metro_stops_transfers(
         filters.push(0);
     }
     if filters.is_empty() {
-        return Json(Vec::<Transfer>::new());
+        // send everything
+        return list_transfers();
     }
     use crate::schema::transfers::dsl::*;
     let connection = &mut establish_connection_pg();

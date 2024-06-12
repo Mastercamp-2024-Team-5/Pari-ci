@@ -11,17 +11,13 @@ pub struct Edge {
 #[derive(Debug, Clone)]
 pub struct Node {
     pub id: usize,
-    pub name: String,
-    pub terminus: bool,
-    pub branchement: u32,
-    pub lines: Vec<u32>, // Change to Vec<u32> for array of integers
     pub edges: Vec<Edge>,
 }
 
 #[derive(Debug)]
 pub struct Graph {
     pub nodes: Vec<Node>,
-    pub node_indices: HashMap<String, usize>,
+    pub node_indices: HashMap<usize, usize>, // Use usize as key
 }
 
 impl Graph {
@@ -32,38 +28,27 @@ impl Graph {
         }
     }
 
-    pub fn add_node(
-        &mut self,
-        id: usize,
-        name: &str,
-        terminus: bool,
-        branchement: u32,
-        lines: Vec<u32>,
-    ) {
+    pub fn add_node(&mut self, id: usize) {
         let index = self.nodes.len();
         self.nodes.push(Node {
             id,
-            name: name.to_string(),
-            terminus,
-            branchement,
-            lines,
             edges: Vec::new(),
         });
-        self.node_indices.insert(name.to_string(), index);
+        self.node_indices.insert(id, index);
     }
 
-    pub fn add_edge(&mut self, from: &str, to: &str, weight: u32) {
-        let from_index = self.node_indices[from];
-        let to_index = self.node_indices[to];
+    pub fn add_edge(&mut self, from: usize, to: usize, weight: u32) {
+        let from_index = self.node_indices[&from];
+        let to_index = self.node_indices[&to];
         self.nodes[from_index].edges.push(Edge {
             destination: to_index,
             weight,
         });
     }
 
-    pub fn shortest_path(&self, start: &str, goal: &str) -> Option<(u32, Vec<String>)> {
-        let start_index = *self.node_indices.get(start)?;
-        let goal_index = *self.node_indices.get(goal)?;
+    pub fn shortest_path(&self, start: usize, goal: usize) -> Option<(u32, Vec<usize>)> {
+        let start_index = *self.node_indices.get(&start)?;
+        let goal_index = *self.node_indices.get(&goal)?;
 
         let mut distances = vec![u32::MAX; self.nodes.len()];
         let mut previous_nodes = vec![None; self.nodes.len()];
@@ -80,10 +65,10 @@ impl Graph {
                 let mut path = Vec::new();
                 let mut current = goal_index;
                 while let Some(prev) = previous_nodes[current] {
-                    path.push(self.nodes[current].name.clone());
+                    path.push(self.nodes[current].id);
                     current = prev;
                 }
-                path.push(self.nodes[start_index].name.clone());
+                path.push(self.nodes[start_index].id);
                 path.reverse();
                 return Some((cost, path));
             }

@@ -1,16 +1,22 @@
+import React from "react";
 import {
   Center,
   Stack,
   Heading,
-  VStack,
-  FormControl,
-  Input,
-  InputGroup,
   Button,
   Container,
-  Image
+  Image,
+  Text,
+  Box,
 } from "@chakra-ui/react";
-import Icon from "./Icon";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+// Import images
+import accessibility1 from './../assets/accessibility1.jpg';
+import accessibility2 from './../assets/accessibility2.jpg';
+import accessibility3 from './../assets/accessibility3.jpg';
 
 type AccessibleScreenProps = {
   setAccessibleScreen: (value: boolean) => void;
@@ -19,20 +25,37 @@ type AccessibleScreenProps = {
 };
 
 const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stationAccessibleOnly }: AccessibleScreenProps) => {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+  };
+
+  // Set width and height for the images
+  const width_picture = "100%";
+  const height_picture = "60vh"; // Set a fixed height for the images
+
   return (
     <>
       <Container flex="1" bg="F6FBF9" maxW="40vw" height="100vh">
-        <Center height="100%">
-          <Stack spacing={8} w="100%" align="center">
-            <VStack spacing={15} w="90%" justifyContent="center" align="center">
-              <Heading fontFamily="Karla" fontSize="5xl" textAlign="center" marginBottom={"15%"}>
-                Proposer seulement les stations accessibles ?
+        <Center>
+          <Stack spacing={8} w="100%">
+            <Stack align="center">
+              <Heading fontFamily="Karla" marginTop="15%" fontSize="4xl" marginBottom={"5%"}>
+                Citymapper
               </Heading>
-            </VStack>
+              <Text fontFamily="Karla" fontSize="xl" color="32403B" mb={4} marginBottom="25%">
+                Proposer seulement les stations accessibles ?
+              </Text>
+            </Stack>
             <Button
               fontFamily="Karla"
-              bg={stationAccessibleOnly ? "#5eaf91" : "#84C7AE"} // Change background color based on stationAccessibleOnly
               color="white"
+              bg="#84C7AE"
               _hover={{
                 bg: "#5eaf91",
               }}
@@ -41,15 +64,19 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
               width="70%"
               alignSelf="center"
               borderRadius="10"
-              p={6} // Added padding
-              onClick={() => setStationAccessibleOnly(true)} // Update stationAccessibleOnly
+              marginBottom={"5%"}
+              p={6}
+              onClick={() => (
+                setStationAccessibleOnly(true),
+                setAccessibleScreen(true)
+              )}
             >
               Oui
             </Button>
             <Button
               fontFamily="Karla"
-              bg={!stationAccessibleOnly ? "#5eaf91" : "#84C7AE"} // Change background color based on stationAccessibleOnly
               color="white"
+              bg="#84C7AE"
               _hover={{
                 bg: "#5eaf91",
               }}
@@ -59,8 +86,10 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
               alignSelf="center"
               borderRadius="10"
               p={6}
-              marginBottom={"15%"}
-              onClick={() => setStationAccessibleOnly(false)} // Update stationAccessibleOnly
+              onClick={() => (
+                setStationAccessibleOnly(false),
+                setAccessibleScreen(true)
+              )}
             >
               Non
             </Button>
@@ -70,32 +99,53 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
       <Container
         flex="1"
         maxW="60vw"
-        margin={0}
+        margin="0 auto"
         padding={0}
         display="flex"
         alignItems="center"
         justifyContent="center"
+        height="100vh"
       >
-        <Stack spacing={0} bg="red" padding={0} margin={0} width="100%" alignContent={"start"}>
-          <Icon item="wheelchair" size={"35vw"} style={{ padding: "0", margin: "0" }} />
-          <Button
-            fontFamily="Karla"
-            bg="#84C7AE"
-            color="white"
-            _hover={{
-              bg: "#5eaf91",
-            }}
-            rounded="md"
-            fontSize="lg"
-            width="80%"
-            alignSelf="flex-end"
-            borderRadius="10"
-            p={6}
-            onClick={() => setAccessibleScreen(true)}
-          >
-            Suivant
-          </Button>
-        </Stack>
+        <Box height="60vh" width="100%" display="flex" alignItems="center" justifyContent="center">
+          <Slider {...settings} style={{ width: "70%", height: "100%" }}>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <Image 
+                src={accessibility1} 
+                alt="Image 1" 
+                style={{ 
+                  width: width_picture, 
+                  height: height_picture, 
+                  objectFit: "contain",  // Ensure the image fits within the container without being cut
+                  objectPosition: "center" // Center the image
+                }} 
+              />
+            </Box>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <Image 
+                src={accessibility2} 
+                alt="Image 2" 
+                style={{ 
+                  width: width_picture, 
+                  height: height_picture, 
+                  objectFit: "contain",  // Ensure the image fits within the container without being cut
+                  objectPosition: "center" // Center the image
+                }} 
+              />
+            </Box>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <Image 
+                src={accessibility3} 
+                alt="Image 3" 
+                style={{ 
+                  width: width_picture, 
+                  height: height_picture, 
+                  objectFit: "contain",  // Ensure the image fits within the container without being cut
+                  objectPosition: "center" // Center the image
+                }} 
+              />
+            </Box>
+          </Slider>
+        </Box>
       </Container>
     </>
   );

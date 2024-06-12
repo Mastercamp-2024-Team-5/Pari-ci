@@ -239,7 +239,6 @@ pub fn add_stop_times(documents: &Vec<models::StopTime>) -> Result<(), diesel::r
     Ok(())
 }
 
-#[get("/transfers")]
 pub fn list_transfers() -> Json<Vec<models::Transfer>> {
     use schema::transfers::dsl::*;
     let connection = &mut establish_connection_pg();

@@ -31,14 +31,25 @@ pub fn refresh_materialized_view() -> Result<usize, diesel::result::Error> {
     diesel::sql_query("REFRESH MATERIALIZED VIEW stop_route_details").execute(conn)
 }
 
-#[get("/transfers/stops/<stop_type>")]
-pub fn list_metro_stops_transfers(stop_type: String) -> Json<Vec<Transfer>> {
-    let filter = match stop_type.as_str() {
-        "metro" => 1,
-        "rer" => 2,
-        "tram" => 0,
-        _ => 0,
-    };
+#[get("/transfers?<metro>&<rer>&<tram>")]
+pub fn list_metro_stops_transfers(
+    metro: Option<bool>,
+    rer: Option<bool>,
+    tram: Option<bool>,
+) -> Json<Vec<Transfer>> {
+    let mut filters = Vec::<i32>::new();
+    if metro.unwrap_or(false) {
+        filters.push(1);
+    }
+    if rer.unwrap_or(false) {
+        filters.push(2);
+    }
+    if tram.unwrap_or(false) {
+        filters.push(0);
+    }
+    if filters.is_empty() {
+        return Json(Vec::<Transfer>::new());
+    }
     use crate::schema::transfers::dsl::*;
     let connection = &mut establish_connection_pg();
     let (stop1, stop2) = alias!(
@@ -52,11 +63,11 @@ pub fn list_metro_stops_transfers(stop_type: String) -> Json<Vec<Transfer>> {
         .filter(
             stop1
                 .fields(schema::stop_route_details::route_type)
-                .eq(filter)
+                .eq_any(&filters)
                 .and(
                     stop2
                         .fields(schema::stop_route_details::route_type)
-                        .eq(filter),
+                        .eq_any(&filters),
                 ),
         )
         .load::<Transfer>(connection)

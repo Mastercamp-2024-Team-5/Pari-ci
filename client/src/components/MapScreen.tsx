@@ -25,7 +25,7 @@ const MapScreen = () => {
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [lines, setLines] = useState<GeoJSON.Feature<GeoJSON.LineString>[]>([]);
 
-  const metroColors: { [key: string]: string } = {
+  const colors: { [key: string]: string } = {
     "IDFM:C01371": "rgb(255,206,0)",
     "IDFM:C01372": "rgb(0,100,176)",
     "IDFM:C01373": "rgb(159,152,37)",
@@ -42,17 +42,33 @@ const MapScreen = () => {
     "IDFM:C01382": "rgb(0,129,79)",
     "IDFM:C01383": "rgb(152,212,226)",
     "IDFM:C01384": "rgb(102,36,131)",
+    "IDFM:C01742": "rgb(227,5,28)",
+    "IDFM:C01743": "rgb(82,145,206)",
+    "IDFM:C01727": "rgb(255,206,0)",
+    "IDFM:C01728": "rgb(0,129,79)",
+    "IDFM:C01729": "rgb(192,65,145)",
+    "IDFM:C01737": "rgb(141,94,42)",
+    "IDFM:C01739": "rgb(213,201,0)",
+    "IDFM:C01738": "rgb(159,152,37)",
+    "IDFM:C01740": "rgb(206,173,210)"
   };
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/stops/metro')
-      .then(response => response.json())
-      .then((data: Stop[]) => {
-        if (!Array.isArray(data) || !data.length) {
+    const fetchStops = async () => {
+      try {
+        const metroResponse = await fetch('http://127.0.0.1:8000/stops/metro');
+        const metroData: Stop[] = await metroResponse.json();
+        
+        const rerResponse = await fetch('http://127.0.0.1:8000/stops/rer');
+        const rerData: Stop[] = await rerResponse.json();
+
+        if (!Array.isArray(metroData) || !metroData.length || !Array.isArray(rerData) || !rerData.length) {
           throw new Error('API response is not valid');
         }
-        // setStops(data);
-        const uniqueData = data.reduce((acc: Stop[], current: Stop) => {
+
+        const combinedData = [...metroData, ...rerData.filter(stop => colors[stop.route_id] !== undefined)];
+        
+        const uniqueData = combinedData.reduce((acc: Stop[], current: Stop) => {
           const x = acc.find(item => item.parent_station === current.parent_station && item.route_id === current.route_id);
           if (!x) {
             return acc.concat([current]);
@@ -60,16 +76,21 @@ const MapScreen = () => {
             return acc;
           }
         }, []);
+        
         setUniqueMarkers(uniqueData);
         setlines(uniqueData);
-      })
-      .catch(error => console.error('Error:', error));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchStops();
   }, []);
 
   function setlines(stops: Stop[]) {
     const newLines = [];
-    for (let i = 0; i < Object.keys(metroColors).length; i++) {
-      const line = stops.filter(stop => stop.route_id === Object.keys(metroColors)[i]);
+    for (let i = 0; i < Object.keys(colors).length; i++) {
+      const line = stops.filter(stop => stop.route_id === Object.keys(colors)[i]);
       if (line.length > 0) {
         const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
           type: 'Feature',
@@ -104,7 +125,7 @@ const MapScreen = () => {
             longitude={stop.stop_lat}
             latitude={stop.stop_lon}
           >
-            <Icon item="marker" color={metroColors[stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
+            <Icon item="marker" color={colors[stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
           </Marker>
         ))
       }
@@ -129,7 +150,7 @@ const MapScreen = () => {
                 type="line"
                 layout={{}}
                 paint={{
-                  'line-color': metroColors[line.properties?.route_id] || 'red', // Use the color from metroColors
+                  'line-color': colors[line.properties?.route_id] || 'red', // Use the color from metroColors
                   'line-width': 5
                 }}
               />

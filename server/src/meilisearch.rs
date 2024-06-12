@@ -48,10 +48,10 @@ pub fn get_stopentries() -> Vec<StopEntry> {
             parent_station,
             stop_name,
             diesel::dsl::sql::<diesel::sql_types::Text>(
-                format!("string_agg(DISTINCT routes.route_id, ', ')").as_str(),
+                "string_agg(DISTINCT routes.route_id, ', ')",
             ),
             diesel::dsl::sql::<diesel::sql_types::Text>(
-                format!("string_agg(DISTINCT routes.short_name, ', ')").as_str(),
+                "string_agg(DISTINCT routes.short_name, ', ')",
             ),
         ))
         .group_by((parent_station, stop_name))

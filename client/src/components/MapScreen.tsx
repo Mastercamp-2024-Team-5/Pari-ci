@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Map from 'react-map-gl';
+import "mapbox-gl/dist/mapbox-gl.css";
 
 // // Custom Marker Icon
 // import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -28,9 +29,9 @@ const MapScreen = () => {
       initialViewState={{
         longitude: -122.4,
         latitude: 37.8,
-        zoom: 14
+        zoom: 14,
       }}
-      style={{flex: 1}}
+      style={{flex: 1, margin: 0, padding: 0}}
       reuseMaps
       mapStyle="mapbox://styles/mapbox/streets-v9"
     />

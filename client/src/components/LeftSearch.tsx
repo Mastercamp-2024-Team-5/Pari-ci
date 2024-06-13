@@ -10,8 +10,12 @@ import {
   Button,
 } from "@chakra-ui/react";
 import Icon from "./Icon";
+import useScreenWidth from "./useScreenWidth";
+
 
 const LeftSearch = () => {
+  const screenWidth = useScreenWidth();
+
   return (
     <Center>
       <Stack spacing={8} w="100%">
@@ -19,15 +23,15 @@ const LeftSearch = () => {
           <Heading fontFamily="Karla" marginTop="15%" fontSize="4xl">
             Citymapper
           </Heading>
-          <Text
+          {/* <Text
             fontFamily="Karla"
             fontSize="lg"
             color="32403B"
             mb={4}
             marginBottom="15%"
-          >
+          > 
             Subtitle
-          </Text>
+          </Text> */}
           <Icon item="barre" color="a" />
         </Stack>
         <VStack spacing={15} w="90%" alignSelf="center">

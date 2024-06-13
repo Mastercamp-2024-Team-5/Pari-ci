@@ -78,7 +78,7 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
               width="70%"
               alignSelf="center"
               borderRadius="10"
-              marginBottom={"5%"}
+              marginBottom={screenWidth<600?"0":"5%"}
               p={6}
               onClick={() => (
                 setStationAccessibleOnly(true),

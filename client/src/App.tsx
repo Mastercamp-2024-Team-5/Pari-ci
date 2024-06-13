@@ -1,15 +1,14 @@
-import { Container } from "@chakra-ui/react";
-import LeftSearch from "./components/LeftSearch";
-import { ChakraProvider, Flex } from "@chakra-ui/react";
-import MapScreen from "./components/MapScreen";
+import { ChakraProvider, Box, Container, Flex, IconButton } from "@chakra-ui/react";
 import React, { useState } from "react";
 import AccessibleScreen from "./components/AccessibleScreen";
 import useScreenWidth from "./components/useScreenWidth";
+import HomeMobile from "./components/Home/HomeMobile";
+import HomeWeb from "./components/Home/HomeWeb";
 
 function App() {
   const [accessibleScreen, setAccessibleScreen] = useState<boolean>(false);
   const [stationAccessibleOnly, setStationAccessibleOnly] = useState<boolean>(false);
-  
+
   const screenWidth = useScreenWidth();
 
   const [departure, setDeparture] = useState('');
@@ -17,35 +16,45 @@ function App() {
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
 
+
   return (
     <ChakraProvider>
-      <Container margin={0} padding={0} display="flex" justifyContent="space-between" maxW="100vw" maxH="100vh" h={screenWidth<600?"120vh":"100vh"} bg="gray.100">
-        {
-          accessibleScreen ? (
-            <Flex margin={0} padding={0} flex={1}  h="100vh"  direction={screenWidth<600?"column":'row'}>
-              {
-                screenWidth<600 && (
-                  <Container flex="1" bg="red.400" maxH="25vh" margin={0} padding={0}>
-                    <MapScreen />
-                  </Container>
-                )
-              }
-              <Container flex="1" bg="F6FBF9" maxW={screenWidth<600?"100vw":"33vw"} maxH={screenWidth<600?"65vh":"100vh"}>
-                <LeftSearch departure={departure} setDeparture={setDeparture} destination={destination} setDestination={setDestination} startAt={startAt} setStartAt={setStartAt} endAt={endAt} setEndAt={setEndAt}/>
-              </Container>
-              {
-                screenWidth>=600 && (
-                  <Container flex="1" bg="red.400" maxW={screenWidth<600?"100vw":"67vw"} maxH={screenWidth<600?"55vh":"100vh"} margin={0} padding={0}>
-                    <MapScreen />
-                </Container>
-                )
-              }
+      <Container margin={0} padding={0} display="flex" justifyContent="center" maxW="100vw" maxH="100vh" height="100vh" bg="gray.100">
+        {accessibleScreen ? (
+          screenWidth < 600 ? (
+            <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
+              <HomeMobile 
+                departure={departure}
+                setDeparture={setDeparture}
+                destination={destination}
+                setDestination={setDestination}
+                startAt={startAt}
+                setStartAt={setStartAt}
+                endAt={endAt}
+                setEndAt={setEndAt}
+              />
+          </Flex>
+          ) : (
+            <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
+              <HomeWeb
+                departure={departure}
+                setDeparture={setDeparture}
+                destination={destination}
+                setDestination={setDestination}
+                startAt={startAt}
+                setStartAt={setStartAt}
+                endAt={endAt}
+                setEndAt={setEndAt}
+              />
             </Flex>
-          ):(
-            <AccessibleScreen setAccessibleScreen={setAccessibleScreen} setStationAccessibleOnly={setStationAccessibleOnly} stationAccessibleOnly={stationAccessibleOnly}/>  
           )
-
-        }
+        ) : (
+          <AccessibleScreen
+            setAccessibleScreen={setAccessibleScreen}
+            setStationAccessibleOnly={setStationAccessibleOnly}
+            stationAccessibleOnly={stationAccessibleOnly}
+          />
+        )}
       </Container>
     </ChakraProvider>
   );

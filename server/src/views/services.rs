@@ -280,7 +280,7 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
     path
 }
 
-#[get("/route/stops/<route_id>")]
+#[get("/route/<route_id>/stops")]
 pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<String>>> {
     use schema::average_stop_times::dsl as avg_st;
     let connection = &mut establish_connection_pg();

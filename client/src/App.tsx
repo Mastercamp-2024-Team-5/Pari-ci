@@ -23,11 +23,18 @@ function App() {
         {
           accessibleScreen ? (
             <Flex margin={0} padding={0} flex={1}  h="100vh"  direction={screenWidth<600?"column":'row'}>
+              {
+                screenWidth<600 && (
+                  <Container flex="1" bg="red.400" maxH="25vh" margin={0} padding={0}>
+                    <MapScreen />
+                  </Container>
+                )
+              }
               <Container flex="1" bg="F6FBF9" maxW={screenWidth<600?"100vw":"33vw"} maxH={screenWidth<600?"65vh":"100vh"}>
                 <LeftSearch departure={departure} setDeparture={setDeparture} destination={destination} setDestination={setDestination} startAt={startAt} setStartAt={setStartAt} endAt={endAt} setEndAt={setEndAt}/>
               </Container>
               {
-                screenWidth>600 && (
+                screenWidth>=600 && (
                   <Container flex="1" bg="red.400" maxW={screenWidth<600?"100vw":"67vw"} maxH={screenWidth<600?"55vh":"100vh"} margin={0} padding={0}>
                     <MapScreen />
                 </Container>

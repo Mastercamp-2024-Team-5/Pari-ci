@@ -124,6 +124,76 @@ impl Graph {
         }
         graph
     }
+
+    pub fn get_subgraphs(&self) -> Vec<Graph> {
+        let mut visited = vec![false; self.nodes.len()];
+        let mut subgraphs = Vec::new();
+
+        for (index, _) in self.nodes.iter().enumerate() {
+            if !visited[index] {
+                // Perform a depth-first search (DFS) to find all nodes in this subgraph
+                let mut stack = vec![index];
+                let mut nodes_in_subgraph = Vec::new();
+
+                while let Some(current_index) = stack.pop() {
+                    if visited[current_index] {
+                        continue;
+                    }
+                    visited[current_index] = true;
+                    nodes_in_subgraph.push(current_index);
+
+                    for edge in &self.nodes[current_index].edges {
+                        let neighbor_index = edge.destination;
+                        if !visited[neighbor_index] {
+                            stack.push(neighbor_index);
+                        }
+                    }
+                }
+
+                // Create a new subgraph containing only the nodes and edges of this component
+                let mut new_graph = Graph::new();
+                for &node_index in &nodes_in_subgraph {
+                    let node = &self.nodes[node_index];
+                    new_graph.add_node(node.id.clone());
+                    for edge in &node.edges {
+                        new_graph.add_node(self.nodes[edge.destination].id.clone());
+                        new_graph.add_edge(
+                            node.id.clone(),
+                            self.nodes[edge.destination].id.clone(),
+                            edge.weight,
+                        );
+                    }
+                }
+
+                subgraphs.push(new_graph);
+            }
+        }
+        subgraphs
+    }
+
+    pub fn to_vec(&self) -> Vec<String> {
+        // return a vector of the node ids in order of traversal
+        // if more than one edge is present, the function panics
+        let mut result = Vec::new();
+        let mut visited = vec![false; self.nodes.len()];
+        let mut stack = Vec::new();
+        stack.push(0);
+        while let Some(node_index) = stack.pop() {
+            if visited[node_index] {
+                continue;
+            }
+            visited[node_index] = true;
+            let node = &self.nodes[node_index];
+            result.push(node.id.clone());
+            for edge in &node.edges {
+                if visited[edge.destination] {
+                    continue;
+                }
+                stack.push(edge.destination);
+            }
+        }
+        result
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]

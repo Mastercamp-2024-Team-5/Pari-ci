@@ -3,6 +3,7 @@ extern crate rocket;
 use crate::models::Transfer;
 use crate::services::establish_connection_pg;
 use crate::services::list_transfers;
+use crate::tools::graph;
 use crate::views::models;
 use crate::views::schema;
 use diesel::alias;
@@ -277,4 +278,28 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
     }
 
     path
+}
+
+#[get("/route/stops/<route_id>")]
+pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<String>>> {
+    use schema::average_stop_times::dsl as avg_st;
+    let connection = &mut establish_connection_pg();
+    let results = avg_st::average_stop_times
+        .inner_join(
+            schema::stop_route_details::table
+                .on(avg_st::stop_id.eq(schema::stop_route_details::stop_id)),
+        )
+        .filter(schema::stop_route_details::route_id.eq(route_id))
+        .select(avg_st::average_stop_times::all_columns())
+        .load::<models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+    let mygraph = graph::Graph::generate_graph(results);
+    let graphs = mygraph.get_subgraphs();
+
+    Json(
+        graphs
+            .into_iter()
+            .map(|x| x.to_vec())
+            .collect::<Vec<Vec<String>>>(),
+    )
 }

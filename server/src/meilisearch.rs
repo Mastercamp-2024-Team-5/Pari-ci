@@ -12,6 +12,7 @@ extern crate tokio;
 pub mod models;
 pub mod schema;
 mod services;
+pub mod tools;
 pub mod views;
 
 #[derive(Serialize, Deserialize, Debug)]

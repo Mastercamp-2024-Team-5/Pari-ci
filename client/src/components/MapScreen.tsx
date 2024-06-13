@@ -31,7 +31,7 @@ const MapScreen = () => {
         latitude: 37.8,
         zoom: 14,
       }}
-      style={{flex: 1, margin: 0, padding: 0}}
+      style={{flex: 1}}
       reuseMaps
       mapStyle="mapbox://styles/mapbox/streets-v9"
     />

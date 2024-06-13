@@ -2,19 +2,23 @@ import {
   Center,
   Stack,
   Heading,
-  Text,
   VStack,
   FormControl,
   Input,
   InputGroup,
   Button,
+  Flex,
 } from "@chakra-ui/react";
 import Icon from "./Icon";
 import useScreenWidth from "./useScreenWidth";
-
+import { useState } from "react";
 
 const LeftSearch = () => {
   const screenWidth = useScreenWidth();
+  const [departure, setDeparture] = useState('');
+  const [destination, setDestination] = useState('');
+  const [startAt, setStartAt] = useState('');
+  const [endAt, setEndAt] = useState('');
 
   return (
     <Center>
@@ -35,7 +39,37 @@ const LeftSearch = () => {
           <Icon item="barre" color="a" />
         </Stack>
         <VStack spacing={15} w="90%" alignSelf="center">
-          <FormControl isRequired>
+          <Input
+            focusBorderColor="#5eaf91"
+            fontFamily="Karla"
+            variant="outline"
+            border="2px"
+            borderColor="gray.200"
+            rounded="md"
+            type="text"
+            placeholder="Départ"
+            fontSize="lg"
+            p={8}
+            bg="white"
+            value={departure}
+            onChange={(e) => setDeparture(e.target.value)}
+          />
+          <Input
+            focusBorderColor="#5eaf91"
+            fontFamily="Karla"
+            variant="outline"
+            border="2px"
+            borderColor="gray.200"
+            rounded="md"
+            type="text"
+            placeholder="Destination"
+            fontSize="lg"
+            p={8}
+            bg="white"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+          />
+          <Flex maxW={"100%"} margin={0} padding={0} display={"flex"} flex={1} direction={"row"} align="center" justify="center">
             <Input
               focusBorderColor="#5eaf91"
               fontFamily="Karla"
@@ -44,30 +78,34 @@ const LeftSearch = () => {
               borderColor="gray.200"
               rounded="md"
               type="text"
-              placeholder="Départ"
+              placeholder="Partir à"
               fontSize="lg"
               p={8}
               bg="white"
+              width="48%"
+              marginRight={'5%'}
+              value={startAt}
+              onChange={(e) => setStartAt(e.target.value)}
             />
-          </FormControl>
-          <FormControl isRequired>
-            <InputGroup size="md">
-              <Input
-                focusBorderColor="#5eaf91"
-                fontFamily="Karla"
-                variant="outline"
-                border="2px"
-                borderColor="gray.200"
-                rounded="md"
-                type="text"
-                placeholder="Destination"
-                fontSize="lg"
-                p={8}
-                bg="white"
-              />
-            </InputGroup>
-          </FormControl>
+            <Input
+              focusBorderColor="#5eaf91"
+              fontFamily="Karla"
+              variant="outline"
+              border="2px"
+              borderColor="gray.200"
+              rounded="md"
+              type="text"
+              placeholder="Partir à"
+              fontSize="lg"
+              p={8}
+              bg="white"
+              width="48%"
+              value={endAt}
+              onChange={(e) => setEndAt(e.target.value)}
+            />
+          </Flex>
         </VStack>
+        
         <Button
           fontFamily="Karla"
           bg="#84C7AE"

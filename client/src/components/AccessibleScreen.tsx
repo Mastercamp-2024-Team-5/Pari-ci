@@ -14,6 +14,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import useScreenWidth from "./useScreenWidth";
+import Icon from "./Icon";
 
 // Import images
 import accessibility1 from './../assets/accessibility1.jpg';
@@ -60,9 +61,10 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
               <Heading textAlign={'center'} fontFamily="Karla" marginTop="15%" fontSize="4xl" marginBottom={"5%"}>
                 Citymapper
               </Heading>
-              <Text  textAlign={'center'} fontFamily="Karla" fontSize="xl" color="32403B" mb={4} marginBottom={screenWidth<600?"15%":"25%"}>
+              <Text  textAlign={'center'} fontFamily="Karla" fontSize="xl" color="32403B" mb={4} marginBottom={"5%"}>
                 Proposer seulement les stations accessibles ?
               </Text>
+              <Icon item="barre" color="a"/>
             </Stack>
             <Button
               fontFamily="Karla"
@@ -82,6 +84,7 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
                 setStationAccessibleOnly(true),
                 setAccessibleScreen(true)
               )}
+              marginTop={screenWidth<600?"10%":"20%"}
             >
               Oui
             </Button>
@@ -128,7 +131,8 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
                 width: width_picture, 
                 height: height_picture, 
                 objectFit: "contain",  // Ensure the image fits within the container without being cut
-                objectPosition: "center" // Center the image
+                objectPosition: "center", // Center the image
+                marginTop:screenWidth<600?"12.5%":"4%",
               }} 
             />
           </Box>
@@ -140,7 +144,8 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
                 width: width_picture, 
                 height: height_picture, 
                 objectFit: "contain",  // Ensure the image fits within the container without being cut
-                objectPosition: "center" // Center the image
+                objectPosition: "center", // Center the image
+                marginTop:screenWidth<600?"16%":"4%",
               }} 
             />
           </Box>
@@ -152,7 +157,8 @@ const AccessibleScreen = ({ setAccessibleScreen, setStationAccessibleOnly, stati
                 width: width_picture, 
                 height: height_picture, 
                 objectFit: "contain",  // Ensure the image fits within the container without being cut
-                objectPosition: "center" // Center the image
+                objectPosition: "center", // Center the image
+                marginTop:screenWidth<600?"16%":"4%",
               }} 
             />
           </Box>

@@ -77,13 +77,7 @@ fn rocket() -> _ {
                 views::services::list_average_stop_times
             ],
         )
-        .mount(
-            "/",
-            routes![
-                views::services::list_sorted_stops,
-                views::services::list_sorted_stops_detailed
-            ],
-        )
+        .mount("/", routes![views::services::list_sorted_stops])
         .mount(
             "/",
             routes![views::services::get_path, views::services::get_fast_path],

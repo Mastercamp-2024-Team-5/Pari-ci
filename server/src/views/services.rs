@@ -5,10 +5,10 @@ use std::ops::Add;
 use crate::models::Transfer;
 use crate::services::establish_connection_pg;
 use crate::services::list_transfers;
-use crate::tools::graph;
 use crate::tools::graph::Graph;
 use crate::views::models;
 use crate::views::schema;
+use crate::views::services;
 use diesel::alias;
 use diesel::prelude::*;
 use rocket::get;
@@ -21,8 +21,6 @@ use time::Date;
 use time::Duration;
 use time::PrimitiveDateTime;
 use time::Time;
-
-use super::models::StopRouteDetails;
 
 #[get("/stops?<metro>&<rer>&<tram>")]
 pub fn list_stops(
@@ -293,14 +291,50 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
     path
 }
 
-#[get("/route/<route_id>/stops")]
-pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<String>>> {
-    Json(vec![vec![]])
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RouteNode {
+    stop: String,
+    children: Vec<String>,
 }
 
-#[get("/route/<route_id>/stops?details")]
-pub fn list_sorted_stops_detailed(route_id: &str) -> Json<Vec<Vec<StopRouteDetails>>> {
-    Json(vec![vec![]])
+#[get("/route/<route_id>/stops")]
+pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<RouteNode>>> {
+    use schema::average_stop_times::dsl as avg_st;
+    let connection = &mut services::establish_connection_pg();
+    let results = avg_st::average_stop_times
+        .inner_join(
+            schema::stop_route_details::table
+                .on(avg_st::stop_id.eq(schema::stop_route_details::stop_id)),
+        )
+        .filter(schema::stop_route_details::route_id.eq(route_id))
+        .select(avg_st::average_stop_times::all_columns())
+        .load::<models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+
+    let mygraph = Graph::generate_graph(results);
+    mygraph.draw("graph.dot", "graph.png");
+    let mut graphs = mygraph.get_subgraphs();
+    for graph in graphs.iter_mut() {
+        *graph = graph.into_tree().unwrap();
+    }
+
+    let mut stop_route_details = Vec::<Vec<RouteNode>>::new();
+    for graph in graphs {
+        let mut vec = Vec::new();
+        for node in graph.nodes.iter() {
+            let children = node
+                .edges
+                .iter()
+                .map(|x| graph.nodes[x.destination].id.clone())
+                .collect::<Vec<String>>();
+            vec.push(RouteNode {
+                stop: node.id.clone(),
+                children: children,
+            });
+        }
+        stop_route_details.push(vec);
+    }
+    Json(stop_route_details)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -19,20 +19,6 @@ interface Stop {
   route_type: number;
 }
 
-interface Stop {
-  stop_id: string;
-  stop_name: string;
-  stop_lat: number;
-  stop_lon: number;
-  location_type: number;
-  parent_station: string;
-  wheelchair_boarding: number;
-  route_id: string;
-  route_short_name: string;
-  route_long_name: string;
-  route_type: number;
-}
-
 const MapScreen = () => {
   // const [stops, setStops] = useState<Stop[]>([]);
   const [uniqueMarkers, setUniqueMarkers] = useState<Stop[]>([]);
@@ -73,15 +59,20 @@ const MapScreen = () => {
         const metroResponse = await fetch('http://127.0.0.1:8000/stops?metro');
         const metroData: Stop[] = await metroResponse.json();
         
-        const rerResponse = await fetch('http://127.0.0.1:8000/stops?rer');
-        const rerData: Stop[] = await rerResponse.json();
+        // const rerResponse = await fetch('http://127.0.0.1:8000/stops?rer');
+        // const rerData: Stop[] = await rerResponse.json();
 
-        if (!Array.isArray(metroData) || !metroData.length || !Array.isArray(rerData) || !rerData.length) {
+        // if (!Array.isArray(metroData) || !metroData.length || !Array.isArray(rerData) || !rerData.length) {
+        //   throw new Error('API response is not valid');
+        // }
+        if (!Array.isArray(metroData) || !metroData.length) {
           throw new Error('API response is not valid');
         }
 
-        const combinedData = [...metroData, ...rerData.filter(stop => colors[stop.route_id] !== undefined)];
+        // const combinedData = [...metroData, ...rerData.filter(stop => colors[stop.route_id] !== undefined)];
+        const combinedData = metroData;
         
+
         const uniqueData = combinedData.reduce((acc: Stop[], current: Stop) => {
           const x = acc.find(item => item.parent_station === current.parent_station && item.route_id === current.route_id);
           if (!x) {
@@ -92,7 +83,7 @@ const MapScreen = () => {
         }, []);
         
         setUniqueMarkers(uniqueData);
-        setlines(uniqueData);
+        await setlines(combinedData);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -101,24 +92,70 @@ const MapScreen = () => {
     fetchStops();
   }, []);
 
-  function setlines(stops: Stop[]) {
-    const newLines = [];
-    for (let i = 0; i < Object.keys(colors).length; i++) {
-      const line = stops.filter(stop => stop.route_id === Object.keys(colors)[i]);
-      if (line.length > 0) {
-        const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
-          type: 'Feature',
-          properties: {route_id: line.map((stop: Stop) => stop.route_id)[0]},
-          geometry: {
-            type: 'LineString',
-            coordinates: line.map((stop: Stop) => [stop.stop_lon, stop.stop_lat]) // Corrected coordinates order
+  async function setlines(stops: Stop[]) {
+    const newLines: GeoJSON.Feature<GeoJSON.LineString>[] = [];
+    const visitedStops = new Set<string>();
+    // const routeId = 'IDFM:C01384';
+    for (const routeId of Object.keys(colors)) {
+      const routeStops = stops.filter(stop => stop.route_id === routeId);
+      if (routeStops.length > 0) {
+        const graphsResponse = await fetch(`http://127.0.0.1:8000/route/${routeId}/stops`);
+        const graphs: string[][] = await graphsResponse.json();
+        if (!Array.isArray(graphs) || !graphs.length) {
+          throw new Error('API response is not valid');
+        }
+        if (graphs.length === 1) {
+          const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+            type: 'Feature',
+            properties: {route_id: routeId},
+            geometry: {
+              type: 'LineString',
+              coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])
+            }
+          };
+          newLines.push(lineFeatures);
+          continue;
+        }
+        graphs.sort((a, b) => b.length - a.length);
+        const stopsToBeAdded = new Set<string>();
+        for (const graph of graphs) {
+          const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+            type: 'Feature',
+            properties: {route_id: routeId},
+            geometry: {
+              type: 'LineString',
+              coordinates: []
+            }
+          };
+          for (const stop of graph) {
+            if (visitedStops.has(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "") && stopsToBeAdded.size === 0) {
+              continue;
+            }
+            if (graph.indexOf(stop) != 0) {
+              // stopsToBeAdded.add(graph[graph.indexOf(stop) - 1]);
+              stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === graph[graph.indexOf(stop) - 1])?.parent_station || "");
+            }
+            visitedStops.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
+            // stopsToBeAdded.add(stop);
+            stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
           }
-        };
-        newLines.push(lineFeatures);
+          stopsToBeAdded.forEach((stopToBeAdded: string) => {
+            const stopData = stops.find(stopData => stopData.parent_station === stopToBeAdded && stopData.route_id === routeId);
+            if (stopData) {
+              lineFeatures.geometry.coordinates.push([stopData.stop_lon, stopData.stop_lat]);
+            } else {
+              console.warn(`Stop with ID ${stopToBeAdded} not found in stops array.`);
+            }
+          });
+          stopsToBeAdded.clear();
+          newLines.push(lineFeatures);
+        }
+        visitedStops.clear();
       }
     }
     setLines(newLines);
   }
+  
 
   return (
     <Map
@@ -126,7 +163,7 @@ const MapScreen = () => {
       initialViewState={{
         latitude: 48.8566,
         longitude: 2.3522,
-        zoom: 12
+        zoom: 11
       }}
       style={{flex: 1, margin: 0, padding: 0}}
       reuseMaps
@@ -143,6 +180,17 @@ const MapScreen = () => {
           </Marker>
         ))
       }
+      {/* {
+        uniqueMarkers.filter(stop => stop.route_id === 'IDFM:C01384').map((stop, index) => (
+          <Marker
+            key={index}
+            longitude={stop.stop_lon}
+            latitude={stop.stop_lat}
+          >
+            <Icon item="marker" color={colors[stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
+          </Marker>
+        ))
+      } */}
       {
         <Popup
           longitude={selectedStop?.stop_lon || 0}
@@ -151,7 +199,7 @@ const MapScreen = () => {
           onClose={() => setSelectedStop(null)}
         >
           <div>
-            <h2 style={{margin: "0px"}}>{selectedStop?.stop_name}</h2>
+            <h2 style={{margin: "0px"}}>{selectedStop?.stop_name} {selectedStop?.stop_id}</h2> {/*//TODO remove stop_id*/}
           </div>
         </Popup>
       }

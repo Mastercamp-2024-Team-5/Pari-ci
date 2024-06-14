@@ -13,7 +13,7 @@ import {
 import Icon from "./Icon";
 import useScreenWidth from "./useScreenWidth";
 import { useState } from "react";
-import InstantMeiliSearchApp from "./InstantMeiliSearch";
+import InstantMeiliSearchApp from "./instantMeiliSearch.tsx";
 
 const LeftSearch = (
   {

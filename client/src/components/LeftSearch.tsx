@@ -13,6 +13,7 @@ import {
 import Icon from "./Icon";
 import useScreenWidth from "./useScreenWidth";
 import { useState } from "react";
+import InstantMeiliSearchApp from "./InstantMeiliSearch";
 
 const LeftSearch = (
   {
@@ -50,6 +51,7 @@ const LeftSearch = (
           </Text>
           <Icon item="barre" color="a" />
         </Stack>
+        <InstantMeiliSearchApp />
         <VStack spacing={15} w="90%" alignSelf="center">
           <Input
             focusBorderColor="#5eaf91"

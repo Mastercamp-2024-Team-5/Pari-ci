@@ -14,7 +14,7 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 
 const { searchClient } = instantMeiliSearch(
   "localhost:7700",
-  "GlRqSoAk_G37mKtt2JMiEd_qcNdC36uQLK9Y6ib26fc"
+  "a4f452e8-73bd-4a42-be45-fd13e4b44de1"
 );
 
 interface StopEntry {
@@ -33,28 +33,11 @@ const Hit = ({ hit }: { hit: StopEntry }) => (
     <div>
       <Snippet attribute="route_short_name" hit={hit} />
     </div>
-    {/* <div>ID: {hit.id}</div>
-    <div>Stop ID: {hit.stop_id}</div>
-    <div>Stop Name: {hit.stop_name}</div>
-    <div>Route ID: {hit.route_id}</div>
-    <div>Route Short Name: {hit.route_short_name}</div> */}
   </div>
 );
 
-const InstantMeiliSearchApp = () => (
+const InstantMeiliSearch = () => (
   <InstantSearch indexName="stops" searchClient={searchClient}>
-    {/* <div className="filter">
-      <ClearRefinements />
-      <SortBy
-        defaultRefinement="stops"
-        items={[
-          { value: "routes:asc", label: "Routes asc." },
-          { value: "routes:desc", label: "Routes desc." },
-        ]}
-      />
-      <h2>Route Filter</h2>
-      <Configure hitsPerPage={8} />
-    </div> */}
     <div className="result-from-search">
       <SearchBox />
       <Hits hitComponent={Hit} />
@@ -63,4 +46,4 @@ const InstantMeiliSearchApp = () => (
   </InstantSearch>
 );
 
-export default InstantMeiliSearchApp;
+export default InstantMeiliSearch;

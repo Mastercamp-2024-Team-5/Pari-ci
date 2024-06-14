@@ -2,10 +2,6 @@ import {
     Center,
     Stack,
     Heading,
-    VStack,
-    FormControl,
-    Input,
-    InputGroup,
     Button,
     Flex,
     Text,
@@ -19,23 +15,15 @@ import { useState } from "react";
 
 const Itineraire = ({
     departure,
-    setDeparture,
     destination,
-    setDestination,
     startAt,
-    setStartAt,
     endAt,
-    setEndAt,
     setItininerairePage
 }: {
     departure: string,
-    setDeparture: React.Dispatch<React.SetStateAction<string>>,
     destination: string,
-    setDestination: React.Dispatch<React.SetStateAction<string>>,
     startAt: string,
-    setStartAt: React.Dispatch<React.SetStateAction<string>>,
     endAt: string,
-    setEndAt: React.Dispatch<React.SetStateAction<string>>,
     setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
     const screenWidth = useScreenWidth();
@@ -70,8 +58,8 @@ const Itineraire = ({
                                     Arrivé à xx:xx                            
                                 </Heading>
                                 <Stack spacing={0}> {/* Use Stack with spacing set to 0 */}
-                                    <StopDetail stop={"Gare de Lyon"} line={"7"} color={"pink.200"} textColor={"black"} depart={"12:00"} arrivé={"12:30"} direction={"Mairie d'Ivry"} />
-                                    <StopDetail stop={"Mairie d'Ivry"} line={"7"} color={"pink.200"} textColor={"black"} depart={"12:30"} arrivé={"12:45"} direction={"La Courneuve"} />
+                                    <StopDetail stop={"Gare de Lyon"} line={"7"} color={"pink.200"} textColor={"black"} depart={"12:00"} direction={"Mairie d'Ivry"} />
+                                    <StopDetail stop={"Mairie d'Ivry"} line={"7"} color={"pink.200"} textColor={"black"} depart={"12:30"} direction={"La Courneuve"} />
                                 </Stack>
                                 <Text onClick={(prev)=>setMoreDetails(!prev)} fontSize={"md"} color={"#273DFF"} textDecoration={"underline"} alignSelf={"end"} _hover={{ cursor: "pointer" }}>
                                     Plus de détails

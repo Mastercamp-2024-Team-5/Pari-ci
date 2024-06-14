@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 
-const StopDetail = ({ stop, line, color, textColor, depart, arrivé, direction }: { stop: string; line: string; textColor: string; color: string, depart: string, arrivé: string, direction: string }) => {
+const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string }) => {
 
     return (
         <Flex 
@@ -14,9 +14,9 @@ const StopDetail = ({ stop, line, color, textColor, depart, arrivé, direction }
             margin={0}
         >
             <Box 
-                display={"flex"} // Use flex display to center the content
-                alignItems={"center"} // Center the content vertically
-                justifyContent={"center"} // Center the content horizontally
+                display={"flex"} 
+                alignItems={"center"} 
+                justifyContent={"center"} 
                 bgColor={color} 
                 borderRadius={"50%"} 
                 height={"50px"} 
@@ -26,11 +26,11 @@ const StopDetail = ({ stop, line, color, textColor, depart, arrivé, direction }
             >
                 <Text 
                     fontFamily={"Karla"} 
-                    fontSize={"3xl"} // Font size
-                    fontWeight={"bold"} // Font weight
+                    fontSize={"3xl"} 
+                    fontWeight={"bold"} 
                     textColor={textColor} 
                     textAlign={"center"}
-                    lineHeight={"50px"} // Ensure the text is centered vertically
+                    lineHeight={"50px"} 
                 >
                     {line}
                 </Text>
@@ -41,31 +41,31 @@ const StopDetail = ({ stop, line, color, textColor, depart, arrivé, direction }
                 paddingY={2}
                 justifyContent={"space-between"}
                 alignItems={"center"}
-                flex={1} // Make sure the flex container takes the remaining space
+                flex={1} 
             >
                 <Flex 
                     marginLeft={"5%"} 
                     maxW={"100%"} 
                     textColor={textColor} 
                     borderRadius={"50%"}
-                    fontSize={"xl"} // Font size
-                    fontWeight={"500"} // Font weight
+                    fontSize={"xl"}
+                    fontWeight={"500"}
                     direction={"column"}
                 >
                     <Text 
                         margin={"0"} 
                         textColor={textColor} 
-                        fontSize={"md"} // Font size
-                        fontWeight={"700"} // Font weight
+                        fontSize={"md"} 
+                        fontWeight={"700"}
                     >
                         {stop}
                     </Text>
                     <Text 
                         margin={"0"} 
                         textColor={textColor} 
-                        fontSize={"md"} // Font size
-                        fontWeight={"500"} // Font weight
-                        whiteSpace={"nowrap"} // Prevents the text from wrapping
+                        fontSize={"md"}
+                        fontWeight={"500"}
+                        whiteSpace={"nowrap"}
                     >
                         Vers {direction}
                     </Text>
@@ -75,9 +75,9 @@ const StopDetail = ({ stop, line, color, textColor, depart, arrivé, direction }
                     marginLeft={"5%"}
                     textColor={textColor} 
                     borderRadius={"50%"}
-                    fontSize={"md"} // Font size
-                    fontWeight={"500"} // Font weight
-                    whiteSpace={"nowrap"} // Prevents the text from wrapping
+                    fontSize={"md"} 
+                    fontWeight={"500"}
+                    whiteSpace={"nowrap"}
                 >
                     Départ à {depart}
                 </Text>

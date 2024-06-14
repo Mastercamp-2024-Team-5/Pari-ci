@@ -50,13 +50,9 @@ const Home = () => {
             ItininerairePage && (
                     <Itineraire
                         departure={departure}
-                        setDeparture={setDeparture}
                         destination={destination}
-                        setDestination={setDestination}
                         startAt={startAt}
-                        setStartAt={setStartAt}
                         endAt={endAt}
-                        setEndAt={setEndAt}
                         setItininerairePage={setItininerairePage}
                     />
             )

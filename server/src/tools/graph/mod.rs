@@ -23,7 +23,7 @@ impl PartialEq for Node {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Graph {
     pub nodes: Vec<Node>,
     pub node_indices: HashMap<NodeIndex, usize>,

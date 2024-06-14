@@ -12,10 +12,11 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
+    "@types/mapbox-gl": "^3.1.0",
+    "fontello-cli": "^0.6.2",
     "@meilisearch/instant-meilisearch": "^0.18.1",
     "@types/mapbox-gl": "^3.1.0",
     "@types/react-instantsearch-dom": "^6.12.7",
-    "fontello-cli": "^0.6.2",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.4.0",
     "react": "^18.2.0",

@@ -13,6 +13,7 @@ const HomeMobile = ({
   setStartAt,
   endAt,
   setEndAt,
+  setItininerairePage
 }: {
   departure: string;
   setDeparture: React.Dispatch<React.SetStateAction<string>>;
@@ -22,6 +23,7 @@ const HomeMobile = ({
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
+  setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
@@ -80,6 +82,7 @@ const HomeMobile = ({
                   setStartAt={setStartAt}
                   endAt={endAt}
                   setEndAt={setEndAt}
+                  setItininerairePage={setItininerairePage}
                 />
               </DrawerBody>
             </DrawerContent>

@@ -295,61 +295,12 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
 
 #[get("/route/<route_id>/stops")]
 pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<String>>> {
-    use schema::average_stop_times::dsl as avg_st;
-    let connection = &mut establish_connection_pg();
-    let results = avg_st::average_stop_times
-        .inner_join(
-            schema::stop_route_details::table
-                .on(avg_st::stop_id.eq(schema::stop_route_details::stop_id)),
-        )
-        .filter(schema::stop_route_details::route_id.eq(route_id))
-        .select(avg_st::average_stop_times::all_columns())
-        .load::<models::AverageStopTime>(connection)
-        .expect("Error loading stops");
-    let mygraph = graph::Graph::generate_graph(results);
-    let graphs = mygraph.get_subgraphs();
-
-    Json(
-        graphs
-            .into_iter()
-            .map(|x| x.to_vec())
-            .collect::<Vec<Vec<String>>>(),
-    )
+    Json(vec![vec![]])
 }
 
 #[get("/route/<route_id>/stops?details")]
 pub fn list_sorted_stops_detailed(route_id: &str) -> Json<Vec<Vec<StopRouteDetails>>> {
-    use schema::average_stop_times::dsl as avg_st;
-    let connection = &mut establish_connection_pg();
-    let results = avg_st::average_stop_times
-        .inner_join(
-            schema::stop_route_details::table
-                .on(avg_st::stop_id.eq(schema::stop_route_details::stop_id)),
-        )
-        .filter(schema::stop_route_details::route_id.eq(route_id))
-        .select(avg_st::average_stop_times::all_columns())
-        .load::<models::AverageStopTime>(connection)
-        .expect("Error loading stops");
-    let mygraph = graph::Graph::generate_graph(results);
-    let graphs = mygraph.get_subgraphs();
-
-    let mut stop_route_details = Vec::<Vec<StopRouteDetails>>::new();
-    let vec = graphs
-        .into_iter()
-        .map(|x| x.to_vec())
-        .collect::<Vec<Vec<String>>>();
-    for path in vec {
-        let mut details = Vec::<StopRouteDetails>::new();
-        for stop in path {
-            let stop_details = schema::stop_route_details::table
-                .filter(schema::stop_route_details::stop_id.eq(&stop))
-                .first::<StopRouteDetails>(connection)
-                .expect("Error loading stops");
-            details.push(stop_details);
-        }
-        stop_route_details.push(details);
-    }
-    Json(stop_route_details)
+    Json(vec![vec![]])
 }
 
 #[derive(Serialize, Deserialize, Debug)]

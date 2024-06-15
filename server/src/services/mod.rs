@@ -280,3 +280,41 @@ pub fn add_transfers(documents: &Vec<models::Transfer>) -> Result<(), diesel::re
         .execute(connection)?;
     Ok(())
 }
+
+#[get("/routes_trace?<metro>&<rer>&<tram>")]
+pub fn list_routes_trace(
+    metro: Option<bool>,
+    rer: Option<bool>,
+    tram: Option<bool>,
+) -> Json<Vec<models::RouteTrace>> {
+    let mut filter = Vec::<i32>::new();
+    if metro.unwrap_or(false) {
+        filter.push(1);
+    }
+    if rer.unwrap_or(false) {
+        filter.push(2);
+    }
+    if tram.unwrap_or(false) {
+        filter.push(0);
+    }
+    if filter.is_empty() {
+        return Json(Vec::<models::RouteTrace>::new());
+    }
+    use schema::routes_trace::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = routes_trace
+        .filter(route_type.eq_any(filter))
+        .load::<models::RouteTrace>(connection)
+        .expect("Error loading routes_trace");
+    Json(results)
+}
+
+pub fn add_routes_trace(documents: &Vec<models::RouteTrace>) -> Result<(), diesel::result::Error> {
+    use schema::routes_trace::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(routes_trace)
+        .values(documents)
+        .on_conflict_do_nothing()
+        .execute(connection)?;
+    Ok(())
+}

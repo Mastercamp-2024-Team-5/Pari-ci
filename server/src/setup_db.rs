@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use models::{Agency, Calendar, CalendarDate, Route, Stop, StopTime, Transfer, Trip};
+use models::{Agency, Calendar, CalendarDate, Route, RouteTrace, Stop, StopTime, Transfer, Trip};
 use services::{
-    add_agencies, add_calendar_dates, add_calendars, add_routes, add_stop_times, add_stops,
-    add_transfers, add_trips,
+    add_agencies, add_calendar_dates, add_calendars, add_routes, add_routes_trace, add_stop_times,
+    add_stops, add_transfers, add_trips,
 };
 use views::services::refresh_materialized_view;
 
@@ -37,6 +37,7 @@ enum Task {
     AddStops,
     AddStopTimes,
     AddTransfers,
+    AddRoutesTrace,
     AddAll,
     Invalid,
 }
@@ -60,6 +61,7 @@ fn main() {
         "AddStopTimes" => Task::AddStopTimes,
         "AddAll" => Task::AddAll,
         "AddTransfers" => Task::AddTransfers,
+        "AddRoutesTrace" => Task::AddRoutesTrace,
         _ => Task::Invalid,
     };
     let t1 = std::time::Instant::now();
@@ -174,6 +176,19 @@ fn main() {
             .unwrap()
         });
         println!("Transfers added");
+    }
+    if task == Task::AddRoutesTrace {
+        let path = "src/data/traces-des-lignes-de-transport-en-commun-idfm.txt";
+        get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
+            add_routes_trace(
+                &chunk
+                    .iter()
+                    .map(|line| RouteTrace::from_str(line).unwrap())
+                    .collect::<Vec<RouteTrace>>(),
+            )
+            .unwrap()
+        });
+        println!("Routes added");
     }
 
     if task == Task::AddAll

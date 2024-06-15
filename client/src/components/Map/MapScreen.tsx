@@ -4,8 +4,9 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useState } from 'react';
 import Icon from '../Shared/Icon';
 import './MapScreen.css';
+import RER_stops from './coordinates';
 
-interface Stop {
+export interface Stop {
   stop_id: string;
   stop_name: string;
   stop_lat: number;
@@ -55,33 +56,6 @@ const MapScreen: React.FC = () => {
   const [lines, setLines] = useState<GeoJSON.Feature<GeoJSON.LineString>[]>([]);
   const [selectedButton, setSelectedButton] = useState<string>('metro');
 
-  // const colors: { [key: string]: string } = {
-  //   "IDFM:C01371": "rgb(255,206,0)",
-  //   "IDFM:C01372": "rgb(0,100,176)",
-  //   "IDFM:C01373": "rgb(159,152,37)",
-  //   "IDFM:C01386": "rgb(152,212,226)",
-  //   "IDFM:C01374": "rgb(192,65,145)",
-  //   "IDFM:C01375": "rgb(242,142,66)",
-  //   "IDFM:C01376": "rgb(131,196,145)",
-  //   "IDFM:C01377": "rgb(243,164,186)",
-  //   "IDFM:C01387": "rgb(131,196,145)",
-  //   "IDFM:C01378": "rgb(206,173,210)",
-  //   "IDFM:C01379": "rgb(213,201,0)",
-  //   "IDFM:C01380": "rgb(227,179,42)",
-  //   "IDFM:C01381": "rgb(141,94,42)",
-  //   "IDFM:C01382": "rgb(0,129,79)",
-  //   "IDFM:C01383": "rgb(152,212,226)",
-  //   "IDFM:C01384": "rgb(102,36,131)",
-  //   "IDFM:C01742": "rgb(227,5,28)",
-  //   "IDFM:C01743": "rgb(82,145,206)",
-  //   "IDFM:C01727": "rgb(255,206,0)",
-  //   "IDFM:C01728": "rgb(0,129,79)",
-  //   "IDFM:C01729": "rgb(192,65,145)",
-  //   "IDFM:C01737": "rgb(141,94,42)",
-  //   "IDFM:C01739": "rgb(213,201,0)",
-  //   "IDFM:C01738": "rgb(159,152,37)",
-  //   "IDFM:C01740": "rgb(206,173,210)"
-  // };
   const colors: { [key: string]: { [key: string]: string } } = {
     "metro": {
       "IDFM:C01371": "rgb(255,206,0)",
@@ -116,7 +90,6 @@ const MapScreen: React.FC = () => {
     }
   };
 
-
   useEffect(() => {
     fetchStops(selectedButton);
   }, [selectedButton]);
@@ -134,6 +107,15 @@ const MapScreen: React.FC = () => {
         data = data.filter(stop => colors[buttonType][stop.route_id] !== undefined);
       }
 
+      // if RER A (route_id = IDFM:C01742) log all stops
+      if (buttonType === 'rer') {
+        data.forEach(stop => {
+          if (stop.route_id === "IDFM:C01742") {
+            console.log(stop);
+          }
+        });
+      }
+
       const uniqueData = data.reduce((acc: Stop[], current: Stop) => {
         const x = acc.find(item => item.parent_station === current.parent_station && item.route_id === current.route_id);
         if (!x) {
@@ -144,70 +126,88 @@ const MapScreen: React.FC = () => {
       }, []);
 
       setUniqueMarkers(uniqueData);
-      await setlines(data);
+      await setlines(data, buttonType);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const setlines = async (stops: Stop[]) => {
+  const setlines = async (stops: Stop[], buttonType: string) => {
     const newLines: GeoJSON.Feature<GeoJSON.LineString>[] = [];
     const visitedStops = new Set<string>();
 
-    // const routeId = "IDFM:C01380";
-    for (const routeId of Object.keys(colors[selectedButton])) {
-      const routeStops = stops.filter(stop => stop.route_id === routeId);
-      if (routeStops.length > 0) {
-        const graphsResponse = await fetch(`http://127.0.0.1:8000/route/${routeId}/stops`);
-        const graphs: string[][] = transformGraphsToLists(await graphsResponse.json());
-        if (!Array.isArray(graphs) || !graphs.length) {
-          throw new Error('API response is not valid');
-        }
-        if (graphs.length === 1) {
-          const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
-            type: 'Feature',
-            properties: { route_id: routeId },
-            geometry: {
-              type: 'LineString',
-              coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])
-            }
-          };
-          newLines.push(lineFeatures);
-          continue;
-        }
-        graphs.sort((a, b) => b.length - a.length);
-        const stopsToBeAdded = new Set<string>();
-        for (const graph of graphs) {
-          const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
-            type: 'Feature',
-            properties: { route_id: routeId },
-            geometry: {
-              type: 'LineString',
-              coordinates: []
-            }
-          };
-          for (const stop of graph) {
-            if (visitedStops.has(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "") && stopsToBeAdded.size === 0) {
-              continue;
-            }
-            if (graph.indexOf(stop) !== 0) {
-              stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === graph[graph.indexOf(stop) - 1])?.parent_station || "");
-            }
-            visitedStops.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
-            stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
+    if (buttonType === 'rer') {
+      for (const rer of RER_stops) {
+        for (const route of rer) {
+          const routeStops = route.map(stopId => stops.find(stop => stop.stop_id === stopId) || {});
+          if (routeStops.length > 0) {
+            const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+              type: 'Feature',
+              properties: { route_id: Object.keys(colors['rer'])[RER_stops.indexOf(rer)] },
+              geometry: {
+                type: 'LineString',
+                coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])
+              }
+            };
+            newLines.push(lineFeatures);
           }
-          stopsToBeAdded.forEach((stopToBeAdded: string) => {
-            const stopData = stops.find(stopData => stopData.parent_station === stopToBeAdded && stopData.route_id === routeId);
-            if (stopData) {
-              lineFeatures.geometry.coordinates.push([stopData.stop_lon, stopData.stop_lat]);
-            } else {
-              console.warn(`Stop with ID ${stopToBeAdded} not found in stops array.`);
-            }
-          });
-          stopsToBeAdded.clear();
-          newLines.push(lineFeatures);
         }
-        visitedStops.clear();
+      }
+    } else {
+      for (const routeId of Object.keys(colors[selectedButton])) {
+        const routeStops = stops.filter(stop => stop.route_id === routeId);
+        if (routeStops.length > 0) {
+          const graphsResponse = await fetch(`http://127.0.0.1:8000/route/${routeId}/stops`);
+          const graphs: string[][] = transformGraphsToLists(await graphsResponse.json());
+          if (!Array.isArray(graphs) || !graphs.length) {
+            throw new Error('API response is not valid');
+          }
+          if (graphs.length === 1) {
+            const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+              type: 'Feature',
+              properties: { route_id: routeId },
+              geometry: {
+                type: 'LineString',
+                coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])
+              }
+            };
+            newLines.push(lineFeatures);
+            continue;
+          }
+          graphs.sort((a, b) => b.length - a.length);
+          const stopsToBeAdded = new Set<string>();
+          for (const graph of graphs) {
+            const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+              type: 'Feature',
+              properties: { route_id: routeId },
+              geometry: {
+                type: 'LineString',
+                coordinates: []
+              }
+            };
+            for (const stop of graph) {
+              if (visitedStops.has(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "") && stopsToBeAdded.size === 0) {
+                continue;
+              }
+              if (graph.indexOf(stop) !== 0) {
+                stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === graph[graph.indexOf(stop) - 1])?.parent_station || "");
+              }
+              visitedStops.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
+              stopsToBeAdded.add(stops.find(stop_gen => stop_gen.stop_id === stop)?.parent_station || "");
+            }
+            stopsToBeAdded.forEach((stopToBeAdded: string) => {
+              const stopData = stops.find(stopData => stopData.parent_station === stopToBeAdded && stopData.route_id === routeId);
+              if (stopData) {
+                lineFeatures.geometry.coordinates.push([stopData.stop_lon, stopData.stop_lat]);
+              } else {
+                console.warn(`Stop with ID ${stopToBeAdded} not found in stops array.`);
+              }
+            });
+            stopsToBeAdded.clear();
+            newLines.push(lineFeatures);
+          }
+          visitedStops.clear();
+        }
       }
     }
     setLines(newLines);
@@ -260,17 +260,6 @@ const MapScreen: React.FC = () => {
             </Marker>
           ))
         }
-        {/* {
-          uniqueMarkers.filter(stop => stop.route_id === "IDFM:C01377").map((stop, index) => (
-            <Marker
-              key={index}
-              longitude={stop.stop_lon}
-              latitude={stop.stop_lat}
-            >
-              <Icon item="marker" color={colors[selectedButton][stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
-            </Marker>
-          ))
-        } */}
         {
           selectedStop && (
             <Popup

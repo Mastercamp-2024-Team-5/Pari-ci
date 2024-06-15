@@ -1,5 +1,5 @@
 import { Box} from "@chakra-ui/react";
-import MapScreen from "./../MapScreen";
+import MapScreen from "../MapScreen";
 import LeftSearch from "./../LeftSearch";
 
 const HomeWeb = ({

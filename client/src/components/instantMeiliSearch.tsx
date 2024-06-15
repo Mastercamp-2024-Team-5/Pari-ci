@@ -22,7 +22,7 @@ interface StopEntry {
   stop_id: string;
   stop_name: string;
   route_id: string;
-  route_short_name: string;
+  route_short_names: string;
 }
 
 const Hit = ({ hit }: { hit: StopEntry }) => (
@@ -31,7 +31,7 @@ const Hit = ({ hit }: { hit: StopEntry }) => (
       <Highlight attribute="stop_name" hit={hit} />
     </div>
     <div>
-      <Snippet attribute="route_short_name" hit={hit} />
+      <Snippet attribute="route_short_names" hit={hit} />
     </div>
   </div>
 );

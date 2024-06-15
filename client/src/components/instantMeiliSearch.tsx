@@ -14,7 +14,7 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 
 const { searchClient } = instantMeiliSearch(
   "localhost:7700",
-  "a4f452e8-73bd-4a42-be45-fd13e4b44de1"
+  "W9R4tm-Ko9k7Y4BAQN_xg6bVxRTEGo755xnpOQ3q9JM"
 );
 
 interface StopEntry {

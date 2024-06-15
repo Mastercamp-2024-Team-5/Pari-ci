@@ -49,11 +49,35 @@ pub fn add_agencies(documents: &Vec<models::Agency>) -> Result<(), diesel::resul
 }
 
 // return a list of routes in JSON format
-#[get("/routes")]
-pub fn list_routes() -> Json<Vec<models::Route>> {
+#[get("/routes?<metro>&<rer>&<tram>")]
+pub fn list_routes(
+    metro: Option<bool>,
+    rer: Option<bool>,
+    tram: Option<bool>,
+) -> Json<Vec<models::Route>> {
     use schema::routes::dsl::*;
     let connection = &mut establish_connection_pg();
-    let results = routes
+    let results = routes.into_boxed();
+    let mut filters = Vec::<i32>::new();
+    if metro.unwrap_or(false) {
+        filters.push(1);
+    }
+    if rer.unwrap_or(false) {
+        filters.push(2);
+    }
+    if tram.unwrap_or(false) {
+        filters.push(0);
+    }
+    if filters.is_empty() {
+        // send everything
+        return Json(
+            results
+                .load::<models::Route>(connection)
+                .expect("Error loading routes"),
+        );
+    }
+    let results = results
+        .filter(route_type.eq_any(filters))
         .load::<models::Route>(connection)
         .expect("Error loading routes");
     Json(results)

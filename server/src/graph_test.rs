@@ -1,43 +1,89 @@
+use serde::{Deserialize, Serialize};
 use tools::graph::Graph;
-use views::services::{
-    get_average_times, get_average_transfert_times, get_first_child_stop, remove_trailing_stops,
-};
+
 pub mod models;
 pub mod schema;
 mod services;
 pub mod tools;
 pub mod views;
-use std::time;
+use diesel::prelude::*;
 // Main function for debugging purposes
 
+#[derive(Debug, Serialize, Deserialize)]
+struct StopRouteDetails {
+    stop: String,
+    children: Vec<String>,
+}
+
 fn main() {
-    // Example usage:
-    let mut average_stop_times = get_average_times();
-    average_stop_times.append(&mut get_average_transfert_times());
-    println!("{:?}", average_stop_times.len());
+    let route_id = "IDFM:C01379";
 
-    let graph = Graph::generate_graph(average_stop_times);
+    use views::schema::average_stop_times::dsl as avg_st;
+    let connection = &mut services::establish_connection_pg();
+    let results = avg_st::average_stop_times
+        .inner_join(
+            views::schema::stop_route_details::table
+                .on(avg_st::stop_id.eq(views::schema::stop_route_details::stop_id)),
+        )
+        .filter(views::schema::stop_route_details::route_id.eq(route_id))
+        .select(avg_st::average_stop_times::all_columns())
+        .load::<views::models::AverageStopTime>(connection)
+        .expect("Error loading stops");
 
-    let t1 = time::Instant::now();
-    let starts = get_first_child_stop("IDFM:70143");
-    // let ends = get_first_child_stop("IDFM:61727"); bois le roi
-    // let ends = get_first_child_stop("IDFM:71591"); // Porte dorée (Tram 3a)
-    let ends = get_first_child_stop("IDFM:70604"); // Porte de Choisy (Tram 3a)
+    for result in &results {
+        let stop_name = views::schema::stop_route_details::table
+            .filter(views::schema::stop_route_details::stop_id.eq(&result.stop_id))
+            .select(views::schema::stop_route_details::stop_name)
+            .first::<String>(connection)
+            .expect("Error loading stops");
+        let next_stop_name = views::schema::stop_route_details::table
+            .filter(views::schema::stop_route_details::stop_id.eq(&result.next_stop_id))
+            .select(views::schema::stop_route_details::stop_name)
+            .first::<String>(connection)
+            .expect("Error loading stops");
+        println!(
+            "{:?} -> {:?} : {:?} {:?}",
+            stop_name,
+            next_stop_name,
+            result.avg_travel_time,
+            (&result.stop_id, &result.next_stop_id)
+        );
+    }
 
-    println!("{:?}", starts);
-    println!("{:?}", ends);
+    let mygraph = Graph::generate_graph(results);
+    mygraph.draw("graph.dot", "graph.png");
+    let mut graphs = mygraph.get_subgraphs();
+    let mut i = 0;
+    for graph in graphs.iter_mut() {
+        *graph = graph.into_tree().unwrap();
+        graph.draw(
+            format!("graph{}.dot", i).as_str(),
+            format!("graph{}.png", i).as_str(),
+        );
+        i += 1;
+    }
 
-    let shortest_path = graph.shortest_path(starts, ends);
-
-    let shortest_path = match shortest_path {
-        Some((cost, path)) => {
-            let path: Vec<String> = path.iter().map(|x| x.clone()).collect();
-            (cost, path)
+    let mut stop_route_details = Vec::<Vec<StopRouteDetails>>::new();
+    for graph in graphs {
+        let mut vec = Vec::new();
+        for node in graph.nodes.iter() {
+            let children = node
+                .edges
+                .iter()
+                .map(|x| graph.nodes[x.destination].id.clone())
+                .collect::<Vec<String>>();
+            vec.push(StopRouteDetails {
+                stop: node.id.clone(),
+                children: children,
+            });
         }
-        None => (0, vec![]),
-    };
-    let shortest_path = (shortest_path.0, remove_trailing_stops(shortest_path.1));
+        stop_route_details.push(vec);
+    }
 
-    println!("{:?}", shortest_path);
-    println!("{:?}", t1.elapsed());
+    for graph in stop_route_details {
+        for node in graph {
+            println!("{:?}", node);
+        }
+        println!("-----------------");
+    }
 }

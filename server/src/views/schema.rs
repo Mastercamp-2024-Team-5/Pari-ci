@@ -30,3 +30,4 @@ diesel::joinable!(stop_route_details -> trips (route_id));
 diesel::joinable!(transfers -> stop_route_details (from_stop_id));
 
 diesel::allow_tables_to_appear_in_same_query!(transfers, stop_route_details, average_stop_times);
+diesel::allow_tables_to_appear_in_same_query!(stop_route_details, stop_times);

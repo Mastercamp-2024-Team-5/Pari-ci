@@ -11,6 +11,7 @@ const HomeWeb = ({
     setStartAt,
     endAt,
     setEndAt,
+    setItininerairePage
   }: {
     departure: string,
     setDeparture: React.Dispatch<React.SetStateAction<string>>,
@@ -20,10 +21,11 @@ const HomeWeb = ({
     setStartAt: React.Dispatch<React.SetStateAction<string>>,
     endAt: string,
     setEndAt: React.Dispatch<React.SetStateAction<string>>,
+    setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>
   }) => {
     return (
         <>
-            <Box
+          <Box
             bg="F6FBF9"
             w="33%"
             h="100%"
@@ -38,13 +40,13 @@ const HomeWeb = ({
                 setStartAt={setStartAt}
                 endAt={endAt}
                 setEndAt={setEndAt}
+                setItininerairePage={setItininerairePage}
             />
             </Box>
             <Box
-            bg="red.400"
-            w="67%"
-            h="100%"
-            display="flex"
+              w="67%"
+              h="100%"
+              display="flex"
             >
             <MapScreen />
             </Box>

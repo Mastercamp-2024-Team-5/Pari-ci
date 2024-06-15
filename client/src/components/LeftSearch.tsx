@@ -24,7 +24,8 @@ const LeftSearch = (
     startAt,
     setStartAt,
     endAt,
-    setEndAt
+    setEndAt,
+    setItininerairePage
   }: {
     departure: string,
     setDeparture: React.Dispatch<React.SetStateAction<string>>,
@@ -33,11 +34,18 @@ const LeftSearch = (
     startAt: string,
     setStartAt: React.Dispatch<React.SetStateAction<string>>,
     endAt: string,
-    setEndAt: React.Dispatch<React.SetStateAction<string>>
+    setEndAt: React.Dispatch<React.SetStateAction<string>>,
+    setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>
   }
 ) => {
   const screenWidth = useScreenWidth();
 
+
+  const handleClickItineraire = () => {
+    if (departure !== "" && destination !== "" && startAt !== "" && endAt !== "") {
+      setItininerairePage(true);
+    }
+  };
 
   return (
     <Center>
@@ -46,7 +54,7 @@ const LeftSearch = (
           <Heading fontFamily="Karla" fontWeight="600" marginTop="15%" fontSize={screenWidth<600?"5xl":"4xl"} marginBottom='5%'>
             CITYMAPPER
           </Heading>
-          <Text fontSize={screenWidth<600?"xl":"lg"} marginBottom='10%'>
+          <Text fontSize={screenWidth<600?"xl":"lg"} marginBottom='5%'>
             Trouvez votre itinéraire
           </Text>
           <Icon item="barre" color="a" />
@@ -138,6 +146,7 @@ const LeftSearch = (
             borderRadius="15"
             marginTop='10%'
             p={screenWidth<600?10:8} // Added padding
+            onClick={handleClickItineraire}
           >
             Trouver l’itinéraire
           </Button>

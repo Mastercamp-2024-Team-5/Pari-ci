@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
-
-const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string }) => {
+import CircleLine from "./CircleLine";
+const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string, arrive: boolean }) => {
 
     return (
         <Flex 
@@ -8,33 +8,11 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop:
             maxW={"100%"} 
             direction={"row"} 
             borderRadius={"10px"}
-            paddingX={2}
             paddingY={0}
             bg={"white"}
             margin={0}
         >
-            <Box 
-                display={"flex"} 
-                alignItems={"center"} 
-                justifyContent={"center"} 
-                bgColor={color} 
-                borderRadius={"50%"} 
-                height={"50px"} 
-                width={"50px"}
-                alignSelf={"center"}
-                overflow={"hidden"}
-            >
-                <Text 
-                    fontFamily={"Karla"} 
-                    fontSize={"3xl"} 
-                    fontWeight={"bold"} 
-                    textColor={textColor} 
-                    textAlign={"center"}
-                    lineHeight={"50px"} 
-                >
-                    {line}
-                </Text>
-            </Box>
+            <CircleLine line={line} color={color} textColor={textColor} />
             <Flex
                 direction={"row"}
                 paddingX={2}
@@ -48,14 +26,13 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop:
                     maxW={"100%"} 
                     textColor={textColor} 
                     borderRadius={"50%"}
-                    fontSize={"xl"}
                     fontWeight={"500"}
                     direction={"column"}
                 >
                     <Text 
                         margin={"0"} 
                         textColor={textColor} 
-                        fontSize={"md"} 
+                        fontSize={"ls"} 
                         fontWeight={"700"}
                     >
                         {stop}
@@ -63,9 +40,9 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop:
                     <Text 
                         margin={"0"} 
                         textColor={textColor} 
-                        fontSize={"md"}
+                        fontSize={"sm"}
                         fontWeight={"500"}
-                        whiteSpace={"nowrap"}
+                        whiteSpace={"wrap"}
                     >
                         Vers {direction}
                     </Text>
@@ -79,7 +56,7 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction }: { stop:
                     fontWeight={"500"}
                     whiteSpace={"nowrap"}
                 >
-                    Départ à {depart}
+                    {arrive ? "Arrivé à":"Départ à"} {depart}
                 </Text>
             </Flex>
         </Flex>

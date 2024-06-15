@@ -120,5 +120,106 @@ const RERB_stops_part3: string[] = [
 
 const RERB_stops: string[][] = [RERB_stops_part1, RERB_stops_part2, RERB_stops_part3];
 
-const RER_stops: string[][][] = [RERA_stops, RERB_stops];
+const RERC_stops_part1: string[] = [
+    "IDFM:monomodalStopPlace:44411",
+    "IDFM:monomodalStopPlace:47599",
+    "IDFM:monomodalStopPlace:43150",
+    "IDFM:monomodalStopPlace:43180",
+    "IDFM:monomodalStopPlace:43166",
+    "IDFM:monomodalStopPlace:43126",
+    "IDFM:monomodalStopPlace:43105",
+    "IDFM:monomodalStopPlace:47898",
+    "IDFM:monomodalStopPlace:43201",
+    "IDFM:monomodalStopPlace:43077",
+    "IDFM:monomodalStopPlace:43130",
+    "IDFM:monomodalStopPlace:43230",
+    "IDFM:monomodalStopPlace:43203",
+    "IDFM:monomodalStopPlace:44514",
+    "IDFM:monomodalStopPlace:44314",
+    "IDFM:monomodalStopPlace:415093",
+    "IDFM:monomodalStopPlace:45437",
+    "IDFM:monomodalStopPlace:45447",
+    "IDFM:monomodalStopPlace:45453",
+    "IDFM:monomodalStopPlace:45419",
+    "IDFM:monomodalStopPlace:58757",
+    "IDFM:monomodalStopPlace:415091",
+    "IDFM:monomodalStopPlace:470540",
+    "IDFM:monomodalStopPlace:45705",
+    "IDFM:monomodalStopPlace:44877",
+    "IDFM:monomodalStopPlace:43072",
+    "IDFM:monomodalStopPlace:45301",
+    "IDFM:monomodalStopPlace:46366",
+    "IDFM:monomodalStopPlace:46375",
+    "IDFM:monomodalStopPlace:43227",
+    "IDFM:monomodalStopPlace:43110",
+    "IDFM:monomodalStopPlace:46307",
+    "IDFM:monomodalStopPlace:46387",
+    "IDFM:monomodalStopPlace:46395",
+    "IDFM:monomodalStopPlace:43192",
+    "IDFM:monomodalStopPlace:43076",
+    "IDFM:monomodalStopPlace:43188",
+    "IDFM:monomodalStopPlace:43202",
+    "IDFM:monomodalStopPlace:43098",
+    "IDFM:monomodalStopPlace:47939",
+    "IDFM:monomodalStopPlace:43068",
+    "IDFM:monomodalStopPlace:415484",
+    "IDFM:monomodalStopPlace:47925",
+    "IDFM:monomodalStopPlace:43099",
+    "IDFM:monomodalStopPlace:47952",
+    "IDFM:monomodalStopPlace:47950",
+    "IDFM:monomodalStopPlace:43121",
+    "IDFM:monomodalStopPlace:47095",
+]
+
+const RERC_stops_part2: string[] = [
+    "IDFM:monomodalStopPlace:43098",
+    "IDFM:monomodalStopPlace:43159",
+    "IDFM:monomodalStopPlace:47905",
+    "IDFM:monomodalStopPlace:43149",
+    "IDFM:monomodalStopPlace:47927",
+    "IDFM:monomodalStopPlace:43081",
+    "IDFM:monomodalStopPlace:43080",
+    "IDFM:monomodalStopPlace:47115",
+]
+
+const RERC_stops_part3: string[] = [
+    "IDFM:monomodalStopPlace:43110",
+    "IDFM:monomodalStopPlace:46298",
+    "IDFM:monomodalStopPlace:46299",
+    "IDFM:monomodalStopPlace:47907",
+    "IDFM:monomodalStopPlace:44787",
+    "IDFM:monomodalStopPlace:46035",
+    "IDFM:monomodalStopPlace:47940",
+    "IDFM:monomodalStopPlace:58774",
+    "IDFM:monomodalStopPlace:43083",
+    "IDFM:monomodalStopPlace:43091",
+    "IDFM:monomodalStopPlace:43215",
+    "IDFM:monomodalStopPlace:43136",
+    "IDFM:monomodalStopPlace:57674",
+    "IDFM:monomodalStopPlace:43219",
+]
+
+const RERC_stops_part4: string[] = [
+    "IDFM:monomodalStopPlace:462388",
+    "IDFM:monomodalStopPlace:43219",
+    "IDFM:monomodalStopPlace:46990",
+    "IDFM:monomodalStopPlace:461504",
+]
+
+const RERC_stops_part5: string[] = [
+    "IDFM:monomodalStopPlace:58757",
+    "IDFM:monomodalStopPlace:45346",
+    "IDFM:monomodalStopPlace:58798",
+    "IDFM:monomodalStopPlace:462357",
+    "IDFM:monomodalStopPlace:43084",
+    "IDFM:monomodalStopPlace:43163",
+    "IDFM:monomodalStopPlace:47883",
+    "IDFM:monomodalStopPlace:462388",
+    "IDFM:monomodalStopPlace:43183",
+    "IDFM:monomodalStopPlace:43220",
+]
+
+const RERC_stops: string[][] = [RERC_stops_part1, RERC_stops_part2, RERC_stops_part3, RERC_stops_part4, RERC_stops_part5];
+
+const RER_stops: string[][][] = [RERA_stops, RERB_stops, RERC_stops];
 export default RER_stops;

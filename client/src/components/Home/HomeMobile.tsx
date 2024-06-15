@@ -2,7 +2,7 @@ import { Box, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButto
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "./../LeftSearch";
 import React, { useState } from "react";
-import MapScreen from "./../MapScreen";
+import MapScreen from "../MapScreen";
 
 const HomeMobile = ({
   departure,

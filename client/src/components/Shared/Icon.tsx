@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/react";
 import "../assets/font/fontello/css/fontello.css";
-import data from "../assets/font/fontello/config.json";
+import data from "../../assets/font/fontello/config.json";
 
 interface IconProps {
   item: string; // Icon name (can be found in the config.json file in the glyphs[].css field)

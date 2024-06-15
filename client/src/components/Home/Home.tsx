@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import HomeMobile from "./HomeMobile";
 import HomeWeb from "./HomeWeb";
-import Itineraire from "../Initenaire/Itineraire";
+import Itineraire from "./../Itineraire/Itineraire";
 
 const Home = () => {
   const [departure, setDeparture] = useState("");

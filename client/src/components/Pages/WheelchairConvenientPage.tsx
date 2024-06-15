@@ -17,9 +17,9 @@ import useScreenWidth from "../Shared/useScreenWidth";
 import Icon from "../Shared/Icon";
 
 // Import images
-import accessibility1 from "./../assets/accessibility1.jpg";
-import accessibility2 from "./../assets/accessibility2.jpg";
-import accessibility3 from "./../assets/accessibility3.jpg";
+import accessibility1 from "./../../assets/accessibility1.jpg";
+import accessibility2 from "./../../assets/accessibility2.jpg";
+import accessibility3 from "./../../assets/accessibility3.jpg";
 
 type AccessibleScreenProps = {
   setAccessibleScreen: (value: boolean) => void;

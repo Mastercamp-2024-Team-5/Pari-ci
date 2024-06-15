@@ -54,17 +54,15 @@ const LeftSearch = ({
         <Stack align="center">
           <Heading
             fontFamily="Karla"
-            fontWeight="600"
+            fontWeight="650"
             marginTop="15%"
             fontSize={screenWidth < 600 ? "5xl" : "4xl"}
-            marginBottom="5%"
           >
             CITYMAPPER
           </Heading>
           <Text fontSize={screenWidth < 600 ? "xl" : "lg"} marginBottom="5%">
             Trouvez votre itinéraire
           </Text>
-          <Icon item="barre" color="a" />
         </Stack>
         <InstantMeiliSearchApp />
         <VStack spacing={15} w="90%" alignSelf="center">
@@ -155,12 +153,11 @@ const LeftSearch = ({
             }}
             rounded="md"
             marginBottom={screenWidth < 600 ? "5%" : "0%"}
-            fontSize={screenWidth < 600 ? "3xl" : "xl"}
+            fontSize={screenWidth < 600 ? "2xl" : "xl"}
             whiteSpace="wrap"
             width={screenWidth < 600 ? "80%" : "80%"}
             alignSelf="center"
             borderRadius="15"
-            marginTop="10%"
             p={screenWidth < 600 ? 10 : 8} // Added padding
             onClick={handleClickItineraire}
           >

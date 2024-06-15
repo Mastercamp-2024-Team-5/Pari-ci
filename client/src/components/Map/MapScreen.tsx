@@ -19,6 +19,11 @@ interface Stop {
   route_type: number;
 }
 
+interface GraphNode {
+  stop: string;
+  children: string[];
+}
+
 const ControlButton: React.FC<{ selectedButton: string; onSelectButton: (buttonType: string) => void; }> = ({ selectedButton, onSelectButton }) => {
   return (
     <div className="control-button">
@@ -149,11 +154,12 @@ const MapScreen: React.FC = () => {
     const newLines: GeoJSON.Feature<GeoJSON.LineString>[] = [];
     const visitedStops = new Set<string>();
 
+    // const routeId = "IDFM:C01380";
     for (const routeId of Object.keys(colors[selectedButton])) {
       const routeStops = stops.filter(stop => stop.route_id === routeId);
       if (routeStops.length > 0) {
         const graphsResponse = await fetch(`http://127.0.0.1:8000/route/${routeId}/stops`);
-        const graphs: string[][] = await graphsResponse.json();
+        const graphs: string[][] = transformGraphsToLists(await graphsResponse.json());
         if (!Array.isArray(graphs) || !graphs.length) {
           throw new Error('API response is not valid');
         }
@@ -207,6 +213,25 @@ const MapScreen: React.FC = () => {
     setLines(newLines);
   };
 
+  const transformGraphsToLists = (graphs: GraphNode[][]): string[][] => {
+    const result: string[][] = [];
+    for (const graph of graphs) {
+      const rootNodes = graph.filter(node => !graph.some(n => n.children.includes(node.stop)));
+      for (const rootNode of rootNodes) {
+        const graphList: string[] = [];
+        let children = rootNode.children;
+        graphList.push(rootNode.stop);
+        while (children.length > 0) {
+          const nextNode = graph.find(node => node.stop === children[0]) || { stop: "", children: [] };
+          graphList.push(nextNode.stop);
+          children = nextNode.children;
+        }
+        result.push(graphList);
+      }
+    }
+    return result;
+  };
+
   const handleSelectButton = (buttonType: string) => {
     setSelectedButton(buttonType);
   };
@@ -235,6 +260,17 @@ const MapScreen: React.FC = () => {
             </Marker>
           ))
         }
+        {/* {
+          uniqueMarkers.filter(stop => stop.route_id === "IDFM:C01377").map((stop, index) => (
+            <Marker
+              key={index}
+              longitude={stop.stop_lon}
+              latitude={stop.stop_lat}
+            >
+              <Icon item="marker" color={colors[selectedButton][stop.route_id]} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
+            </Marker>
+          ))
+        } */}
         {
           selectedStop && (
             <Popup

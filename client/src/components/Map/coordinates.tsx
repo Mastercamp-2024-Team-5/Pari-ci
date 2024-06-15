@@ -221,5 +221,114 @@ const RERC_stops_part5: string[] = [
 
 const RERC_stops: string[][] = [RERC_stops_part1, RERC_stops_part2, RERC_stops_part3, RERC_stops_part4, RERC_stops_part5];
 
-const RER_stops: string[][][] = [RERA_stops, RERB_stops, RERC_stops];
+const RERD_stops_part1: string[] = [
+    "IDFM:monomodalStopPlace:411440",
+    "IDFM:monomodalStopPlace:411428",
+    "IDFM:monomodalStopPlace:411421",
+    "IDFM:monomodalStopPlace:411418",
+    "IDFM:monomodalStopPlace:47958",
+    "IDFM:monomodalStopPlace:44628",
+    "IDFM:monomodalStopPlace:47968",
+    "IDFM:monomodalStopPlace:47876",
+    "IDFM:monomodalStopPlace:43222",
+    "IDFM:monomodalStopPlace:43251",
+    "IDFM:monomodalStopPlace:43179",
+    "IDFM:monomodalStopPlace:412743",
+    "IDFM:monomodalStopPlace:43204",
+    "IDFM:monomodalStopPlace:462394",
+    "IDFM:monomodalStopPlace:45102",
+    "IDFM:monomodalStopPlace:470195",
+    "IDFM:monomodalStopPlace:43154",
+    "IDFM:monomodalStopPlace:464040",
+    "IDFM:monomodalStopPlace:46286",
+    "IDFM:monomodalStopPlace:46304",
+    "IDFM:monomodalStopPlace:45067",
+    "IDFM:monomodalStopPlace:47684",
+    "IDFM:monomodalStopPlace:43226",
+    "IDFM:monomodalStopPlace:58873",
+    "IDFM:monomodalStopPlace:47924",
+    "IDFM:monomodalStopPlace:45771",
+    "IDFM:monomodalStopPlace:47669",
+    "IDFM:monomodalStopPlace:47665",
+    "IDFM:monomodalStopPlace:42516",
+    "IDFM:monomodalStopPlace:45784",
+    "IDFM:monomodalStopPlace:47909",
+]
+
+const RERD_stops_part2: string[] = [
+    "IDFM:monomodalStopPlace:47909",
+    "IDFM:monomodalStopPlace:47967",
+    "IDFM:monomodalStopPlace:45763",
+    "IDFM:monomodalStopPlace:45812",
+    "IDFM:monomodalStopPlace:45814",
+    "IDFM:monomodalStopPlace:45824",
+    "IDFM:monomodalStopPlace:45820",
+    "IDFM:monomodalStopPlace:47904",
+    "IDFM:monomodalStopPlace:45759",
+    "IDFM:monomodalStopPlace:43115",
+    "IDFM:monomodalStopPlace:45745",
+    "IDFM:monomodalStopPlace:45860",
+    "IDFM:monomodalStopPlace:47948",
+    "IDFM:monomodalStopPlace:43225",
+    "IDFM:monomodalStopPlace:45739",
+    "IDFM:monomodalStopPlace:45735",
+    "IDFM:monomodalStopPlace:45067",
+]
+
+const RERD_stops_part3: string[] = [
+    "IDFM:monomodalStopPlace:43225",
+    "IDFM:monomodalStopPlace:43132",
+    "IDFM:monomodalStopPlace:48489",
+    "IDFM:monomodalStopPlace:47906",
+    "IDFM:monomodalStopPlace:45850",
+    "IDFM:monomodalStopPlace:43115",
+    "IDFM:monomodalStopPlace:45761",
+    "IDFM:monomodalStopPlace:47899",
+    "IDFM:monomodalStopPlace:43087",
+    "IDFM:monomodalStopPlace:43142",
+    "IDFM:monomodalStopPlace:47895",
+    "IDFM:monomodalStopPlace:43156",
+    "IDFM:monomodalStopPlace:43102",
+    "IDFM:monomodalStopPlace:43092",
+    "IDFM:monomodalStopPlace:411485",
+]
+
+const RERD_stops: string[][] = [RERD_stops_part1, RERD_stops_part2, RERD_stops_part3];
+
+const RERE_stops_part1: string[] = [
+    "IDFM:monomodalStopPlace:487011",
+    "IDFM:monomodalStopPlace:470549",
+    "IDFM:monomodalStopPlace:415093",
+    "IDFM:monomodalStopPlace:58718",
+    "IDFM:monomodalStopPlace:58572",
+    "IDFM:monomodalStopPlace:58498",
+    "IDFM:monomodalStopPlace:43176",
+    "IDFM:monomodalStopPlace:44201",
+    "IDFM:monomodalStopPlace:43096",
+    "IDFM:monomodalStopPlace:47901",
+    "IDFM:monomodalStopPlace:43044",
+    "IDFM:monomodalStopPlace:43127",
+    "IDFM:monomodalStopPlace:58879",
+    "IDFM:monomodalStopPlace:43211",
+]
+
+const RERE_stops_part2: string[] = [
+    "IDFM:monomodalStopPlace:43096",
+    "IDFM:monomodalStopPlace:42356",
+    "IDFM:monomodalStopPlace:47877",
+    "IDFM:monomodalStopPlace:47900",
+    "IDFM:monomodalStopPlace:46552",
+    "IDFM:monomodalStopPlace:58267",
+    "IDFM:monomodalStopPlace:43223",
+    "IDFM:monomodalStopPlace:58288",
+    "IDFM:monomodalStopPlace:43074",
+    "IDFM:monomodalStopPlace:46568",
+    "IDFM:monomodalStopPlace:462901",
+    "IDFM:monomodalStopPlace:43131",
+    "IDFM:monomodalStopPlace:43208",
+]
+
+const RERE_stops: string[][] = [RERE_stops_part1, RERE_stops_part2];
+
+const RER_stops: string[][][] = [RERA_stops, RERB_stops, RERC_stops, RERD_stops, RERE_stops];
 export default RER_stops;

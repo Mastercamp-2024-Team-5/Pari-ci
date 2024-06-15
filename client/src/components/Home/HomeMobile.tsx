@@ -1,8 +1,16 @@
-import { Box, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerBody } from "@chakra-ui/react";
+import {
+  Box,
+  IconButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerBody,
+} from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import LeftSearch from "./../LeftSearch";
+import LeftSearch from "../Search/LeftSearch";
 import React, { useState } from "react";
-import MapScreen from "./../MapScreen";
+import MapScreen from "../Map/MapScreen";
 
 const HomeMobile = ({
   departure,
@@ -13,7 +21,7 @@ const HomeMobile = ({
   setStartAt,
   endAt,
   setEndAt,
-  setItininerairePage
+  setItininerairePage,
 }: {
   departure: string;
   setDeparture: React.Dispatch<React.SetStateAction<string>>;
@@ -61,14 +69,15 @@ const HomeMobile = ({
             onClick={handleDrawerOpen}
           >
             <span>Search Options</span>
-            <IconButton
-              icon={<ArrowBackIcon />}
-              aria-label="Open drawer"
-            />
+            <IconButton icon={<ArrowBackIcon />} aria-label="Open drawer" />
           </Box>
 
           {/* Full Drawer Content */}
-          <Drawer placement="bottom" onClose={handleDrawerClose} isOpen={isDrawerOpen}>
+          <Drawer
+            placement="bottom"
+            onClose={handleDrawerClose}
+            isOpen={isDrawerOpen}
+          >
             <DrawerOverlay />
             <DrawerContent>
               <DrawerCloseButton />

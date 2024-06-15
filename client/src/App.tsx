@@ -1,6 +1,6 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
 import React, { useState } from "react";
-import AccessibleScreen from "./components/AccessibleScreen";
+import AccessibleScreen from "./components/Pages/WheelchairConvenientPage";
 import Home from "./components/Home/Home";
 
 function App() {

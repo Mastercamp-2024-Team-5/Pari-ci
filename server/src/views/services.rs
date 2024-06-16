@@ -312,7 +312,7 @@ pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<RouteNode>>> {
         .expect("Error loading stops");
 
     let mygraph = Graph::generate_graph(results);
-    mygraph.draw("graph.dot", "graph.png");
+    // mygraph.draw("graph.dot", "graph.png");
     let mut graphs = mygraph.get_subgraphs();
     for graph in graphs.iter_mut() {
         *graph = graph.into_tree().unwrap();

@@ -61,6 +61,21 @@ diesel::table! {
 }
 
 diesel::table! {
+    routes_trace (route_id) {
+        #[max_length = 255]
+        route_id -> Varchar,
+        #[max_length = 255]
+        short_name -> Varchar,
+        #[max_length = 255]
+        long_name -> Varchar,
+        route_type -> Int4,
+        #[max_length = 255]
+        color -> Nullable<Varchar>,
+        shape -> Nullable<Text>,
+    }
+}
+
+diesel::table! {
     stop_times (trip_id, stop_id, stop_sequence, arrival_time, departure_time) {
         #[max_length = 255]
         trip_id -> Varchar,
@@ -150,6 +165,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     calendar,
     calendar_dates,
     routes,
+    routes_trace,
     stop_times,
     stops,
     transfers,

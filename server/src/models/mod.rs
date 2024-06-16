@@ -6,8 +6,10 @@ use super::schema::calendar_dates;
 use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
+use crate::schema::routes_trace;
 use crate::schema::stop_times;
 use crate::schema::transfers;
+use crate::tools::graph::Graph;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use time::format_description;
@@ -461,4 +463,165 @@ impl FromStr for Transfer {
             min_transfer_time: parts[3].parse().unwrap(),
         })
     }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = routes_trace)]
+pub struct RouteTrace {
+    route_id: String,
+    short_name: String,
+    long_name: String,
+    route_type: i32,
+    color: Option<String>,
+    shape: Option<String>,
+}
+
+impl FromStr for RouteTrace {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(';').collect();
+        if parts.len() != 13 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        let route_type = match parts[3] {
+            "Tram" => 0,
+            "Subway" => 1,
+            "Rail" => 2,
+            "Bus" => 3,
+            "Ferry" => 4,
+            "Cable car" => 5,
+            "Gondola" => 6,
+            "Funicular" => 7,
+            _ => 8,
+        };
+
+        // if field is empty, set it to None
+        let color = if parts[4].is_empty() {
+            None
+        } else {
+            Some(parts[4].to_string())
+        };
+        let shape = if parts[6].is_empty() {
+            None
+        } else {
+            if route_type == 1 {
+                // display id and short_name
+                Some(clean_shape(parts[0]))
+            } else {
+                None
+            }
+        };
+
+        Ok(Self {
+            route_id: parts[0].parse().unwrap(),
+            short_name: parts[1].to_string(),
+            long_name: parts[2].to_string(),
+            route_type,
+            color,
+            shape,
+        })
+    }
+}
+
+// #[derive(Deserialize, Serialize, Debug)]
+// struct Shape {
+//     coordinates: Vec<Vec<Vec<f64>>>,
+//     type_: String,
+// }
+
+// impl Shape {
+//     fn to_graph(&self) -> Graph {
+//         let mut graph = Graph::new();
+//         for line in &self.coordinates {
+//             for point in line {
+//                 let node_id = format!("{},{}", point[0], point[1]);
+//                 graph.add_node(node_id.clone());
+//             }
+//             for i in 0..line.len() - 1 {
+//                 let node_id1 = format!("{},{}", line[i][0], line[i][1]);
+//                 let node_id2 = format!("{},{}", line[i + 1][0], line[i + 1][1]);
+//                 graph.add_edge(node_id1, node_id2, 1);
+//             }
+//         }
+//         graph
+//     }
+// }
+
+fn clean_shape(route_id: &str) -> String {
+    // // Parse the shape string as JSON
+    // let shape = shape
+    //     .replace("\"\"", "\"")
+    //     .replace("\"{", "{")
+    //     .replace("}\"", "}")
+    //     .replace("type", "type_");
+    // let shape: Shape = serde_json::from_str(&shape).unwrap();
+    // let graph = shape.to_graph();
+    use crate::views::schema::average_stop_times::dsl as avg_st;
+    let connection = &mut crate::services::establish_connection_pg();
+    let results = avg_st::average_stop_times
+        .inner_join(
+            crate::views::schema::stop_route_details::table
+                .on(avg_st::stop_id.eq(crate::views::schema::stop_route_details::stop_id)),
+        )
+        .filter(crate::views::schema::stop_route_details::route_id.eq(route_id))
+        .select(avg_st::average_stop_times::all_columns())
+        .load::<crate::views::models::AverageStopTime>(connection)
+        .expect("Error loading stops");
+
+    let graph = Graph::generate_graph(results);
+    // println!("{:?}", graph);
+    graph.draw("graph.dot", "graph.png");
+    let mut graphs = graph.get_subgraphs();
+    println!("{:?}", graphs.len());
+    for graph in graphs.iter_mut() {
+        *graph = graph.into_tree().unwrap();
+    }
+    // reformat the graph to a list of lines (each line is a list of points (lat, lon, stop_id))
+    // line must be in order of the route
+    // if a node as multiple children, we must split the line
+    let mut lines = Vec::new();
+    for graph in graphs {
+        let mut line = Vec::new();
+        let mut children = Vec::new();
+        for node in graph.nodes.iter() {
+            if node.edges.len() > 1 {
+                // split the line
+                if !line.is_empty() {
+                    lines.push(line.clone());
+                    line.clear();
+                }
+                children.push(node.clone());
+            } else {
+                line.push(node.clone());
+            }
+        }
+        if !line.is_empty() {
+            lines.push(line.clone());
+            line.clear();
+        }
+        for child in children {
+            line.push(child);
+            lines.push(line.clone());
+            line.clear();
+        }
+    }
+    // format the lines to a json string
+    let mut shape = String::new();
+    shape.push_str("{\"coordinates\":[");
+    for line in lines {
+        shape.push('[');
+        for node in line {
+            shape.push_str("\"");
+            shape.push_str(&node.id);
+            shape.push_str("\",");
+        }
+        shape.pop();
+        shape.push_str("],");
+    }
+    shape.pop();
+    shape.push_str("],\"type\":\"LineString\"}");
+    shape
 }

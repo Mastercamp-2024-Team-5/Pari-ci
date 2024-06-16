@@ -61,9 +61,9 @@ diesel::table! {
 }
 
 diesel::table! {
-    routes_trace (id) {
+    routes_trace (route_id) {
         #[max_length = 255]
-        id -> Varchar,
+        route_id -> Varchar,
         #[max_length = 255]
         short_name -> Varchar,
         #[max_length = 255]
@@ -71,21 +71,7 @@ diesel::table! {
         route_type -> Int4,
         #[max_length = 255]
         color -> Nullable<Varchar>,
-        #[max_length = 255]
-        route_url -> Nullable<Varchar>,
         shape -> Nullable<Text>,
-        #[max_length = 255]
-        id_ilico -> Nullable<Varchar>,
-        #[max_length = 255]
-        operator_name -> Nullable<Varchar>,
-        #[max_length = 255]
-        network_name -> Nullable<Varchar>,
-        #[max_length = 255]
-        url -> Nullable<Varchar>,
-        #[max_length = 255]
-        long_name_first -> Nullable<Varchar>,
-        #[max_length = 255]
-        geo_point_2d -> Nullable<Varchar>,
     }
 }
 

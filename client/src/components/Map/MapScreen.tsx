@@ -4,7 +4,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useState } from 'react';
 import Icon from '../Shared/Icon';
 import './MapScreen.css';
-import RER_stops from './coordinates';
+import RER_stops from './coordinates_RER';
+import trains from './coordinates_train';
 
 export interface Stop {
   stop_id: string;
@@ -144,6 +145,23 @@ const MapScreen: React.FC = () => {
             const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
               type: 'Feature',
               properties: { route_id: Object.keys(colors['rer'])[RER_stops.indexOf(rer)] },
+              geometry: {
+                type: 'LineString',
+                coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])
+              }
+            };
+            newLines.push(lineFeatures);
+          }
+        }
+      }
+    } else if (buttonType === 'train') {
+      for (const train of trains) {
+        for (const route of train) {
+          const routeStops = route.map(stopId => stops.find(stop => stop.stop_id === stopId) || {});
+          if (routeStops.length > 0) {
+            const lineFeatures: GeoJSON.Feature<GeoJSON.LineString> = {
+              type: 'Feature',
+              properties: { route_id: Object.keys(colors['train'])[trains.indexOf(train)] },
               geometry: {
                 type: 'LineString',
                 coordinates: routeStops.map((stop: Stop) => [stop.stop_lon, stop.stop_lat])

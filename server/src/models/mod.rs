@@ -6,6 +6,7 @@ use super::schema::calendar_dates;
 use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
+use crate::schema::routes_trace;
 use crate::schema::stop_times;
 use crate::schema::transfers;
 use diesel::prelude::*;
@@ -459,6 +460,111 @@ impl FromStr for Transfer {
             from_stop_id: parts[0].parse().unwrap(),
             to_stop_id: parts[1].parse().unwrap(),
             min_transfer_time: parts[3].parse().unwrap(),
+        })
+    }
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = routes_trace)]
+pub struct RouteTrace {
+    id: String,
+    short_name: String,
+    long_name: String,
+    route_type: i32,
+    color: Option<String>,
+    route_url: Option<String>,
+    shape: Option<String>,
+    id_ilico: Option<String>,
+    operator_name: Option<String>,
+    network_name: Option<String>,
+    url: Option<String>,
+    long_name_first: Option<String>,
+    geo_point_2d: Option<String>,
+}
+
+impl FromStr for RouteTrace {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(';').collect();
+        if parts.len() != 13 {
+            println!("Invalid number of fields: {}", parts.len());
+            return Err(());
+        }
+
+        // if field is empty, set it to None
+        let color = if parts[4].is_empty() {
+            None
+        } else {
+            Some(parts[4].to_string())
+        };
+        let route_url = if parts[5].is_empty() {
+            None
+        } else {
+            Some(parts[5].to_string())
+        };
+        let shape = if parts[6].is_empty() {
+            None
+        } else {
+            Some(parts[6].to_string())
+        };
+        let id_ilico = if parts[7].is_empty() {
+            None
+        } else {
+            Some(parts[7].to_string())
+        };
+        let operator_name = if parts[8].is_empty() {
+            None
+        } else {
+            Some(parts[8].to_string())
+        };
+        let network_name = if parts[9].is_empty() {
+            None
+        } else {
+            Some(parts[9].to_string())
+        };
+        let url = if parts[10].is_empty() {
+            None
+        } else {
+            Some(parts[10].to_string())
+        };
+        let long_name_first = if parts[11].is_empty() {
+            None
+        } else {
+            Some(parts[11].to_string())
+        };
+        let geo_point_2d = if parts[12].is_empty() {
+            None
+        } else {
+            Some(parts[12].to_string())
+        };
+
+        let route_type = match parts[3] {
+            "Tram" => 0,
+            "Subway" => 1,
+            "Rail" => 2,
+            "Bus" => 3,
+            "Ferry" => 4,
+            "Cable car" => 5,
+            "Gondola" => 6,
+            "Funicular" => 7,
+            _ => 8,
+        };
+
+        Ok(Self {
+            id: parts[0].parse().unwrap(),
+            short_name: parts[1].to_string(),
+            long_name: parts[2].to_string(),
+            route_type,
+            color,
+            route_url,
+            shape,
+            id_ilico,
+            operator_name,
+            network_name,
+            url,
+            long_name_first,
+            geo_point_2d,
         })
     }
 }

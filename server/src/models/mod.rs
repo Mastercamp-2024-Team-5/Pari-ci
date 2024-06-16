@@ -581,31 +581,42 @@ fn clean_shape(route_id: &str) -> String {
     }
     // reformat the graph to a list of lines (each line is a list of points (lat, lon, stop_id))
     // line must be in order of the route
-    // if a node as multiple children, we must split the line
     let mut lines = Vec::new();
     for graph in graphs {
-        let mut line = Vec::new();
-        let mut children = Vec::new();
-        for node in graph.nodes.iter() {
-            if node.edges.len() > 1 {
-                // split the line
-                if !line.is_empty() {
+        let starts = graph.get_root().unwrap();
+        // follow the tree to get the order of the stops
+        // if a node as multiple children, we must split the line in two
+        for start in starts {
+            let mut line = Vec::new();
+            let mut visited = Vec::new();
+            let mut current = start;
+            let mut unfinished_lines: Vec<(String, String)> = Vec::new();
+            loop {
+                visited.push(current.clone());
+                line.push(current.clone());
+                let children = graph.get_children(&current);
+                if children.len() == 0 {
+                    // we reached the end of the line
                     lines.push(line.clone());
                     line.clear();
+                    // check if there are unfinished lines
+                    if unfinished_lines.len() > 0 {
+                        let (parent, child) = unfinished_lines.pop().unwrap();
+                        line.push(parent.clone());
+                        current = child.clone();
+                    } else {
+                        break;
+                    }
+                } else if children.len() == 1 {
+                    // only one child, we can continue
+                    current = children[0].clone();
+                } else {
+                    // multiple children, we must split the line
+                    // we save the current line and continue with the first child
+                    unfinished_lines.push((current, children[1].clone()));
+                    current = children[0].clone();
                 }
-                children.push(node.clone());
-            } else {
-                line.push(node.clone());
             }
-        }
-        if !line.is_empty() {
-            lines.push(line.clone());
-            line.clear();
-        }
-        for child in children {
-            line.push(child);
-            lines.push(line.clone());
-            line.clear();
         }
     }
     // format the lines to a json string
@@ -615,7 +626,7 @@ fn clean_shape(route_id: &str) -> String {
         shape.push('[');
         for node in line {
             shape.push_str("\"");
-            shape.push_str(&node.id);
+            shape.push_str(&node);
             shape.push_str("\",");
         }
         shape.pop();

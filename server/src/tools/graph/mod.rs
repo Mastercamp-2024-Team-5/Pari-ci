@@ -449,6 +449,37 @@ impl Graph {
 
         Ok(tree)
     }
+
+    pub fn get_root(&self) -> Option<Vec<NodeIndex>> {
+        // return the node with no predecessors
+        let roots = self
+            .nodes
+            .iter()
+            .filter(|node| {
+                !self.nodes.iter().any(|other_node| {
+                    other_node
+                        .edges
+                        .iter()
+                        .any(|edge| edge.destination == self.node_indices[&node.id])
+                })
+            })
+            .map(|node| node.id.clone())
+            .collect::<Vec<NodeIndex>>();
+        if roots.len() >= 1 {
+            Some(roots)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_children(&self, node: &NodeIndex) -> Vec<NodeIndex> {
+        // return the children of a node
+        self.nodes[self.node_indices[node]]
+            .edges
+            .iter()
+            .map(|edge| self.nodes[edge.destination].id.clone())
+            .collect()
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]

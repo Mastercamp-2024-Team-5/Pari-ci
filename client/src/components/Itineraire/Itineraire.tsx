@@ -17,14 +17,8 @@ import { useHomeContext } from './../Home/HomeContext';
 
 const Itineraire = () => {
   const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
-  console.log("DEPARTURE  :sdf:sdfsdgf ");
-  console.log(departure);
-  console.log("DESTINATION  :sdf:sdfsdgf ");
-  console.log(destination);
   const [data, setData] = useState<any>({});
   const screenWidth = useScreenWidth();
-  console.log("READ FROM ITINERAIRE");
-    console.log(DataPath);
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
   const [moreDetails, setMoreDetails] = useState(false);
@@ -86,7 +80,7 @@ const Itineraire = () => {
       marginTop: '10px',
     }}>
       {
-        data && data.points.map((obj: any, index: number) => (
+        !isEmpty(data) && data.points.map((obj: any, index: number) => (
           <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={"direction"} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
         ))
       }
@@ -117,7 +111,7 @@ const Itineraire = () => {
 
   return (
     <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
-      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : "33%"} h="100%" p={4}>
+      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"33%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>
@@ -260,14 +254,14 @@ const Itineraire = () => {
       </Box>
       {
         screenWidth >= 700 && !moreDetails &&(
-          <Box w="67%" h="100%" display="flex">
+          <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
             <MapScreen />
           </Box>
         )
       }
       {
         screenWidth >= 700 && moreDetails && (
-          <Flex padding={"5%"} paddingY={"2%"} direction={"column"} w="67%" h="100%" display="flex" bg="white">
+          <Flex padding={"5%"} paddingY={"2%"} direction={"column"} flexBasis="67%" flexShrink={1} h="100%" display="flex" bg="white">
             <Text
               onClick={() => setMoreDetails(!moreDetails)}
               fontSize={"md"}

@@ -19,7 +19,6 @@ const LeftSearch = () => {
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
   const handleClickItineraire = () => {
-    console.log("tuhjthyhtyyhtfryhtufr");
     if (
         true
       // departure !== "" &&

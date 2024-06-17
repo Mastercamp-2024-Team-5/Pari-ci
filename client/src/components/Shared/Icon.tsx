@@ -5,7 +5,7 @@ import data from "./../../assets/font/fontello/config.json";
 
 interface IconProps {
   item: string; // Icon name (can be found in the config.json file in the glyphs[].css field)
-  size?: string; // Icon size (optional)
+  size?: string | number; // Icon size (optional)
   style?: React.CSSProperties; // Icon style (optional)
   color?: string; // Icon color (if specifies a metro or RER number, color is set to the metro or RER color) (optional)
   onMouseEnter?: () => void; // Function to call when the mouse enters the icon (optional)

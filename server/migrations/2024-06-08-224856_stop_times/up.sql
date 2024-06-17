@@ -21,3 +21,7 @@ CREATE TABLE
         FOREIGN KEY (stop_id) REFERENCES stops (stop_id),
         FOREIGN KEY (trip_id) REFERENCES trips (trip_id)
     );
+
+CREATE INDEX arrival_time_index ON stop_times (arrival_time);
+
+CREATE INDEX departure_time_index ON stop_times (departure_time);

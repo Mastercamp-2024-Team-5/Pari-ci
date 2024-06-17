@@ -31,27 +31,30 @@ pub fn list_stops(
 ) -> Json<Vec<models::StopRouteDetails>> {
     use schema::stop_route_details::dsl::*;
     let connection = &mut establish_connection_pg();
-    let mut results = stop_route_details.into_boxed();
+    let mut agency_filter = Vec::<String>::new();
     let mut filters = Vec::<i32>::new();
     if metro.unwrap_or(false) {
+        agency_filter.push("IDFM:Operator_100".to_string());
         filters.push(1);
     }
     if rer.unwrap_or(false) {
-        results = results.filter(agency_id.eq("IDFM:71"));
+        agency_filter.push("IDFM:71".to_string());
         filters.push(2);
     }
     if tram.unwrap_or(false) {
+        agency_filter.push("IDFM:Operator_100".to_string());
         filters.push(0);
     }
     if train.unwrap_or(false) {
-        results = results.filter(agency_id.eq("IDFM:1046"));
+        agency_filter.push("IDFM:1046".to_string());
         filters.push(2);
     }
     if filters.is_empty() {
         // send everything
         return Json(Vec::new());
     }
-    let results = results
+    let results = stop_route_details
+        .filter(agency_id.eq_any(&agency_filter))
         .filter(route_type.eq_any(&filters))
         .load::<models::StopRouteDetails>(connection)
         .expect("Error loading stops");

@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import Icon from '../Shared/Icon';
 import './MapScreen.css';
 import coordinates from './coordinates/coordinates';
-import type {FeatureCollection} from 'geojson';
 
 export interface Stop {
   stop_id: string;
@@ -119,8 +118,8 @@ const MapScreen: React.FC = React.memo(() => {
         const lineCollection:RouteCollection = {
           collection: {
             type: "FeatureCollection",
-            features: route_traces.map(route_trace => {
-              return {
+            features: route_traces.map(route_trace => 
+              ({
                 type: "Feature",
                 geometry: {
                   type: "LineString",
@@ -129,8 +128,8 @@ const MapScreen: React.FC = React.memo(() => {
                 properties: {
                   route_id: route_trace.route_id
                 }
-              }
-            }),
+              })
+            ),
           },
           route_id: route.route_id,
           // parse color from hex string
@@ -181,7 +180,7 @@ const MapScreen: React.FC = React.memo(() => {
               onClose={() => setSelectedStop(null)}
             >
               <div>
-                <h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
+              <Icon item={selectedStop.route_short_name} size={23} /><h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
               </div>
             </Popup>
           )

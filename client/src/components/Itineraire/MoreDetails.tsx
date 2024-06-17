@@ -58,7 +58,7 @@ const MoreDetails = (
         <Box w="100%" display="flex" alignItems="center" justifyContent="flex-start">
           <Icon item="barre" size="30px" color={color} />
           <Text marginLeft="6%" fontSize="md" fontWeight="500">
-            {nbrArrets} arrêts
+            {nbrArrets} arrêt{nbrArrets>1?"s":""}
           </Text>
         </Box>
         <StopDetail 

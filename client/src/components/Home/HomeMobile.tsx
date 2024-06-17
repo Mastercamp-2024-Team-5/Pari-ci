@@ -79,7 +79,7 @@ const HomeMobile = ({
             isOpen={isDrawerOpen}
           >
             <DrawerOverlay />
-            <DrawerContent>
+            <DrawerContent maxH={"90vh"}>
               <DrawerCloseButton />
               <DrawerBody>
                 <LeftSearch

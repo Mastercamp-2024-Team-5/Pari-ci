@@ -52,7 +52,7 @@ const Itineraire = ({
   const renderMoreDetails = () => (
     <div style={{
       overflowY: 'auto',
-      maxHeight: screenWidth < 600 ? 'calc(100vh - 450px)' : '100%',
+      maxHeight: screenWidth < 700 ? 'calc(100vh - 450px)' : '100%',
       maxWidth: '100%',
       borderRadius: '10px',
       padding: '10px',
@@ -68,16 +68,16 @@ const Itineraire = ({
   );
 
   return (
-    <Flex flex={1} direction={screenWidth < 600 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
-      <Box bg="#F6FBF9" w={screenWidth < 600 ? "100%" : "33%"} h="100%" p={4}>
+    <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
+      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : "33%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>
               <Heading
                 fontFamily="Karla"
-                fontWeight="600"
-                marginTop={screenWidth < 600 ? "5%" : "15%"}
-                fontSize={screenWidth < 600 ? "5xl" : "4xl"}
+                fontWeight="700"
+                marginTop={screenWidth < 700 ? "5%" : "15%"}
+                fontSize={screenWidth < 700 ? "5xl" : "4xl"}
                 marginBottom={"5%"}
               >
                 CITYMAPPER
@@ -99,14 +99,14 @@ const Itineraire = ({
                 />
               </Stack>
               {
-                screenWidth >= 600 && (
+                screenWidth >= 700 && (
                   <>
                     <Heading
                       textDecoration="underline"
                       textAlign="start"
                       fontFamily="Karla"
-                      fontWeight="600"
-                      fontSize={screenWidth < 600 ? "4xl" : "3xl"}
+                      fontWeight="700"
+                      fontSize={screenWidth < 700 ? "4xl" : "3xl"}
                       marginY="0"
                       marginLeft="5%"
                     >
@@ -160,7 +160,7 @@ const Itineraire = ({
               color="white"
               onClick={() => setItininerairePage(false)}
               padding={7}
-              fontSize={screenWidth < 600 ? "3xl" : "2xl"}
+              fontSize={screenWidth < 700 ? "3xl" : "2xl"}
               whiteSpace="wrap"
               width={"45%"}
               alignSelf="center"
@@ -171,7 +171,7 @@ const Itineraire = ({
               Annuler
             </Button>
             {
-              screenWidth < 600 && (
+              screenWidth < 700 && (
                 <>
                   {renderMoreDetails()}
                   <Button
@@ -182,7 +182,7 @@ const Itineraire = ({
                     }}
                     onClick={() => setItininerairePage(false)}
                     padding={7}
-                    fontSize={screenWidth < 600 ? "3xl" : "2xl"}
+                    fontSize={screenWidth < 700 ? "3xl" : "2xl"}
                     whiteSpace="wrap"
                     width={"90%"}
                     alignSelf="center"
@@ -199,14 +199,14 @@ const Itineraire = ({
         </Center>
       </Box>
       {
-        screenWidth >= 600 && !moreDetails &&(
+        screenWidth >= 700 && !moreDetails &&(
           <Box w="67%" h="100%" display="flex">
             <MapScreen />
           </Box>
         )
       }
       {
-        screenWidth >= 600 && moreDetails && (
+        screenWidth >= 700 && moreDetails && (
           <Flex padding={"5%"} paddingY={"2%"} direction={"column"} w="67%" h="100%" display="flex" bg="white">
             <Text
               onClick={() => setMoreDetails(!moreDetails)}
@@ -220,7 +220,7 @@ const Itineraire = ({
             </Text>
             <Text 
               fontSize="4xl" 
-              fontWeight="600" 
+              fontWeight="700" 
               textAlign="start" 
               marginTop={"2%"}
             >

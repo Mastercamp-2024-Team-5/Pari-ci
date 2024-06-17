@@ -45,7 +45,7 @@ const AccessibleScreen = ({
 
   // Set width and height for the images
   const width_picture = "100%";
-  const height_picture = screenWidth < 600 ? "60vw" : "30vw"; // Set a fixed height for the images
+  const height_picture = screenWidth < 700 ? "60vw" : "30vw"; // Set a fixed height for the images
 
   return (
     <Flex
@@ -55,12 +55,12 @@ const AccessibleScreen = ({
       maxH="100vh"
       maxW="100vw"
       bg="F6FBF9"
-      direction={screenWidth < 600 ? "column" : "row"}
+      direction={screenWidth < 700 ? "column" : "row"}
     >
       <Container
         flex="1"
-        maxW={screenWidth < 600 ? "100vw" : "40vw"}
-        height={screenWidth < 600 ? "60vh" : "100vh"}
+        maxW={screenWidth < 700 ? "100vw" : "40vw"}
+        height={screenWidth < 700 ? "60vh" : "100vh"}
       >
         <Center>
           <Stack spacing={8} w="100%">
@@ -98,12 +98,12 @@ const AccessibleScreen = ({
               width="70%"
               alignSelf="center"
               borderRadius="10"
-              marginBottom={screenWidth < 600 ? "0" : "5%"}
+              marginBottom={screenWidth < 700 ? "0" : "5%"}
               p={6}
               onClick={() => (
                 setStationAccessibleOnly(true), setAccessibleScreen(true)
               )}
-              marginTop={screenWidth < 600 ? "10%" : "20%"}
+              marginTop={screenWidth < 700 ? "10%" : "20%"}
             >
               Oui
             </Button>
@@ -131,16 +131,16 @@ const AccessibleScreen = ({
       </Container>
       <Container
         flex="1"
-        maxW={screenWidth < 600 ? "100vw" : "60vw"}
+        maxW={screenWidth < 700 ? "100vw" : "60vw"}
         margin="0"
         padding={0}
         display="flex"
         alignItems="center"
         justifyContent="center"
-        height={screenWidth < 600 ? "40vh" : "100vh"}
+        height={screenWidth < 700 ? "40vh" : "100vh"}
       >
         <Box
-          height={screenWidth < 600 ? "40vh" : "60vh"}
+          height={screenWidth < 700 ? "40vh" : "60vh"}
           width="100%"
           display="flex"
           alignItems="center"
@@ -165,7 +165,7 @@ const AccessibleScreen = ({
                   height: height_picture,
                   objectFit: "contain", // Ensure the image fits within the container without being cut
                   objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 600 ? "12.5%" : "4%",
+                  marginTop: screenWidth < 700 ? "12.5%" : "4%",
                 }}
               />
             </Box>
@@ -183,7 +183,7 @@ const AccessibleScreen = ({
                   height: height_picture,
                   objectFit: "contain", // Ensure the image fits within the container without being cut
                   objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 600 ? "16%" : "4%",
+                  marginTop: screenWidth < 700 ? "16%" : "4%",
                 }}
               />
             </Box>
@@ -201,7 +201,7 @@ const AccessibleScreen = ({
                   height: height_picture,
                   objectFit: "contain", // Ensure the image fits within the container without being cut
                   objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 600 ? "16%" : "4%",
+                  marginTop: screenWidth < 700 ? "16%" : "4%",
                 }}
               />
             </Box>

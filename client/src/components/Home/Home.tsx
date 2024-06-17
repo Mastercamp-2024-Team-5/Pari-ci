@@ -16,7 +16,7 @@ const Home = () => {
   return (
     <>
       {!ItininerairePage &&
-        (screenWidth < 600 ? (
+        (screenWidth < 700 ? (
           <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
             <HomeMobile
               departure={departure}

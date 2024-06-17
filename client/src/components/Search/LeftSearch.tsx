@@ -3,16 +3,14 @@ import {
   Stack,
   Heading,
   VStack,
-  // FormControl,
   Input,
-  // InputGroup,
   Button,
   Flex,
   Text,
 } from "@chakra-ui/react";
-import Icon from "../Shared/Icon";
 import useScreenWidth from "../Shared/useScreenWidth";
 import InstantMeiliSearchApp from "./InstantMeiliSearch";
+import { start } from "repl";
 
 const LeftSearch = ({
   departure,
@@ -36,13 +34,13 @@ const LeftSearch = ({
   setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const screenWidth = useScreenWidth();
+  const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
   const handleClickItineraire = () => {
     if (
       departure !== "" &&
       destination !== "" &&
-      startAt !== "" &&
-      endAt !== ""
+      ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
     ) {
       setItininerairePage(true);
     }
@@ -55,12 +53,12 @@ const LeftSearch = ({
           <Heading
             fontFamily="Karla"
             fontWeight="650"
-            marginTop="15%"
-            fontSize={screenWidth < 600 ? "5xl" : "4xl"}
+            marginTop={screenWidth < 700 ? "10%" : "15%"}
+            fontSize={screenWidth < 700 ? "5xl" : "4xl"}
           >
             CITYMAPPER
           </Heading>
-          <Text fontSize={screenWidth < 600 ? "xl" : "lg"} marginBottom="5%">
+          <Text fontSize={screenWidth < 700 ? "xl" : "lg"} marginBottom="5%">
             Trouvez votre itinéraire
           </Text>
         </Stack>
@@ -75,7 +73,7 @@ const LeftSearch = ({
             rounded="md"
             type="text"
             placeholder="Départ"
-            fontSize={screenWidth < 600 ? "xl" : "lg"}
+            fontSize={screenWidth < 700 ? "xl" : "lg"}
             p={8}
             bg="white"
             borderRadius="15"
@@ -91,7 +89,7 @@ const LeftSearch = ({
             rounded="md"
             type="text"
             placeholder="Destination"
-            fontSize={screenWidth < 600 ? "xl" : "lg"}
+            fontSize={screenWidth < 700 ? "xl" : "lg"}
             p={8}
             bg="white"
             borderRadius="15"
@@ -105,44 +103,66 @@ const LeftSearch = ({
             display={"flex"}
             flex={1}
             direction={"row"}
-            align="center"
-            justify="center"
+            align="space-between"
+            justify="space-between"
+            width="100%"
           >
-            <Input
-              focusBorderColor="#5eaf91"
-              fontFamily="Karla"
-              variant="outline"
-              border="2px"
-              borderColor="gray.200"
-              rounded="md"
-              type="text"
-              placeholder="Partir à"
-              fontSize={screenWidth < 600 ? "xl" : "lg"}
-              p={8}
-              bg="white"
-              width="48%"
-              borderRadius="15"
-              marginRight={"5%"}
-              value={startAt}
-              onChange={(e) => setStartAt(e.target.value)}
-            />
-            <Input
-              focusBorderColor="#5eaf91"
-              fontFamily="Karla"
-              variant="outline"
-              border="2px"
-              borderColor="gray.200"
-              rounded="md"
-              type="text"
-              placeholder="Arriver à"
-              fontSize={screenWidth < 600 ? "xl" : "lg"}
-              p={8}
-              bg="white"
-              width="48%"
-              borderRadius="15"
-              value={endAt}
-              onChange={(e) => setEndAt(e.target.value)}
-            />
+            <div style={{minWidth: "48%", marginRight: "2%"}}>
+              <Input
+                color={dateRegex.test(startAt) ? "black" : "gray.400"}
+                focusBorderColor="#5eaf91"
+                fontFamily="Karla"
+                variant="outline"
+                border="2px"
+                borderColor="gray.200"
+                rounded="md"
+                type="datetime-local"
+                placeholder="Partir à"
+                fontSize={screenWidth < 700 ? "xl" : "xs"}
+                bg="white"
+                width="100%" // Ensuring constant width
+                paddingTop={6}
+                paddingBottom={8}
+                textAlign="center"
+                borderRadius="15"
+                margin={"0%"}
+                value={startAt}
+                whiteSpace="nowrap"
+                overflow={"hidden"}
+                onChange={(e) => {
+                  setEndAt("");
+                  setStartAt(e.target.value);
+                }}
+              />
+            </div>
+            <div style={{ minWidth: "48%" }}>
+              <Input
+                color={dateRegex.test(endAt) ? "black" : "gray.400"}
+                focusBorderColor="#5eaf91"
+                fontFamily="Karla"
+                variant="outline"
+                border="2px"
+                borderColor="gray.200"
+                rounded="md"
+                type="datetime-local"
+                placeholder="Arriver à"
+                fontSize={screenWidth < 700 ? "xl" : "xs"}
+                bg="white"
+                width="100%" // Ensuring constant width
+                paddingTop={6}
+                paddingBottom={8}
+                textAlign="center"
+                borderRadius="15"
+                margin={"0%"}
+                value={endAt}
+                whiteSpace="nowrap"
+                overflow={"hidden"}
+                onChange={(e) => {
+                  setStartAt("");
+                  setEndAt(e.target.value);
+                }}
+              />
+            </div>
           </Flex>
           <Button
             fontFamily="Karla"
@@ -152,13 +172,13 @@ const LeftSearch = ({
               bg: "#5eaf91",
             }}
             rounded="md"
-            marginBottom={screenWidth < 600 ? "5%" : "0%"}
-            fontSize={screenWidth < 600 ? "2xl" : "xl"}
+            marginBottom={screenWidth < 700 ? "5%" : "0%"}
+            fontSize={screenWidth < 700 ? "2xl" : "xl"}
             whiteSpace="wrap"
-            width={screenWidth < 600 ? "80%" : "80%"}
+            width={screenWidth < 700 ? "80%" : "80%"}
             alignSelf="center"
             borderRadius="15"
-            p={screenWidth < 600 ? 10 : 8} // Added padding
+            p={screenWidth < 700 ? 10 : 8} // Added padding
             onClick={handleClickItineraire}
           >
             Trouver l’itinéraire

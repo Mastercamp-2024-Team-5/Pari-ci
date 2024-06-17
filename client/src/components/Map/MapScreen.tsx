@@ -69,7 +69,7 @@ interface RouteCollection {
 }
 
 
-const MapScreen: React.FC = () => {
+const MapScreen: React.FC = React.memo(() => {
   const [uniqueMarkers, setUniqueMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<RouteCollection[]>([]);
@@ -207,6 +207,6 @@ const MapScreen: React.FC = () => {
       <ControlButton selectedButton={selectedButton} onSelectButton={handleSelectButton} />
     </>
   );
-};
+});
 
 export default MapScreen;

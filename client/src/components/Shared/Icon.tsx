@@ -53,7 +53,7 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="", onMou
     );
   }
 
-  const colors_others: { [key: string]: string[] } = {
+  const colors_rer: { [key: string]: string[] } = {
     "a": ["rgb(227,5,28)", "white"],
     "b": ["rgb(82,145,206)", "white"],
     "c": ["rgb(255,206,0)", "rgb(37,48,59)"],
@@ -63,22 +63,56 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="", onMou
     "j": ["rgb(213,201,0)", "rgb(37,48,59)"],
     "k": ["rgb(159,152,37)", "white"],
     "l": ["rgb(206,173,210)", "rgb(37,48,59)"],
+    "n": ["rgb(0,168,143)", "white"],
+    "r": ["rgb(243,164,186)", "rgb(37,48,59)"],
+    "p": ["rgb(242,142,66)", "rgb(37,48,59)"],
+    "u": ["rgb(185,8,69)", "white"],
+    "v": ["rgb(159,152,37)", "white"],
   };
 
-  if (item in colors_others === true) {
+  if (item in colors_rer === true) {
     return (
       <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
-        <i className="icon-carre" style={{ fontSize: size, color: colors_others[item][0] }}></i>
+        <i className="icon-carre" style={{ fontSize: size, color: colors_rer[item][0] }}></i>
         <Box position="absolute">
-          <i className={`icon-${item}`} style={{ color: colors_others[item][1], fontSize: size }}></i>
+          <i className={`icon-${item}`} style={{ color: colors_rer[item][1], fontSize: size }}></i>
+        </Box>
+      </Box>
+    );
+  }
+
+  const colors_tram: { [key: string]: string } = {
+    "t1": "#0064B0",
+    "t2": "#C04191",
+    "t3a": "#F28E42",
+    "t3b": "#00814F",
+    "t4": "#E3B32A",
+    "t5": "#662483",
+    "t6": "#E3051C",
+    "t7": "#8D5E2A",
+    "t8": "#9F9825",
+    "t9": "#5291CE",
+    "t10": "#9F9825",
+    "t11": "#F28E42",
+    "t12": "#B90845",
+    "t13": "#8D5E2A",
+    "t14": "#00A88F",
+  };
+
+  if (item in colors_tram === true) {
+    return (
+      <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
+        <i className="icon-traits" style={{ fontSize: size, color: colors_tram[item] }}></i>
+        <Box position="absolute">
+          <i className={`icon-${item}`} style={{ color: "#25303B", fontSize: size }}></i>
         </Box>
       </Box>
     );
   }
 
   let color_chosen = color;
-  if (color in colors_others === true) {
-    color_chosen = colors_others[color][0];
+  if (color in colors_rer === true) {
+    color_chosen = colors_rer[color][0];
   }
   if (color in colors_metro === true) {
     color_chosen = colors_metro[color][0];

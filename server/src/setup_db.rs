@@ -1,9 +1,10 @@
 use std::str::FromStr;
 
+use diesel::prelude::*;
 use models::{Agency, Calendar, CalendarDate, Route, RouteTrace, Stop, StopTime, Transfer, Trip};
 use services::{
     add_agencies, add_calendar_dates, add_calendars, add_routes, add_routes_trace, add_stop_times,
-    add_stops, add_transfers, add_trips,
+    add_stops, add_transfers, add_trips, establish_connection_pg,
 };
 use views::services::refresh_materialized_view;
 
@@ -38,6 +39,7 @@ enum Task {
     AddStopTimes,
     AddTransfers,
     AddRoutesTrace,
+    CorrectStopLocationWithTrace,
     AddAll,
     Invalid,
 }
@@ -62,6 +64,7 @@ fn main() {
         "AddAll" => Task::AddAll,
         "AddTransfers" => Task::AddTransfers,
         "AddRoutesTrace" => Task::AddRoutesTrace,
+        "CorrectStop" => Task::CorrectStopLocationWithTrace,
         _ => Task::Invalid,
     };
     let t1 = std::time::Instant::now();
@@ -206,6 +209,27 @@ fn main() {
         // refresh the materialized view
         refresh_materialized_view().unwrap();
         println!("Materialized view refreshed");
+    }
+
+    if task == Task::CorrectStopLocationWithTrace {
+        // correct the location of the stops with the trace of the routes
+        let conn = &mut establish_connection_pg();
+        use crate::schema::routes_trace::dsl as routes_trace_dsl;
+        let traces = routes_trace_dsl::routes_trace
+            .load::<RouteTrace>(conn)
+            .expect("Error loading routes trace");
+
+        use crate::views::schema::stop_route_details::dsl as stops_dsl;
+        let stops_res = stops_dsl::stop_route_details
+            .filter(stops_dsl::route_type.eq_any(&[0, 1, 2, 3]))
+            .filter(stops_dsl::agency_id.eq_any(&[
+                "IDFM:Operator_100",
+                "IDFM:1046",
+                "IDFM:93",
+                "IDFM:71",
+            ]))
+            .load::<views::models::StopRouteDetails>(conn)
+            .expect("Error loading stops");
     }
 
     println!("Done!");

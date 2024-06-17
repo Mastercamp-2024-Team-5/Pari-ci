@@ -18,7 +18,7 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
 
 const HomeContent: React.FC = () => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, ItininerairePage, setItininerairePage } = useHomeContext();
+  const { ItininerairePage } = useHomeContext();
   const screenWidth = useScreenWidth();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);

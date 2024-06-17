@@ -15,47 +15,66 @@ import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
 
-// interface TrajetStop {
-//     from_stop_id: string;
-//     route_id: string;
-//     route_short_name: string;
-//     to_stop_id: string;
-//     travel_time: number;
-//     wait_time: number;
-// }
-//
-// interface AAA{
-//     date: string;
-//     TrajetStop: TrajetStop[];
-// }
-
 const Itineraire = () => {
   const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
+  console.log("DEPARTURE  :sdf:sdfsdgf ");
+  console.log(departure);
+  console.log("DESTINATION  :sdf:sdfsdgf ");
+  console.log(destination);
+  const [data, setData] = useState<any>({});
   const screenWidth = useScreenWidth();
   console.log("READ FROM ITINERAIRE");
     console.log(DataPath);
-  const [firstStopName, setFirstStopName] = useState("BEUTEUUUU");
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
   const [moreDetails, setMoreDetails] = useState(false);
-  const stopDetail1 = {
-    stop: firstStopName,
-    line: "7",
-    color: "#F3A4BA",
-    textColor: "black",
-    depart: "12:00",
-    direction: "Mairie d'Ivry",
-    arrive: false
+
+  const getInfosFromData = (pointList: any) => {
+    // format : 
+    // {
+    //   "from_stop_id": "IDFM:21957",
+    //   "to_stop_id": "IDFM:21958",
+    //   "route_id": "IDFM:C01384",
+    //   "route_short_name": "14",
+    //   "wait_time": 0,
+    //   "travel_time": 60
+    // },
+    const lst=[];
+    let lastline=pointList[0].route_short_name;
+    let first=pointList[0].from_stop_id;
+    let last=pointList[0].from_stop_id;
+    let cpt=0;
+    let travel_time=0;
+    let depart=0;
+    for (let i = 0; i < pointList.length; i++) {
+      travel_time+=pointList[i].travel_time;
+      travel_time+=pointList[i].wait_time;
+      if (pointList[i].route_short_name){
+        if (pointList[i].route_short_name===lastline){
+          last=pointList[i].from_stop_id;
+          cpt+=1;
+        }
+        else{
+          lst.push({line:lastline,from:first,to:last,nbr:cpt-2, travel_time:travel_time, depart:depart});
+          lastline=pointList[i].route_short_name;
+          first=last;
+          last=pointList[i].from_stop_id;
+          cpt=2;
+          depart=travel_time+depart;
+          travel_time=0;
+        }
+      }
+    }
+    lst.push({line:lastline,from:first,to:pointList[pointList.length-1].from_stop_id,nbr:cpt-2, travel_time:travel_time, depart:depart});
+    return lst;
   };
-  const stopDetail2 = {
-    stop: "Porte de Choisy",
-    line: "7",
-    color: "#F3A4BA",
-    textColor: "black",
-    depart: "12:10",
-    direction: "Villejuif-Louis Aragon",
-    arrive: false
-  };
+
+  const additionSecondTime = (time: string, addition: number) => {
+    const d = new Date(time);
+    d.setSeconds(d.getSeconds() + addition);
+    let str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+    return str;
+  }
 
   const renderMoreDetails = () => (
     <div style={{
@@ -66,21 +85,33 @@ const Itineraire = () => {
       padding: '10px',
       marginTop: '10px',
     }}>
-      <MoreDetails ligne={stopDetail1.line} arret1={stopDetail1.stop} arret2={stopDetail2.stop} depart={stopDetail1.depart} arrive={stopDetail1.depart} direction={stopDetail1.direction} nbrArrets={10} color={stopDetail1.color} textColor={stopDetail1.textColor} correspondance={false}/>
-      <MoreDetails ligne={stopDetail1.line} arret1={stopDetail1.stop} arret2={stopDetail2.stop} depart={stopDetail1.depart} arrive={stopDetail1.depart} direction={stopDetail1.direction} nbrArrets={10} color={stopDetail1.color} textColor={stopDetail1.textColor} correspondance={true}/>
-      <MoreDetails ligne={stopDetail1.line} arret1={stopDetail1.stop} arret2={stopDetail2.stop} depart={stopDetail1.depart} arrive={stopDetail1.depart} direction={stopDetail1.direction} nbrArrets={10} color={stopDetail1.color} textColor={stopDetail1.textColor} correspondance={true}/>
+      {
+        data && data.points.map((obj: any, index: number) => (
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={"direction"} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
+        ))
+      }
       <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
-        Arrivé à xx:xx
+        Arrivé à {!isEmpty(data) ? data.arrival : "xx:xx:xx"}
       </Text>
     </div>
   );
 
+  const isEmpty = (obj: any) => {
+    return Object.keys(obj).length === 0;
+  };
 
   useEffect(() => {
     if (DataPath.length>0) {
-      setFirstStopName(DataPath[1][0].from_stop_id);
-    } else {
-        setFirstStopName("LOADING");
+      const points=getInfosFromData(DataPath[1]);
+      let dt=0;
+      for (let i = 0; i < points.length; i++) {
+        dt+=points[i].travel_time;
+      }
+      setData({
+        departure:DataPath[0],
+        points: points,
+        arrival:additionSecondTime(DataPath[0], dt)
+      })
     }
   }, [DataPath]);
 
@@ -116,7 +147,7 @@ const Itineraire = () => {
                 />
               </Stack>
               {
-                screenWidth >= 700 && (
+                screenWidth >= 700 && !isEmpty(data) && (
                   <>
                     <Heading
                       textDecoration="underline"
@@ -147,14 +178,26 @@ const Itineraire = () => {
                         fontSize="2xl"
                         marginBottom="2%"
                       >
-                        Arrivé à xx:xx
+                        Arrivé à {data.arrival}
                       </Heading>
                       <Stack spacing={0}>
                         <StopDetail
-                          {...stopDetail1}
+                          stop={data.points[0].from}
+                          line={data.points[0].line}
+                          textColor="black"
+                          color="#F3A4BA"
+                          depart="depart"
+                          arrive={false}
+                          direction="direction"
                         />
                         <StopDetail
-                          {...stopDetail2}
+                          stop={data.points[data.points.length-1].to}
+                          line={data.points[data.points.length-1].line}
+                          textColor="black"
+                          color="#F3A4BA"
+                          depart="depart"
+                          arrive={true}
+                          direction="direction"
                         />
                       </Stack>
                       <Text

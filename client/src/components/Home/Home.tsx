@@ -83,10 +83,10 @@ const HomeContent: React.FC = () => {
           </Flex>
         ) : (
           <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
-            <Box bg="F6FBF9" w="33%" h="100%" p={4}>
-              <LeftSearch/>
+            <Box bg="#F6FBF9" minWidth="350px" flexBasis="33%" flexShrink={0} h="100%" p={4}>
+              <LeftSearch />
             </Box>
-            <Box w="67%" h="100%" display="flex">
+            <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
               <MapScreen />
             </Box>
           </Flex>

@@ -11,28 +11,11 @@ import {
 import useScreenWidth from "../Shared/useScreenWidth";
 import InstantMeiliSearchApp from "./InstantMeiliSearch";
 import { start } from "repl";
+import { HomeProvider, useHomeContext } from './../Home/HomeContext';
 
-const LeftSearch = ({
-  departure,
-  setDeparture,
-  destination,
-  setDestination,
-  startAt,
-  setStartAt,
-  endAt,
-  setEndAt,
-  setItininerairePage,
-}: {
-  departure: string;
-  setDeparture: React.Dispatch<React.SetStateAction<string>>;
-  destination: string;
-  setDestination: React.Dispatch<React.SetStateAction<string>>;
-  startAt: string;
-  setStartAt: React.Dispatch<React.SetStateAction<string>>;
-  endAt: string;
-  setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+
+const LeftSearch = () => {
+  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, ItininerairePage, setItininerairePage } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 

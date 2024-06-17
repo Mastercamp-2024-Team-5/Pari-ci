@@ -13,20 +13,10 @@ import MapScreen from "../Map/MapScreen";
 import StopDetail from "./StopDetail";
 import { useState } from "react";
 import MoreDetails from "./MoreDetails";
+import { useHomeContext } from './../Home/HomeContext';
 
-const Itineraire = ({
-  departure,
-  destination,
-  startAt,
-  endAt,
-  setItininerairePage,
-}: {
-  departure: string;
-  destination: string;
-  startAt: string;
-  endAt: string;
-  setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+const Itineraire = () => {
+  const { departure, destination, startAt, endAt, setItininerairePage } = useHomeContext();
   const screenWidth = useScreenWidth();
 
   const [moreDetails, setMoreDetails] = useState(false);

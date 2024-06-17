@@ -80,6 +80,12 @@ fn main() {
                 &chunk
                     .iter()
                     .map(|line| Agency::from_str(line).unwrap())
+                    // .filter(|agency| {
+                    //     agency.agency_id == "IDFM:Operator_100"
+                    //         || agency.agency_id == "IDFM:1046"
+                    //         || agency.agency_id == "IDFM:93"
+                    //         || agency.agency_id == "IDFM:71"
+                    // })
                     .collect::<Vec<Agency>>(),
             )
             .unwrap()
@@ -177,8 +183,8 @@ fn main() {
         });
         println!("Transfers added");
     }
-    if task == Task::AddRoutesTrace {
-        let path = "src/data/traces-des-lignes-de-transport-en-commun-idfm.txt";
+    if task == Task::AddRoutesTrace || task == Task::AddAll {
+        let path = "src/data/routes_traces.txt";
         get_entries!(path).chunks(CHUNK_SIZE).for_each(|chunk| {
             add_routes_trace(
                 &chunk

@@ -61,13 +61,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    routes_trace (route_id) {
+    routes_trace (id) {
+        #[max_length = 255]
+        id -> Varchar,
         #[max_length = 255]
         route_id -> Varchar,
-        #[max_length = 255]
-        short_name -> Varchar,
-        #[max_length = 255]
-        long_name -> Varchar,
         route_type -> Int4,
         #[max_length = 255]
         color -> Nullable<Varchar>,

@@ -9,11 +9,13 @@ use super::schema::trips;
 use crate::schema::routes_trace;
 use crate::schema::stop_times;
 use crate::schema::transfers;
-use crate::tools::graph::Graph;
+// use crate::tools::graph::Graph;
 use diesel::prelude::*;
+// use rocket::serde::json::to_string;
 use serde::{Deserialize, Serialize};
 use time::format_description;
 use time::Date;
+use uuid::Uuid;
 
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = agency)]
@@ -468,9 +470,8 @@ impl FromStr for Transfer {
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = routes_trace)]
 pub struct RouteTrace {
+    id: String,
     route_id: String,
-    short_name: String,
-    long_name: String,
     route_type: i32,
     color: Option<String>,
     shape: Option<String>,
@@ -481,44 +482,35 @@ impl FromStr for RouteTrace {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.split(';').collect();
-        if parts.len() != 13 {
+        if parts.len() != 22 {
             println!("Invalid number of fields: {}", parts.len());
             return Err(());
         }
 
-        let route_type = match parts[3] {
-            "Tram" => 0,
-            "Subway" => 1,
-            "Rail" => 2,
-            "Bus" => 3,
-            "Ferry" => 4,
-            "Cable car" => 5,
-            "Gondola" => 6,
-            "Funicular" => 7,
-            _ => 8,
+        let route_type = match parts[6] {
+            "TRAMWAY" => 0,
+            "METRO" => 1,
+            "RER" => 2,
+            "TRAIN" => 3,
+            "GRANDES LIGNES" => 4,
+            _ => -1,
         };
 
         // if field is empty, set it to None
-        let color = if parts[4].is_empty() {
+        let color = if parts[18].is_empty() {
             None
         } else {
-            Some(parts[4].to_string())
+            Some(parts[18].to_string())
         };
-        let shape = if parts[6].is_empty() {
+        let shape = if parts[1].is_empty() {
             None
         } else {
-            if route_type == 1 {
-                // display id and short_name
-                Some(clean_shape(parts[0]))
-            } else {
-                None
-            }
+            Some(parts[1].to_string())
         };
 
         Ok(Self {
-            route_id: parts[0].parse().unwrap(),
-            short_name: parts[1].to_string(),
-            long_name: parts[2].to_string(),
+            id: Uuid::new_v4().to_string(),
+            route_id: "IDFM:".to_string() + parts[3],
             route_type,
             color,
             shape,
@@ -548,91 +540,82 @@ impl FromStr for RouteTrace {
 //         }
 //         graph
 //     }
+
+//     fn new(geojson: &str) -> Self {
+//         // Parse the shape string as JSON
+//         let shape = geojson
+//             .replace("\"\"", "\"")
+//             .replace("\"{", "{")
+//             .replace("}\"", "}")
+//             .replace("type", "type_");
+//         serde_json::from_str(&shape).unwrap()
+//     }
 // }
 
-fn clean_shape(route_id: &str) -> String {
-    // // Parse the shape string as JSON
-    // let shape = shape
-    //     .replace("\"\"", "\"")
-    //     .replace("\"{", "{")
-    //     .replace("}\"", "}")
-    //     .replace("type", "type_");
-    // let shape: Shape = serde_json::from_str(&shape).unwrap();
-    // let graph = shape.to_graph();
-    use crate::views::schema::average_stop_times::dsl as avg_st;
-    let connection = &mut crate::services::establish_connection_pg();
-    let results = avg_st::average_stop_times
-        .inner_join(
-            crate::views::schema::stop_route_details::table
-                .on(avg_st::stop_id.eq(crate::views::schema::stop_route_details::stop_id)),
-        )
-        .filter(crate::views::schema::stop_route_details::route_id.eq(route_id))
-        .select(avg_st::average_stop_times::all_columns())
-        .load::<crate::views::models::AverageStopTime>(connection)
-        .expect("Error loading stops");
+// fn shape_to_string(shape: &str) -> String {
+//     let shape = Shape::new(shape);
+//     let graph = shape.to_graph();
 
-    let graph = Graph::generate_graph(results);
-    // println!("{:?}", graph);
-    graph.draw("graph.dot", "graph.png");
-    let mut graphs = graph.get_subgraphs();
-    println!("{:?}", graphs.len());
-    for graph in graphs.iter_mut() {
-        *graph = graph.into_tree().unwrap();
-    }
-    // reformat the graph to a list of lines (each line is a list of points (lat, lon, stop_id))
-    // line must be in order of the route
-    let mut lines = Vec::new();
-    for graph in graphs {
-        let starts = graph.get_root().unwrap();
-        // follow the tree to get the order of the stops
-        // if a node as multiple children, we must split the line in two
-        for start in starts {
-            let mut line = Vec::new();
-            let mut visited = Vec::new();
-            let mut current = start;
-            let mut unfinished_lines: Vec<(String, String)> = Vec::new();
-            loop {
-                visited.push(current.clone());
-                line.push(current.clone());
-                let children = graph.get_children(&current);
-                if children.len() == 0 {
-                    // we reached the end of the line
-                    lines.push(line.clone());
-                    line.clear();
-                    // check if there are unfinished lines
-                    if unfinished_lines.len() > 0 {
-                        let (parent, child) = unfinished_lines.pop().unwrap();
-                        line.push(parent.clone());
-                        current = child.clone();
-                    } else {
-                        break;
-                    }
-                } else if children.len() == 1 {
-                    // only one child, we can continue
-                    current = children[0].clone();
-                } else {
-                    // multiple children, we must split the line
-                    // we save the current line and continue with the first child
-                    unfinished_lines.push((current, children[1].clone()));
-                    current = children[0].clone();
-                }
-            }
-        }
-    }
-    // format the lines to a json string
-    let mut shape = String::new();
-    shape.push_str("{\"coordinates\":[");
-    for line in lines {
-        shape.push('[');
-        for node in line {
-            shape.push_str("\"");
-            shape.push_str(&node);
-            shape.push_str("\",");
-        }
-        shape.pop();
-        shape.push_str("],");
-    }
-    shape.pop();
-    shape.push_str("],\"type\":\"LineString\"}");
-    shape
-}
+//     graph.draw("graph.dot", "graph.png");
+//     let mut graphs = graph.get_subgraphs();
+//     println!("{:?}", graphs.len());
+//     for graph in graphs.iter_mut() {
+//         *graph = graph.into_tree().unwrap();
+//     }
+//     // reformat the graph to a list of lines (each line is a list of points (lat, lon, stop_id))
+//     // line must be in order of the route
+//     let mut lines = Vec::new();
+//     for graph in graphs {
+//         let starts = graph.get_root().unwrap();
+//         // follow the tree to get the order of the stops
+//         // if a node as multiple children, we must split the line in two
+//         for start in starts {
+//             let mut line = Vec::new();
+//             let mut visited = Vec::new();
+//             let mut current = start;
+//             let mut unfinished_lines: Vec<(String, String)> = Vec::new();
+//             loop {
+//                 visited.push(current.clone());
+//                 line.push(current.clone());
+//                 let children = graph.get_children(&current);
+//                 if children.len() == 0 {
+//                     // we reached the end of the line
+//                     lines.push(line.clone());
+//                     line.clear();
+//                     // check if there are unfinished lines
+//                     if unfinished_lines.len() > 0 {
+//                         let (parent, child) = unfinished_lines.pop().unwrap();
+//                         line.push(parent.clone());
+//                         current = child.clone();
+//                     } else {
+//                         break;
+//                     }
+//                 } else if children.len() == 1 {
+//                     // only one child, we can continue
+//                     current = children[0].clone();
+//                 } else {
+//                     // multiple children, we must split the line
+//                     // we save the current line and continue with the first child
+//                     unfinished_lines.push((current, children[1].clone()));
+//                     current = children[0].clone();
+//                 }
+//             }
+//         }
+//     }
+//     // format the lines to a json string
+//     let mut shape = String::new();
+//     shape.push_str("{\"coordinates\":[");
+//     for line in lines {
+//         shape.push('[');
+//         for node in line {
+//             shape.push_str("\"");
+//             shape.push_str(&node);
+//             shape.push_str("\",");
+//         }
+//         shape.pop();
+//         shape.push_str("],");
+//     }
+//     shape.pop();
+//     shape.push_str("],\"type\":\"LineString\"}");
+//     shape
+// }

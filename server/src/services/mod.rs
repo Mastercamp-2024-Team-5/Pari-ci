@@ -281,11 +281,12 @@ pub fn add_transfers(documents: &Vec<models::Transfer>) -> Result<(), diesel::re
     Ok(())
 }
 
-#[get("/routes_trace?<metro>&<rer>&<tram>")]
+#[get("/routes_trace?<metro>&<rer>&<tram>&<train>")]
 pub fn list_routes_trace(
     metro: Option<bool>,
     rer: Option<bool>,
     tram: Option<bool>,
+    train: Option<bool>,
 ) -> Json<Vec<models::RouteTrace>> {
     let mut filter = Vec::<i32>::new();
     if metro.unwrap_or(false) {
@@ -296,6 +297,9 @@ pub fn list_routes_trace(
     }
     if tram.unwrap_or(false) {
         filter.push(0);
+    }
+    if train.unwrap_or(false) {
+        filter.push(3)
     }
     if filter.is_empty() {
         return Json(Vec::<models::RouteTrace>::new());

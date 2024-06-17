@@ -177,6 +177,7 @@ dependencies = [
  "serde_json",
  "time",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
@@ -290,6 +291,7 @@ dependencies = [
  "pq-sys",
  "r2d2",
  "time",
+ "uuid",
 ]
 
 [[package]]

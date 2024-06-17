@@ -11,17 +11,35 @@ import Stop from "./Stop";
 import useScreenWidth from "../Shared/useScreenWidth";
 import MapScreen from "../Map/MapScreen";
 import StopDetail from "./StopDetail";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
 
+// interface TrajetStop {
+//     from_stop_id: string;
+//     route_id: string;
+//     route_short_name: string;
+//     to_stop_id: string;
+//     travel_time: number;
+//     wait_time: number;
+// }
+//
+// interface AAA{
+//     date: string;
+//     TrajetStop: TrajetStop[];
+// }
+
 const Itineraire = () => {
-  const { departure, destination, startAt, endAt, setItininerairePage } = useHomeContext();
+  const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
   const screenWidth = useScreenWidth();
+  console.log("READ FROM ITINERAIRE");
+    console.log(DataPath);
+  const [firstStopName, setFirstStopName] = useState("BEUTEUUUU");
+    //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
   const [moreDetails, setMoreDetails] = useState(false);
   const stopDetail1 = {
-    stop: "Gare de Lyon",
+    stop: firstStopName,
     line: "7",
     color: "#F3A4BA",
     textColor: "black",
@@ -56,6 +74,15 @@ const Itineraire = () => {
       </Text>
     </div>
   );
+
+
+  useEffect(() => {
+    if (DataPath.length>0) {
+      setFirstStopName(DataPath[1][0].from_stop_id);
+    } else {
+        setFirstStopName("LOADING");
+    }
+  }, [DataPath]);
 
   return (
     <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">

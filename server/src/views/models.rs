@@ -14,6 +14,7 @@ pub struct StopRouteDetails {
     pub route_short_name: String,
     pub route_long_name: String,
     pub route_type: i32,
+    pub agency_id: String,
 }
 
 #[derive(Queryable, Debug, Serialize, Deserialize)]

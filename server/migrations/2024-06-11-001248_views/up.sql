@@ -11,7 +11,8 @@ SELECT DISTINCT
     r.route_id,
     r.short_name AS route_short_name,
     r.long_name AS route_long_name,
-    r.route_type
+    r.route_type,
+    r.agency_id
 FROM
     stops s
     JOIN stop_times st ON s.stop_id = st.stop_id

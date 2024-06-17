@@ -22,29 +22,36 @@ use time::Duration;
 use time::PrimitiveDateTime;
 use time::Time;
 
-#[get("/stops?<metro>&<rer>&<tram>")]
+#[get("/stops?<metro>&<rer>&<tram>&<train>")]
 pub fn list_stops(
     metro: Option<bool>,
     rer: Option<bool>,
     tram: Option<bool>,
+    train: Option<bool>,
 ) -> Json<Vec<models::StopRouteDetails>> {
+    use schema::stop_route_details::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let mut results = stop_route_details.into_boxed();
     let mut filters = Vec::<i32>::new();
     if metro.unwrap_or(false) {
         filters.push(1);
     }
     if rer.unwrap_or(false) {
+        results = results.filter(agency_id.eq("IDFM:71"));
         filters.push(2);
     }
     if tram.unwrap_or(false) {
         filters.push(0);
     }
+    if train.unwrap_or(false) {
+        results = results.filter(agency_id.eq("IDFM:1046"));
+        filters.push(2);
+    }
     if filters.is_empty() {
         // send everything
         return Json(Vec::new());
     }
-    use schema::stop_route_details::dsl::*;
-    let connection = &mut establish_connection_pg();
-    let results = stop_route_details
+    let results = results
         .filter(route_type.eq_any(&filters))
         .load::<models::StopRouteDetails>(connection)
         .expect("Error loading stops");

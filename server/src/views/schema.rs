@@ -13,6 +13,7 @@ diesel::table! {
         route_short_name -> Varchar,
         route_long_name -> Varchar,
         route_type -> Int4,
+        agency_id -> Varchar,
     }
 }
 

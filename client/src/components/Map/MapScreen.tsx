@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Icon from '../Shared/Icon';
 import './MapScreen.css';
 import coordinates from './coordinates/coordinates';
+import type {FeatureCollection} from 'geojson';
 
 export interface Stop {
   stop_id: string;
@@ -29,12 +30,12 @@ const ControlButton: React.FC<{ selectedButton: string; onSelectButton: (buttonT
       >
         <Icon item="metro" />
       </div>
-      <div
+      {/* <div
         className={`icon-container ${selectedButton === 'train' ? 'selected' : ''}`}
         onClick={() => onSelectButton('train')}
       >
         <Icon item="train" />
-      </div>
+      </div> */}
       <div
         className={`icon-container ${selectedButton === 'rer' ? 'selected' : ''}`}
         onClick={() => onSelectButton('rer')}
@@ -45,10 +46,39 @@ const ControlButton: React.FC<{ selectedButton: string; onSelectButton: (buttonT
   );
 };
 
+interface RouteTrace {
+  id: string;
+  route_id: string;
+  shape: string;
+  route_type: number;
+  color: string;
+}
+
+interface Route {
+  route_id: string,
+  agency_id: string,
+  short_name: string,
+  long_name: string,
+  description?: string,
+  route_type: number,
+  url?: string,
+  color: string,
+  text_color?: string,
+  sort_order?: number
+}
+
+interface RouteCollection {
+  collection: GeoJSON.FeatureCollection
+  route_id: string
+  route_color: string
+}
+
+
 const MapScreen: React.FC = () => {
   const [uniqueMarkers, setUniqueMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [lines, setLines] = useState<GeoJSON.Feature<GeoJSON.LineString>[]>([]);
+  const [geojson, setGeojson] = useState<RouteCollection[]>([]);
   const [selectedButton, setSelectedButton] = useState<string>('metro');
 
   const colors: { [key: string]: { [key: string]: string } } = {
@@ -82,11 +112,18 @@ const MapScreen: React.FC = () => {
       "IDFM:C01739": "rgb(213,201,0)",
       "IDFM:C01738": "rgb(159,152,37)",
       "IDFM:C01740": "rgb(206,173,210)"
+    },
+    "tram": {
+      "IDFM:C01737": "rgb(141,94,42)",
+      "IDFM:C01739": "rgb(213,201,0)",
+      "IDFM:C01738": "rgb(159,152,37)",
+      "IDFM:C01740": "rgb(206,173,210)"
     }
   };
 
   useEffect(() => {
     fetchStops(selectedButton);
+    fetchGeojson(selectedButton);
   }, [selectedButton]);
 
   const fetchStops = async (buttonType: string) => {
@@ -104,7 +141,7 @@ const MapScreen: React.FC = () => {
 
       setUniqueMarkers(data.filter(stop => coordinates[buttonType].flat(2).includes(stop.stop_id)));
 
-      await setlines(data, buttonType);
+      // await setlines(data, buttonType);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -132,6 +169,48 @@ const MapScreen: React.FC = () => {
     }
     setLines(newLines);
   };
+
+  const fetchGeojson = async (buttonType: string) => {
+    try {
+
+      const route_response = await fetch(`http://localhost:8000/routes?${buttonType}`);
+      const routes:Route[] = await route_response.json();
+
+      const response = await fetch(`http://localhost:8000/routes_trace?${buttonType}`);
+      const data:RouteTrace[] = await response.json();
+
+      const geojson_output:RouteCollection[] = [];
+      for (const route of routes) {
+        const route_traces:RouteTrace[] = data.filter(route_trace => route_trace.route_id === route.route_id);
+        
+        const lineCollection:RouteCollection = {
+          collection: {
+            type: "FeatureCollection",
+            features: route_traces.map(route_trace => {
+              return {
+                type: "Feature",
+                geometry: {
+                  type: "LineString",
+                  coordinates: JSON.parse(route_trace.shape).coordinates
+                },
+                properties: {
+                  route_id: route_trace.route_id
+                }
+              }
+            }),
+          },
+          route_id: route.route_id,
+          // parse color from hex string
+          route_color: `#${route.color}`
+        }
+        geojson_output.push(lineCollection);
+      }
+      setGeojson(geojson_output);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
   
 
   const handleSelectButton = (buttonType: string) => {
@@ -177,19 +256,38 @@ const MapScreen: React.FC = () => {
           )
         }
         {
-          lines.map((line, index) => (
-            <Source key={index} id={`lineLayer${index}`} type="geojson" data={line}>
-              <Layer
-                id={`line${index}`}
-                type="line"
-                layout={{}}
-                paint={{
-                  'line-color': colors[selectedButton][line.properties?.route_id] || 'red',
-                  'line-width': 5
-                }}
-              />
-            </Source>
-          ))
+          // lines.map((line, index) => {
+          //   console.log("hey");
+          //   return (
+          //     <Source key={index} id={`lineLayer${index}`} type="geojson" data={line}>
+          //     <Layer
+          //       id={`line${index}`}
+          //       type="line"
+          //       layout={{}}
+          //       paint={{
+          //         'line-color': colors[selectedButton][line.properties?.route_id] || 'red',
+          //         'line-width': 5
+          //       }}
+          //     />
+          //   </Source>
+          //   )
+          // }
+          // )
+          geojson.map((line, index) => {
+            return (
+              <Source key={index} id={`lineLayer${index}`} type="geojson" data={line.collection}>
+                <Layer
+                  id={`line${index}`}
+                  type="line"
+                  layout={{}}
+                  paint={{
+                    'line-color': line.route_color || 'red',
+                    'line-width': 5
+                  }}
+                />
+              </Source>
+            )
+          })
         }
       </Map>
       <ControlButton selectedButton={selectedButton} onSelectButton={handleSelectButton} />

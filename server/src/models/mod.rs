@@ -505,7 +505,14 @@ impl FromStr for RouteTrace {
         let shape = if parts[1].is_empty() {
             None
         } else {
-            Some(parts[1].to_string())
+            Some(
+                parts[1]
+                    .to_string()
+                    .replace("\"\"", "\"")
+                    .replace("\"{", "{")
+                    .replace("}\"", "}")
+                    .replace("type", "type_"),
+            )
         };
 
         Ok(Self {

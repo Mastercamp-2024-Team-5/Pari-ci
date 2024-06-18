@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Icon from '../Shared/Icon';
 import './MapScreen.css';
 import coordinates from './coordinates/coordinates';
+import MapItineraire from './MapItineraire';
 
 export interface Stop {
   stop_id: string;
@@ -48,7 +49,7 @@ interface RouteTrace {
   color: string;
 }
 
-interface Route {
+export interface Route {
   route_id: string,
   agency_id: string,
   short_name: string,
@@ -73,6 +74,7 @@ const MapScreen: React.FC = React.memo(() => {
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<RouteCollection[]>([]);
   const [selectedButton, setSelectedButton] = useState<string>('metro');
+  const [onItineraire, setOnItineraire] = useState<boolean>(false);
 
   useEffect(() => {
     fetchStops(selectedButton);
@@ -138,6 +140,7 @@ const MapScreen: React.FC = React.memo(() => {
         geojson_output.push(lineCollection);
       }
       setGeojson(geojson_output);
+      setOnItineraire(true); //TODO: change this
     } catch (error) {
       console.error('Error:', error);
     }
@@ -147,6 +150,23 @@ const MapScreen: React.FC = React.memo(() => {
     setSelectedButton(buttonType);
   };
 
+  if (onItineraire) {
+    return (
+      <Map
+        mapboxAccessToken={import.meta.env.VITE_REACT_APP_MAPBOX_TOKEN}
+        initialViewState={{
+          latitude: 48.8566,
+          longitude: 2.3522,
+          zoom: 11
+        }}
+        style={{ flex: 1, margin: 0, padding: 0 }}
+        reuseMaps
+        mapStyle="mapbox://styles/mapbox/streets-v9"
+      >
+        <MapItineraire />
+      </Map>
+    );
+  }
   return (
     <>
       <Map

@@ -25,6 +25,18 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    stop_times_joined (trip_id, stop_id1, stop_id2) {
+        trip_id -> Varchar,
+        stop_id1 -> Varchar,
+        stop_id2 -> Varchar,
+        arrival_time1 -> Int4,
+        arrival_time2 -> Int4,
+        departure_time1 -> Int4,
+        departure_time2 -> Int4,
+    }
+}
+
 diesel::joinable!(stop_route_details -> routes (route_id));
 diesel::joinable!(stop_route_details -> stops (stop_id));
 diesel::joinable!(stop_route_details -> trips (route_id));
@@ -32,3 +44,7 @@ diesel::joinable!(transfers -> stop_route_details (from_stop_id));
 
 diesel::allow_tables_to_appear_in_same_query!(transfers, stop_route_details, average_stop_times);
 diesel::allow_tables_to_appear_in_same_query!(stop_route_details, stop_times);
+
+diesel::joinable!(stop_times_joined -> trips (trip_id));
+diesel::allow_tables_to_appear_in_same_query!(stop_times_joined, trips);
+diesel::allow_tables_to_appear_in_same_query!(stop_times_joined, routes);

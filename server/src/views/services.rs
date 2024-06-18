@@ -356,6 +356,7 @@ pub struct PathNode {
     route_short_name: Option<String>,
     wait_time: u32,
     travel_time: u32,
+    trip_id: Option<String>,
 }
 
 pub fn real_time_path(
@@ -393,11 +394,12 @@ pub fn real_time_path(
                 stop_times_dsl::arrival_time2,
                 trips_dsl::route_id,
                 routes_dsl::short_name,
+                stop_times_dsl::trip_id,
             ))
-            .first::<(i32, i32, String, String)>(connection);
+            .first::<(i32, i32, String, String, String)>(connection);
 
         match stop_time {
-            Ok((departure_time, arrival_time, route_id, route_short_name)) => {
+            Ok((departure_time, arrival_time, route_id, route_short_name, trip_id)) => {
                 let wait_time = departure_time - time;
                 let travel_time = arrival_time - departure_time;
                 new_path.push(PathNode {
@@ -407,6 +409,7 @@ pub fn real_time_path(
                     route_short_name: Some(route_short_name),
                     wait_time: wait_time as u32,
                     travel_time: travel_time as u32,
+                    trip_id: Some(trip_id),
                 });
                 time = arrival_time;
                 println!("At {:?} at time {:?}", stop_id, time);
@@ -434,6 +437,7 @@ pub fn real_time_path(
                             route_short_name: None,
                             wait_time: 0,
                             travel_time: walk_time as u32,
+                            trip_id: None,
                         });
                         time += walk_time;
                         println!("At {:?} at time {:?}", stop_id, time);

@@ -1,5 +1,5 @@
 import { Flex, Text } from "@chakra-ui/react";
-import CircleLine from "./CircleLine";
+import Icon from "../Shared/Icon";
 
 const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; textColor: string; color: string }) => {
     return (
@@ -12,11 +12,11 @@ const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; te
             borderColor={"#273DFF"}
             borderRadius={"10px"}
             paddingX={6}
-            paddingY={3}
+            paddingY={2}
             bg={"white"}
             alignItems={"center"} // Ensure Flex container items are centered
         >
-            <CircleLine line={line} color={color} textColor={textColor} />
+            <Icon item={line} size={"40px"}/>
             <Text
                 marginLeft={"5%"}
                 width={"85%"}

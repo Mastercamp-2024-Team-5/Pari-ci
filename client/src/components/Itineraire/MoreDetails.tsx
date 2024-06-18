@@ -12,6 +12,7 @@ import MapScreen from "../Map/MapScreen";
 import StopDetail from "./StopDetail";
 import { useState } from "react";
 import Icon from "../Shared/Icon";
+import  {colors_metro} from "../Shared/colors_metro";
 
 const MoreDetails = (
     { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, color, textColor, correspondance}:
@@ -55,8 +56,8 @@ const MoreDetails = (
           direction={direction}
           arrive={false}
         />
-        <Box w="100%" display="flex" alignItems="center" justifyContent="flex-start">
-          <Icon item="barre" size="30px" color={color} />
+        <Box w="100%" display="flex" alignItems="center" justifyContent="flex-start" marginLeft={"7px"}>
+          <Icon item="barre" size="30px" color={colors_metro[ligne][0]} />
           <Text marginLeft="6%" fontSize="md" fontWeight="500">
             {nbrArrets} arrêt{nbrArrets>1?"s":""}
           </Text>

@@ -1,5 +1,5 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
-import CircleLine from "./CircleLine";
+import Icon from "../Shared/Icon";
 const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string, arrive: boolean }) => {
 
     return (
@@ -12,7 +12,7 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }:
             bg={"white"}
             margin={0}
         >
-            <CircleLine line={line} color={color} textColor={textColor} />
+            <Icon item={line} size={"40px"}/>
             <Flex
                 direction={"row"}
                 paddingX={2}

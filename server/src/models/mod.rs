@@ -470,11 +470,11 @@ impl FromStr for Transfer {
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[diesel(table_name = routes_trace)]
 pub struct RouteTrace {
-    id: String,
-    route_id: String,
-    route_type: i32,
-    color: Option<String>,
-    shape: Option<String>,
+    pub id: String,
+    pub route_id: String,
+    pub route_type: i32,
+    pub color: Option<String>,
+    pub shape: Option<String>,
 }
 
 impl FromStr for RouteTrace {

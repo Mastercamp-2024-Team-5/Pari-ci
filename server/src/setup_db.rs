@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use diesel::prelude::*;
 use models::{Agency, Calendar, CalendarDate, Route, RouteTrace, Stop, StopTime, Transfer, Trip};
+use serde::Deserialize;
 use services::{
     add_agencies, add_calendar_dates, add_calendars, add_routes, add_routes_trace, add_stop_times,
     add_stops, add_transfers, add_trips, establish_connection_pg,
@@ -26,6 +27,18 @@ macro_rules! get_entries {
             .filter(|line| !line.is_empty()) // skip empty lines
             .collect::<Vec<&str>>()
     };
+}
+
+#[derive(Deserialize)]
+struct Shape {
+    coordinates: Vec<(f64, f64)>,
+    type_: String,
+}
+
+impl Shape {
+    fn new(geojson: &str) -> Self {
+        serde_json::from_str(geojson).unwrap()
+    }
 }
 
 #[derive(PartialEq)]
@@ -64,7 +77,7 @@ fn main() {
         "AddAll" => Task::AddAll,
         "AddTransfers" => Task::AddTransfers,
         "AddRoutesTrace" => Task::AddRoutesTrace,
-        "CorrectStop" => Task::CorrectStopLocationWithTrace,
+        "CorrectStops" => Task::CorrectStopLocationWithTrace,
         _ => Task::Invalid,
     };
     let t1 = std::time::Instant::now();
@@ -220,7 +233,7 @@ fn main() {
             .expect("Error loading routes trace");
 
         use crate::views::schema::stop_route_details::dsl as stops_dsl;
-        let stops_res = stops_dsl::stop_route_details
+        let stops_res: Vec<views::models::StopRouteDetails> = stops_dsl::stop_route_details
             .filter(stops_dsl::route_type.eq_any(&[0, 1, 2, 3]))
             .filter(stops_dsl::agency_id.eq_any(&[
                 "IDFM:Operator_100",
@@ -230,6 +243,57 @@ fn main() {
             ]))
             .load::<views::models::StopRouteDetails>(conn)
             .expect("Error loading stops");
+
+        // parse the traces to keep only the first and last coordinates
+        let traces: Vec<Vec<(f64, f64)>> = traces
+            .iter()
+            .map(|trace| {
+                let shape = trace.shape.clone().unwrap();
+                let shape = Shape::new(&shape);
+                let coordinates = shape.coordinates;
+                let first = coordinates.first().unwrap();
+                let last = coordinates.last().unwrap();
+                vec![first.clone(), last.clone()]
+            })
+            .collect();
+
+        println!("Traces parsed");
+        println!("Number of traces: {}", traces.len());
+        println!("Number of stops: {}", stops_res.len());
+        println!("Correcting stops location...");
+
+        // for each stop, find the closest trace location and update the stop location
+        for stop in stops_res {
+            let stop_location = (stop.stop_lon, stop.stop_lat);
+            let mut min_distance = f64::MAX;
+            let mut closest_trace = (0_f64, 0_f64);
+            for trace in traces.iter() {
+                for coord in trace {
+                    let distance = tools::haversine_distance(stop_location, *coord);
+                    if distance < min_distance {
+                        min_distance = distance;
+                        closest_trace = *coord;
+                    }
+                }
+            }
+            println!(
+                "Stop: {}, Trace: {:?}, Distance: {}",
+                stop.stop_id,
+                (closest_trace.0, closest_trace.1),
+                min_distance
+            );
+            // update the stop location
+            use crate::schema::stops::dsl as stops_dsl;
+            diesel::update(stops_dsl::stops.find(stop.stop_id))
+                .set((
+                    stops_dsl::stop_lon.eq(closest_trace.0),
+                    stops_dsl::stop_lat.eq(closest_trace.1),
+                ))
+                .execute(conn)
+                .expect("Error updating stop");
+        }
+        // refresh the materialized view
+        refresh_materialized_view().unwrap();
     }
 
     println!("Done!");

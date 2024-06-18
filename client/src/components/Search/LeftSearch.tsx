@@ -14,17 +14,29 @@ import { useHomeContext } from './../Home/HomeContext';
 
 
 const LeftSearch = () => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItininerairePage } = useHomeContext();
+  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItininerairePage, setDataPath } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
   const handleClickItineraire = () => {
     if (
-      departure !== "" &&
-      destination !== "" &&
-      ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
+        true
+      // departure !== "" &&
+      // destination !== "" &&
+      // ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
     ) {
       setItininerairePage(true);
+      setDataPath({})
+      const departure_ = "IDFM:70143";
+      const destination_ = "IDFM:71264";
+      const date = "2024-06-17";
+      const time = "08:00:00";
+      fetch("http://127.0.0.1:8000/path?start_stop="+departure_+"&end_stop="+destination_+"&date="+date+"&time="+time)
+          .then(response => response.json())
+          .then((data ) => {
+            setDataPath(data);
+          })
+          .catch(error => console.error(error));
     }
   };
 

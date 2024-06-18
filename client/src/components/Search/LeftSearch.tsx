@@ -34,8 +34,6 @@ const LeftSearch = () => {
       fetch("http://127.0.0.1:8000/path?start_stop="+departure_+"&end_stop="+destination_+"&date="+date+"&time="+time)
           .then(response => response.json())
           .then((data ) => {
-            console.log("DATA WAS READ INTO LEFT SEARCH");
-            console.log(data);
             setDataPath(data);
           })
           .catch(error => console.error(error));

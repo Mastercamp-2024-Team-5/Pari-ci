@@ -23,43 +23,70 @@ const Itineraire = () => {
 
   const [moreDetails, setMoreDetails] = useState(false);
 
-  const getInfosFromData = (pointList: any) => {
-    // format : 
-    // {
-    //   "from_stop_id": "IDFM:21957",
-    //   "to_stop_id": "IDFM:21958",
-    //   "route_id": "IDFM:C01384",
-    //   "route_short_name": "14",
-    //   "wait_time": 0,
-    //   "travel_time": 60
-    // },
-    const lst=[];
-    let lastline=pointList[0].route_short_name;
-    let first=pointList[0].from_stop_id;
-    let last=pointList[0].from_stop_id;
-    let cpt=0;
-    let travel_time=0;
-    let depart=0;
+  const getInfosFromData = async (pointList) => {
+    let lst = [];
+    let lastline = pointList[0].route_short_name;
+    let first = pointList[0].from_stop_id;
+    let last = pointList[0].from_stop_id;
+    let cpt = 0;
+    let travel_time = 0;
+    let depart = 0;
+    let hash = {};
+  
     for (let i = 0; i < pointList.length; i++) {
-      travel_time+=pointList[i].travel_time;
-      travel_time+=pointList[i].wait_time;
-      if (pointList[i].route_short_name){
-        if (pointList[i].route_short_name===lastline){
-          last=pointList[i].from_stop_id;
-          cpt+=1;
-        }
-        else{
-          lst.push({line:lastline,from:first,to:last,nbr:cpt-2, travel_time:travel_time, depart:depart});
-          lastline=pointList[i].route_short_name;
-          first=last;
-          last=pointList[i].from_stop_id;
-          cpt=2;
-          depart=travel_time+depart;
-          travel_time=0;
+      travel_time += pointList[i].travel_time;
+      travel_time += pointList[i].wait_time;
+      if (pointList[i].route_short_name) {
+        if (pointList[i].route_short_name === lastline) {
+          last = pointList[i].from_stop_id;
+          cpt += 1;
+        } else {
+          lst.push({
+            line: lastline,
+            from: first,
+            to: last,
+            nbr: cpt - 2,
+            travel_time: travel_time,
+            depart: depart
+          });
+          lastline = pointList[i].route_short_name;
+          first = last;
+          last = pointList[i].from_stop_id;
+          cpt = 2;
+          depart = travel_time + depart;
+          travel_time = 0;
         }
       }
     }
-    lst.push({line:lastline,from:first,to:pointList[pointList.length-1].from_stop_id,nbr:cpt-2, travel_time:travel_time, depart:depart});
+    lst.push({
+      line: lastline,
+      from: first,
+      to: pointList[pointList.length - 1].from_stop_id,
+      nbr: cpt - 2,
+      travel_time: travel_time,
+      depart: depart
+    });
+  
+    const fetchStopName = async (stopId) => {
+      if (hash[stopId]) {
+        return hash[stopId];
+      }
+      try {
+        const response = await fetch(`http://localhost:8000/stop/${stopId}`);
+        const data = await response.json();
+        hash[stopId] = data[0].stop_name;
+        return hash[stopId];
+      } catch (error) {
+        console.error(error);
+        return stopId; // Fallback to stopId in case of error
+      }
+    };
+  
+    for (let i = 0; i < lst.length; i++) {
+      lst[i].from = await fetchStopName(lst[i].from);
+      lst[i].to = await fetchStopName(lst[i].to);
+    }
+  
     return lst;
   };
 
@@ -95,18 +122,22 @@ const Itineraire = () => {
   };
 
   useEffect(() => {
-    if (DataPath.length>0) {
-      const points=getInfosFromData(DataPath[1]);
-      let dt=0;
-      for (let i = 0; i < points.length; i++) {
-        dt+=points[i].travel_time;
+    const fetchData = async () => {
+      if (DataPath.length > 0) {
+        const points = await getInfosFromData(DataPath[1]);
+        let dt = 0;
+        for (let i = 0; i < points.length; i++) {
+          dt += points[i].travel_time;
+        }
+        setData({
+          departure: DataPath[0],
+          points: points,
+          arrival: additionSecondTime(DataPath[0], dt)
+        });
       }
-      setData({
-        departure:DataPath[0],
-        points: points,
-        arrival:additionSecondTime(DataPath[0], dt)
-      })
-    }
+    };
+
+    fetchData();
   }, [DataPath]);
 
   return (

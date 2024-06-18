@@ -75,7 +75,8 @@ pub fn get_stop_details(id: &str) -> Json<Vec<models::StopRouteDetails>> {
 pub fn refresh_materialized_view() -> Result<usize, diesel::result::Error> {
     let conn = &mut establish_connection_pg();
     diesel::sql_query("REFRESH MATERIALIZED VIEW stop_route_details").execute(conn)?;
-    diesel::sql_query("REFRESH MATERIALIZED VIEW average_stop_times").execute(conn)
+    diesel::sql_query("REFRESH MATERIALIZED VIEW average_stop_times").execute(conn)?;
+    diesel::sql_query("REFRESH MATERIALIZED VIEW stop_times_joined").execute(conn)
 }
 
 #[get("/transfers?<metro>&<rer>&<tram>")]
@@ -374,35 +375,23 @@ pub fn real_time_path(
 
     for stop_id in path.1.iter().skip(1) {
         use crate::schema::routes::dsl as routes_dsl;
-        use crate::schema::stop_times::dsl as stop_times_dsl;
         use crate::schema::trips::dsl as trips_dsl;
+        use schema::stop_times_joined::dsl as stop_times_dsl;
 
-        let (stop_t1, stop_t2) = alias!(
-            crate::schema::stop_times as stop_t1,
-            crate::schema::stop_times as stop_t2
-        );
-
-        let stop_time = stop_t1
-            .inner_join(
-                stop_t2.on(stop_t1
-                    .fields(stop_times_dsl::trip_id)
-                    .eq(stop_t2.fields(stop_times_dsl::trip_id))),
-            )
-            .inner_join(
-                trips_dsl::trips.on(stop_t1
-                    .fields(stop_times_dsl::trip_id)
-                    .eq(trips_dsl::trip_id)),
-            )
+        let stop_time = stop_times_dsl::stop_times_joined
+            .inner_join(trips_dsl::trips)
             .inner_join(routes_dsl::routes.on(trips_dsl::route_id.eq(routes_dsl::route_id)))
-            .filter(stop_t1.fields(stop_times_dsl::stop_id).eq(&current_stop))
-            .filter(stop_t1.fields(stop_times_dsl::departure_time).ge(time))
-            .filter(stop_t2.fields(stop_times_dsl::stop_id).eq(stop_id.clone()))
-            .filter(stop_t2.fields(stop_times_dsl::arrival_time).ge(time))
-            .order(stop_t1.fields(stop_times_dsl::departure_time).asc())
+            .filter(
+                stop_times_dsl::stop_id1
+                    .eq(&current_stop)
+                    .and(stop_times_dsl::stop_id2.eq(stop_id.clone())),
+            )
+            .filter(stop_times_dsl::departure_time1.ge(time))
+            .order(stop_times_dsl::departure_time1.asc())
             .select((
-                stop_t1.fields(stop_times_dsl::departure_time),
-                stop_t2.fields(stop_times_dsl::arrival_time),
-                routes_dsl::route_id,
+                stop_times_dsl::departure_time1,
+                stop_times_dsl::arrival_time2,
+                trips_dsl::route_id,
                 routes_dsl::short_name,
             ))
             .first::<(i32, i32, String, String)>(connection);
@@ -420,8 +409,14 @@ pub fn real_time_path(
                     travel_time: travel_time as u32,
                 });
                 time = arrival_time;
+                println!("At {:?} at time {:?}", stop_id, time);
             }
-            Err(_) => {
+            Err(error) => {
+                println!("Error: {:?}", error);
+                println!(
+                    "No trip found for {:?} -> {:?} at {:?}",
+                    current_stop, stop_id, time
+                );
                 // check for transfers
                 use crate::schema::transfers::dsl as transfers_dsl;
                 let transfer = transfers_dsl::transfers
@@ -441,6 +436,7 @@ pub fn real_time_path(
                             travel_time: walk_time as u32,
                         });
                         time += walk_time;
+                        println!("At {:?} at time {:?}", stop_id, time);
                     }
                     Err(_) => {
                         println!(

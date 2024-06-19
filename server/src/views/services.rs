@@ -8,7 +8,6 @@ use crate::services::list_transfers;
 use crate::tools::graph::Graph;
 use crate::views::models;
 use crate::views::schema;
-use crate::views::services;
 use diesel::alias;
 use diesel::prelude::*;
 use rocket::get;
@@ -181,7 +180,7 @@ pub fn list_average_stop_times(
     Json(results)
 }
 
-pub fn get_average_times() -> Vec<models::AverageStopTime> {
+pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
     use schema::average_stop_times::dsl::*;
     let connection = &mut establish_connection_pg();
     let (stop1, stop2) = alias!(
@@ -205,10 +204,27 @@ pub fn get_average_times() -> Vec<models::AverageStopTime> {
         .load::<models::AverageStopTime>(connection)
         .expect("Error loading stops");
 
-    results
+    let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
+    for i in results {
+        use schema::stop_times_joined::dsl as stop_times_dsl;
+        let count = stop_times_dsl::stop_times_joined
+            .filter(stop_times_dsl::stop_id1.eq(&i.stop_id))
+            .filter(stop_times_dsl::stop_id2.eq(&i.next_stop_id))
+            .count()
+            .get_result::<i64>(connection)
+            .expect("Error loading stops");
+        let average_time = models::AverageStopTimeWithWait {
+            stop_id: i.stop_id.clone(),
+            next_stop_id: i.next_stop_id.clone(),
+            avg_travel_time: i.avg_travel_time,
+            avg_wait_time: (16 * 3600 / count) as i32,
+        };
+        average_times.push(average_time);
+    }
+    average_times
 }
 
-pub fn get_average_transfert_times() -> Vec<models::AverageStopTime> {
+pub fn get_average_transfert_times() -> Vec<models::AverageStopTimeWithWait> {
     use crate::schema::transfers::dsl::*;
     let connection = &mut establish_connection_pg();
 
@@ -224,13 +240,14 @@ pub fn get_average_transfert_times() -> Vec<models::AverageStopTime> {
         .load::<crate::models::Transfer>(connection)
         .expect("Error loading stops");
 
-    let mut average_times = Vec::<models::AverageStopTime>::new();
+    let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
 
     for i in results {
-        let average_time = models::AverageStopTime {
+        let average_time = models::AverageStopTimeWithWait {
             stop_id: i.from_stop_id.clone(),
             next_stop_id: i.to_stop_id.clone(),
             avg_travel_time: i.min_transfer_time,
+            avg_wait_time: 0,
         };
         average_times.push(average_time);
     }
@@ -300,52 +317,6 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
     }
 
     path
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RouteNode {
-    stop: String,
-    children: Vec<String>,
-}
-
-#[get("/route/<route_id>/stops")]
-pub fn list_sorted_stops(route_id: &str) -> Json<Vec<Vec<RouteNode>>> {
-    use schema::average_stop_times::dsl as avg_st;
-    let connection = &mut services::establish_connection_pg();
-    let results = avg_st::average_stop_times
-        .inner_join(
-            schema::stop_route_details::table
-                .on(avg_st::stop_id.eq(schema::stop_route_details::stop_id)),
-        )
-        .filter(schema::stop_route_details::route_id.eq(route_id))
-        .select(avg_st::average_stop_times::all_columns())
-        .load::<models::AverageStopTime>(connection)
-        .expect("Error loading stops");
-
-    let mygraph = Graph::generate_graph(results);
-    // mygraph.draw("graph.dot", "graph.png");
-    let mut graphs = mygraph.get_subgraphs();
-    for graph in graphs.iter_mut() {
-        *graph = graph.into_tree().unwrap();
-    }
-
-    let mut stop_route_details = Vec::<Vec<RouteNode>>::new();
-    for graph in graphs {
-        let mut vec = Vec::new();
-        for node in graph.nodes.iter() {
-            let children = node
-                .edges
-                .iter()
-                .map(|x| graph.nodes[x.destination].id.clone())
-                .collect::<Vec<String>>();
-            vec.push(RouteNode {
-                stop: node.id.clone(),
-                children: children,
-            });
-        }
-        stop_route_details.push(vec);
-    }
-    Json(stop_route_details)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

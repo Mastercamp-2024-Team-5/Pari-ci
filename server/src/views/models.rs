@@ -23,3 +23,11 @@ pub struct AverageStopTime {
     pub next_stop_id: String,
     pub avg_travel_time: i32,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AverageStopTimeWithWait {
+    pub stop_id: String,
+    pub next_stop_id: String,
+    pub avg_travel_time: i32,
+    pub avg_wait_time: i32,
+}

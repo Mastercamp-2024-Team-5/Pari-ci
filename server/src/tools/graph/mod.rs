@@ -1,4 +1,4 @@
-use crate::views::models::AverageStopTime;
+use crate::views::models::AverageStopTimeWithWait;
 use petgraph::dot::{Config, Dot};
 use petgraph::graph::DiGraph;
 use std::cmp::Ordering;
@@ -112,7 +112,7 @@ impl Graph {
         None
     }
 
-    pub fn generate_graph(average_stop_times: Vec<AverageStopTime>) -> Self {
+    pub fn generate_graph(average_stop_times: Vec<AverageStopTimeWithWait>) -> Self {
         let mut graph = Graph::new();
         for i in average_stop_times.iter() {
             graph.add_node(i.stop_id.clone());
@@ -122,7 +122,7 @@ impl Graph {
             graph.add_edge(
                 i.stop_id.clone(),
                 i.next_stop_id.clone(),
-                i.avg_travel_time as u32,
+                i.avg_travel_time as u32 + i.avg_wait_time as u32,
             );
         }
         graph

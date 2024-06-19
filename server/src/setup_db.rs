@@ -32,7 +32,6 @@ macro_rules! get_entries {
 #[derive(Deserialize)]
 struct Shape {
     coordinates: Vec<(f64, f64)>,
-    type_: String,
 }
 
 impl Shape {
@@ -257,11 +256,6 @@ fn main() {
             })
             .collect();
 
-        println!("Traces parsed");
-        println!("Number of traces: {}", traces.len());
-        println!("Number of stops: {}", stops_res.len());
-        println!("Correcting stops location...");
-
         // for each stop, find the closest trace location and update the stop location
         for stop in stops_res {
             let stop_location = (stop.stop_lon, stop.stop_lat);
@@ -276,12 +270,6 @@ fn main() {
                     }
                 }
             }
-            println!(
-                "Stop: {}, Trace: {:?}, Distance: {}",
-                stop.stop_id,
-                (closest_trace.0, closest_trace.1),
-                min_distance
-            );
             // update the stop location
             use crate::schema::stops::dsl as stops_dsl;
             diesel::update(stops_dsl::stops.find(stop.stop_id))

@@ -21,6 +21,7 @@ diesel::table! {
     average_stop_times (stop_id) {
         stop_id -> Varchar,
         next_stop_id -> Varchar,
+        route_id -> Varchar,
         avg_travel_time -> Int4,
     }
 }

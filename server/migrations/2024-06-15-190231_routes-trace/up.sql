@@ -5,5 +5,6 @@ CREATE TABLE
         route_id VARCHAR(255) NOT NULL,
         route_type INTEGER NOT NULL,
         color VARCHAR(255),
-        shape TEXT
+        shape TEXT,
+        FOREIGN KEY (route_id) REFERENCES routes (route_id) ON DELETE CASCADE
     );

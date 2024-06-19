@@ -313,12 +313,30 @@ pub fn list_routes_trace(
     Json(results)
 }
 
-pub fn add_routes_trace(documents: &Vec<models::RouteTrace>) -> Result<(), diesel::result::Error> {
-    use schema::routes_trace::dsl::*;
+pub fn add_routes_trace(
+    documents: &Vec<models::RouteTrace>,
+) -> Result<usize, diesel::result::Error> {
     let connection = &mut establish_connection_pg();
-    diesel::insert_into(routes_trace)
-        .values(documents)
-        .on_conflict_do_nothing()
-        .execute(connection)?;
-    Ok(())
+    use schema::routes_trace::dsl::*;
+    // Insert each document in the database because we want to skip documents with foreign key violation
+    for document in documents {
+        let result = diesel::insert_into(routes_trace)
+            .values(document)
+            .on_conflict_do_nothing()
+            .execute(connection);
+
+        if let Err(ref err) = result {
+            // Handle foreign key violation error, log it and skip the document
+            if let diesel::result::Error::DatabaseError(db_error_kind, _) = err {
+                if *db_error_kind as u32
+                    == diesel::result::DatabaseErrorKind::ForeignKeyViolation as u32
+                {
+                    continue;
+                }
+            }
+            // Propagate other errors
+            return result;
+        }
+    }
+    Ok(1)
 }

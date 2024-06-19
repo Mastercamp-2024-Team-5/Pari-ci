@@ -11,5 +11,5 @@ CREATE TABLE
         color VARCHAR(255),
         text_color VARCHAR(255),
         sort_order INTEGER,
-        FOREIGN KEY (agency_id) REFERENCES agency (agency_id)
+        FOREIGN KEY (agency_id) REFERENCES agency (agency_id) ON DELETE CASCADE
     );

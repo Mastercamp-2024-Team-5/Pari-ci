@@ -204,13 +204,33 @@ fn main() {
             add_routes_trace(
                 &chunk
                     .iter()
-                    .map(|line| RouteTrace::from_str(line).unwrap())
+                    .filter_map(|line| RouteTrace::from_str(line).ok())
                     .collect::<Vec<RouteTrace>>(),
             )
-            .unwrap()
+            .unwrap();
         });
-        println!("Routes added");
+        println!("Routes trace added");
     }
+
+    // remove all data we don't need with cascade delete
+    // remove agencies that are not in the list
+    let agencies = vec!["IDFM:Operator_100", "IDFM:1046", "IDFM:71"];
+    let conn = &mut establish_connection_pg();
+    use crate::schema::agency::dsl as agency_dsl;
+    diesel::delete(agency_dsl::agency.filter(agency_dsl::agency_id.ne_all(&agencies)))
+        .execute(conn)
+        .expect("Error deleting agencies");
+
+    println!("Agencies deleted");
+
+    // remove all routes that are not in the list
+    let routes_types = vec![0, 1, 2, 3];
+    use crate::schema::routes::dsl as routes_dsl;
+    diesel::delete(routes_dsl::routes.filter(routes_dsl::route_type.ne_all(&routes_types)))
+        .execute(conn)
+        .expect("Error deleting routes");
+
+    println!("Routes deleted");
 
     if task == Task::AddAll
         || task == Task::AddRoutes
@@ -223,7 +243,14 @@ fn main() {
         println!("Materialized view refreshed");
     }
 
-    if task == Task::CorrectStopLocationWithTrace {
+    if task == Task::CorrectStopLocationWithTrace
+        || task == Task::AddAll
+        || task == Task::AddRoutesTrace
+        || task == Task::AddStops
+        || task == Task::AddRoutes
+        || task == Task::AddTrips
+        || task == Task::AddStopTimes
+    {
         // correct the location of the stops with the trace of the routes
         let conn = &mut establish_connection_pg();
         use crate::schema::routes_trace::dsl as routes_trace_dsl;

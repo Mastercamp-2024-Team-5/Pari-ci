@@ -18,8 +18,8 @@ CREATE TABLE
             arrival_time,
             departure_time
         ),
-        FOREIGN KEY (stop_id) REFERENCES stops (stop_id),
-        FOREIGN KEY (trip_id) REFERENCES trips (trip_id)
+        FOREIGN KEY (stop_id) REFERENCES stops (stop_id) ON DELETE CASCADE,
+        FOREIGN KEY (trip_id) REFERENCES trips (trip_id) ON DELETE CASCADE
     );
 
 CREATE INDEX arrival_time_index ON stop_times (arrival_time);

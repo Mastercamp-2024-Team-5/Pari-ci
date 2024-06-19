@@ -47,9 +47,7 @@ fn not_found(req: &Request) -> String {
 fn rocket() -> _ {
     println!("Generating graph...");
     let mut average_stop_times = get_average_times();
-    println!("Average times executed");
     average_stop_times.append(&mut get_average_transfert_times());
-    println!("Average transfers times executed");
     let g = graph::Graph::generate_graph(average_stop_times);
 
     println!("Starting server...");

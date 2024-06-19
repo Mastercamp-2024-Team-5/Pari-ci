@@ -11,6 +11,7 @@ type NodeIndex = String;
 pub struct Edge {
     pub destination: usize,
     pub weight: u32,
+    pub wait_time: u32,
 }
 
 #[allow(dead_code)]
@@ -52,12 +53,13 @@ impl Graph {
         self.node_indices.insert(id, index);
     }
 
-    pub fn add_edge(&mut self, from: NodeIndex, to: NodeIndex, weight: u32) {
+    pub fn add_edge(&mut self, from: NodeIndex, to: NodeIndex, weight: u32, wait_time: u32) {
         let from_index = self.node_indices[&from];
         let to_index = self.node_indices[&to];
         self.nodes[from_index].edges.push(Edge {
             destination: to_index,
             weight,
+            wait_time,
         });
     }
 
@@ -98,7 +100,7 @@ impl Graph {
 
             for edge in &self.nodes[position].edges {
                 let next = State {
-                    cost: cost + edge.weight,
+                    cost: cost + edge.weight + edge.wait_time,
                     position: edge.destination,
                 };
 
@@ -122,57 +124,11 @@ impl Graph {
             graph.add_edge(
                 i.stop_id.clone(),
                 i.next_stop_id.clone(),
-                i.avg_travel_time as u32 + i.avg_wait_time as u32,
+                i.avg_travel_time as u32,
+                i.avg_wait_time as u32,
             );
         }
         graph
-    }
-
-    pub fn old_get_subgraphs(&self) -> Vec<Graph> {
-        let mut subgraphs = Vec::new();
-        let mut visited = HashSet::new();
-
-        for node in &self.nodes {
-            if !visited.contains(&node.id) {
-                let mut subgraph_nodes = Vec::new();
-                let mut stack = vec![node.id.clone()];
-
-                while let Some(current_id) = stack.pop() {
-                    if visited.contains(&current_id) {
-                        continue;
-                    }
-
-                    visited.insert(current_id.clone());
-
-                    let current_index = self.node_indices[&current_id];
-                    let current_node = &self.nodes[current_index];
-
-                    subgraph_nodes.push(current_node.clone());
-
-                    for edge in &current_node.edges {
-                        let neighbor_id = &self.nodes[edge.destination].id;
-                        if !visited.contains(neighbor_id) {
-                            stack.push(neighbor_id.clone());
-                        }
-                    }
-                }
-
-                let mut subgraph = Graph::new();
-                for node in subgraph_nodes.iter() {
-                    subgraph.add_node(node.id.clone());
-                }
-                for node in subgraph_nodes {
-                    let from_id = node.id.clone();
-                    for edge in node.edges {
-                        let to_id = self.nodes[edge.destination].id.clone();
-                        subgraph.add_node(to_id.clone());
-                        subgraph.add_edge(from_id.clone(), to_id, edge.weight);
-                    }
-                }
-                subgraphs.push(subgraph);
-            }
-        }
-        subgraphs
     }
 
     pub fn get_subgraphs(&self) -> Vec<Graph> {
@@ -232,7 +188,7 @@ impl Graph {
                     for edge in node.edges {
                         let to_id = self.nodes[edge.destination].id.clone();
                         subgraph.add_node(to_id.clone());
-                        subgraph.add_edge(from_id.clone(), to_id, edge.weight);
+                        subgraph.add_edge(from_id.clone(), to_id, edge.weight, edge.wait_time);
                     }
                 }
                 subgraphs.push(subgraph);
@@ -267,7 +223,7 @@ impl Graph {
                 graph.add_edge(
                     pet_node_indices[i],
                     pet_node_indices[edge.destination],
-                    edge.weight,
+                    edge.weight + edge.wait_time,
                 );
             }
         }
@@ -403,7 +359,7 @@ impl Graph {
         let start = "start".to_string();
         tree.add_node(start.clone());
         for node in starts {
-            tree.add_edge(start.clone(), node, 0);
+            tree.add_edge(start.clone(), node, 0, 0);
         }
 
         let mut stack = vec![start.clone()];

@@ -204,8 +204,6 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
         .load::<models::AverageStopTime>(connection)
         .expect("Error loading stops");
 
-    println!("Average times request executed");
-
     use schema::stop_times_joined::dsl as stop_times_dsl;
     // use custom query to get the number of stops between two stops
     let counts_by_id = stop_times_dsl::stop_times_joined

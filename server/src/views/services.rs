@@ -400,7 +400,7 @@ pub fn real_time_path(
                 });
                 time = arrival_time;
             }
-            Err(error) => {
+            Err(_) => {
                 // check for transfers
                 use crate::schema::transfers::dsl as transfers_dsl;
                 let transfer = transfers_dsl::transfers

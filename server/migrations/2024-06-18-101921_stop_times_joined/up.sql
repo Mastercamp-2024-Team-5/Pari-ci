@@ -13,6 +13,8 @@ FROM
     JOIN stop_times t2 ON t1.trip_id = t2.trip_id
 WHERE
     t1.stop_sequence = t2.stop_sequence - 1
-    OR t1.stop_sequence = t2.stop_sequence + 1;
+    AND t1.stop_id != t2.stop_id;
 
-CREATE UNIQUE INDEX stop_times_joined_idx ON stop_times_joined (trip_id, stop_id1, stop_id2);
+CREATE INDEX stop_times_joined_idx ON stop_times_joined (trip_id, stop_id1, stop_id2);
+
+-- No distinct because some trips go to the same stop twice

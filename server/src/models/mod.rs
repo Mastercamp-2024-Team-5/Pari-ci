@@ -515,6 +515,10 @@ impl FromStr for RouteTrace {
             )
         };
 
+        if parts[3] == "NR" {
+            return Err(());
+        }
+
         Ok(Self {
             id: Uuid::new_v4().to_string(),
             route_id: "IDFM:".to_string() + parts[3],

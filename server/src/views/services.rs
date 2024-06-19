@@ -204,20 +204,32 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
         .load::<models::AverageStopTime>(connection)
         .expect("Error loading stops");
 
+    println!("Average times request executed");
+
+    use schema::stop_times_joined::dsl as stop_times_dsl;
+    // use custom query to get the number of stops between two stops
+    let counts_by_id = stop_times_dsl::stop_times_joined
+        .select((
+            stop_times_dsl::stop_id1,
+            stop_times_dsl::stop_id2,
+            diesel::dsl::sql::<diesel::sql_types::Integer>("count(*)::integer"),
+        ))
+        .group_by((stop_times_dsl::stop_id1, stop_times_dsl::stop_id2))
+        .load::<(String, String, i32)>(connection)
+        .expect("Error loading stops");
+
     let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
     for i in results {
-        use schema::stop_times_joined::dsl as stop_times_dsl;
-        let count = stop_times_dsl::stop_times_joined
-            .filter(stop_times_dsl::stop_id1.eq(&i.stop_id))
-            .filter(stop_times_dsl::stop_id2.eq(&i.next_stop_id))
-            .count()
-            .get_result::<i64>(connection)
-            .expect("Error loading stops");
+        let count = counts_by_id
+            .iter()
+            .find(|x| x.0 == i.stop_id && x.1 == i.next_stop_id)
+            .unwrap()
+            .2;
         let average_time = models::AverageStopTimeWithWait {
             stop_id: i.stop_id.clone(),
             next_stop_id: i.next_stop_id.clone(),
             avg_travel_time: i.avg_travel_time,
-            avg_wait_time: (16 * 3600 / count) as i32,
+            avg_wait_time: (1 * 3600 / count) as i32,
         };
         average_times.push(average_time);
     }
@@ -337,6 +349,10 @@ pub fn real_time_path(
     // for every pair of stops in the path, we need to check the stop times or the transfers
     let mut new_path: Vec<PathNode> = Vec::new();
 
+    if path.1.len() < 2 {
+        return Err(diesel::result::Error::NotFound);
+    }
+
     let connection = &mut establish_connection_pg();
 
     let current_time = start_date.clone();
@@ -383,14 +399,8 @@ pub fn real_time_path(
                     trip_id: Some(trip_id),
                 });
                 time = arrival_time;
-                println!("At {:?} at time {:?}", stop_id, time);
             }
             Err(error) => {
-                println!("Error: {:?}", error);
-                println!(
-                    "No trip found for {:?} -> {:?} at {:?}",
-                    current_stop, stop_id, time
-                );
                 // check for transfers
                 use crate::schema::transfers::dsl as transfers_dsl;
                 let transfer = transfers_dsl::transfers
@@ -411,7 +421,6 @@ pub fn real_time_path(
                             trip_id: None,
                         });
                         time += walk_time;
-                        println!("At {:?} at time {:?}", stop_id, time);
                     }
                     Err(_) => {
                         println!(

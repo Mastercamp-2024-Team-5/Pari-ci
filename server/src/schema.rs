@@ -154,6 +154,7 @@ diesel::table! {
 }
 
 diesel::joinable!(routes -> agency (agency_id));
+diesel::joinable!(routes_trace -> routes (route_id));
 diesel::joinable!(stop_times -> stops (stop_id));
 diesel::joinable!(stop_times -> trips (trip_id));
 diesel::joinable!(trips -> routes (route_id));

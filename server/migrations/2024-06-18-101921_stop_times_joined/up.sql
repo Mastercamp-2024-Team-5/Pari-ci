@@ -17,4 +17,10 @@ WHERE
 
 CREATE INDEX stop_times_joined_idx ON stop_times_joined (trip_id, stop_id1, stop_id2);
 
+CREATE INDEX stop_times_joined_stop_id1_idx ON stop_times_joined (stop_id1);
+
+CREATE INDEX stop_times_joined_stop_id2_idx ON stop_times_joined (stop_id2);
+
+CREATE INDEX stop_times_joined_trip_id_idx ON stop_times_joined (trip_id);
+
 -- No distinct because some trips go to the same stop twice

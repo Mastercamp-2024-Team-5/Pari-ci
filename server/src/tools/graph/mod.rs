@@ -10,6 +10,7 @@ type NodeIndex = String;
 #[derive(Debug, Clone)]
 pub struct Edge {
     pub destination: usize,
+    pub route: String,
     pub weight: u32,
     pub wait_time: u32,
 }
@@ -53,11 +54,19 @@ impl Graph {
         self.node_indices.insert(id, index);
     }
 
-    pub fn add_edge(&mut self, from: NodeIndex, to: NodeIndex, weight: u32, wait_time: u32) {
+    pub fn add_edge(
+        &mut self,
+        from: NodeIndex,
+        to: NodeIndex,
+        weight: u32,
+        wait_time: u32,
+        route: String,
+    ) {
         let from_index = self.node_indices[&from];
         let to_index = self.node_indices[&to];
         self.nodes[from_index].edges.push(Edge {
             destination: to_index,
+            route,
             weight,
             wait_time,
         });
@@ -79,9 +88,15 @@ impl Graph {
         heap.push(State {
             cost: 0,
             position: start_index,
+            prev_route: None,
         });
 
-        while let Some(State { cost, position }) = heap.pop() {
+        while let Some(State {
+            cost,
+            position,
+            prev_route,
+        }) = heap.pop()
+        {
             if position == goal_index {
                 let mut path = Vec::new();
                 let mut current = goal_index;
@@ -100,12 +115,17 @@ impl Graph {
 
             for edge in &self.nodes[position].edges {
                 let next = State {
-                    cost: cost + edge.weight + edge.wait_time,
+                    cost: if prev_route == Some(edge.route.clone()) {
+                        cost + edge.weight
+                    } else {
+                        cost + edge.weight + edge.wait_time
+                    },
+                    prev_route: Some(edge.route.clone()),
                     position: edge.destination,
                 };
 
                 if next.cost < distances[next.position] {
-                    heap.push(next);
+                    heap.push(next.clone());
                     distances[next.position] = next.cost;
                     previous_nodes[next.position] = Some(position);
                 }
@@ -126,6 +146,7 @@ impl Graph {
                 i.next_stop_id.clone(),
                 i.avg_travel_time as u32,
                 i.avg_wait_time as u32,
+                i.route_id.clone(),
             );
         }
         graph
@@ -188,7 +209,13 @@ impl Graph {
                     for edge in node.edges {
                         let to_id = self.nodes[edge.destination].id.clone();
                         subgraph.add_node(to_id.clone());
-                        subgraph.add_edge(from_id.clone(), to_id, edge.weight, edge.wait_time);
+                        subgraph.add_edge(
+                            from_id.clone(),
+                            to_id,
+                            edge.weight,
+                            edge.wait_time,
+                            edge.route.clone(),
+                        );
                     }
                 }
                 subgraphs.push(subgraph);
@@ -359,7 +386,7 @@ impl Graph {
         let start = "start".to_string();
         tree.add_node(start.clone());
         for node in starts {
-            tree.add_edge(start.clone(), node, 0, 0);
+            tree.add_edge(start.clone(), node, 0, 0, "start".to_string());
         }
 
         let mut stack = vec![start.clone()];
@@ -438,10 +465,11 @@ impl Graph {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 struct State {
     cost: u32,
     position: usize,
+    prev_route: Option<String>,
 }
 
 impl Ord for State {

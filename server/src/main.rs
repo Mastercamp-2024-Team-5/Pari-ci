@@ -11,7 +11,7 @@ use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::Header;
 use rocket::Response;
 use tools::graph;
-use views::services::{get_average_times, get_average_transfert_times};
+use views::services::{get_average_times, get_average_transfert_times, get_parent_transfers_times};
 
 pub struct CORS;
 #[rocket::async_trait]
@@ -48,6 +48,7 @@ fn rocket() -> _ {
     println!("Generating graph...");
     let mut average_stop_times = get_average_times();
     average_stop_times.append(&mut get_average_transfert_times());
+    average_stop_times.append(&mut get_parent_transfers_times());
     let g = graph::Graph::generate_graph(average_stop_times);
 
     println!("Starting server...");

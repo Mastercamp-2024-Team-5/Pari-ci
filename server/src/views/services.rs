@@ -226,8 +226,9 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
         let average_time = models::AverageStopTimeWithWait {
             stop_id: i.stop_id.clone(),
             next_stop_id: i.next_stop_id.clone(),
+            route_id: i.route_id.clone(),
             avg_travel_time: i.avg_travel_time,
-            avg_wait_time: (1 * 3600 / count) as i32,
+            avg_wait_time: (10 * 3600 / count) as i32,
         };
         average_times.push(average_time);
     }
@@ -256,11 +257,39 @@ pub fn get_average_transfert_times() -> Vec<models::AverageStopTimeWithWait> {
         let average_time = models::AverageStopTimeWithWait {
             stop_id: i.from_stop_id.clone(),
             next_stop_id: i.to_stop_id.clone(),
+            route_id: "".to_string(),
             avg_travel_time: i.min_transfer_time,
             avg_wait_time: 0,
         };
         average_times.push(average_time);
     }
+    average_times
+}
+
+pub fn get_parent_transfers_times() -> Vec<models::AverageStopTimeWithWait> {
+    // make a list of all the transfers between parent stations and their children with 0 wait time
+    use schema::stop_route_details::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = stop_route_details
+        .filter(location_type.eq(0))
+        .select((parent_station, stop_id))
+        .distinct()
+        .load::<(String, String)>(connection)
+        .expect("Error loading stops");
+
+    let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
+
+    for i in results {
+        let average_time = models::AverageStopTimeWithWait {
+            stop_id: i.1.clone(),
+            next_stop_id: i.0.clone(),
+            route_id: "".to_string(),
+            avg_travel_time: 0,
+            avg_wait_time: 0,
+        };
+        average_times.push(average_time);
+    }
+
     average_times
 }
 
@@ -305,25 +334,16 @@ pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
         }
     }
 
-    // remove stops with same parent_station at end
-    let mut end = stop_route_details
-        .filter(stop_id.eq(&path[path.len() - 1]))
-        .select(parent_station)
-        .first::<String>(connection)
+    // remove last node if it is a parent station
+    use crate::schema::stops::dsl as stops_dsl;
+    let end = stops_dsl::stops
+        .filter(stops_dsl::stop_id.eq(&path[path.len() - 1]))
+        .select(stops_dsl::location_type)
+        .first::<i32>(connection)
         .expect("Error loading stops");
 
-    while path.len() > 1 {
-        let current = stop_route_details
-            .filter(stop_id.eq(&path[path.len() - 2]))
-            .select(parent_station)
-            .first::<String>(connection)
-            .expect("Error loading stops");
-        if current == end {
-            path.pop();
-            end = current;
-        } else {
-            break;
-        }
+    if end == 1 {
+        path.pop();
     }
 
     path
@@ -449,16 +469,19 @@ pub fn get_path(
     let format_date = format_description!("[year]-[month]-[day]");
     let format_time = format_description!("[hour]:[minute]:[second]");
 
+    // get the first child stop (we don't need to do it for the end stop because there is link from child to parent (not the other way around because else the graph would skip transfers))
     let start = get_first_child_stop(&start_stop);
-    let end = get_first_child_stop(&end_stop);
-    let shortest_path = g.shortest_path(start, end);
+    let shortest_path = g.shortest_path(start, end_stop.to_string());
 
     let shortest_path = match shortest_path {
         Some((cost, path)) => {
             let path: Vec<String> = path.iter().map(|x| x.clone()).collect();
             (cost, path)
         }
-        None => (0, vec![]),
+        None => {
+            println!("No path found");
+            (0, vec![])
+        }
     };
     let shortest_path = (shortest_path.0, remove_trailing_stops(shortest_path.1));
 

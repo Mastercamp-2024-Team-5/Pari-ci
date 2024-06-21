@@ -23,35 +23,36 @@ const Itineraire = () => {
 
   const [moreDetails, setMoreDetails] = useState(false);
 
-  const getInfosFromData = async (pointList) => {
+  const getInfosFromData = async (pointList: any) => {
     let lst = [];
     let lastline = pointList[0].route_short_name;
-    let first = pointList[0].from_stop_id;
-    let last = pointList[0].from_stop_id;
+    let first = pointList[0];
+    let last = pointList[0];
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
-    let hash = {};
+    let hash: { [key: string]: string } = {};
   
     for (let i = 0; i < pointList.length; i++) {
       travel_time += pointList[i].travel_time;
       travel_time += pointList[i].wait_time;
       if (pointList[i].route_short_name) {
         if (pointList[i].route_short_name === lastline) {
-          last = pointList[i].from_stop_id;
+          last = pointList[i];
           cpt += 1;
         } else {
           lst.push({
             line: lastline,
-            from: first,
-            to: last,
+            from: first.from_stop_id,
+            direction: last.trip_id,
+            to: last.from_stop_id,
             nbr: cpt - 2,
             travel_time: travel_time,
             depart: depart
           });
           lastline = pointList[i].route_short_name;
           first = last;
-          last = pointList[i].from_stop_id;
+          last = pointList[i];
           cpt = 2;
           depart = travel_time + depart;
           travel_time = 0;
@@ -60,14 +61,15 @@ const Itineraire = () => {
     }
     lst.push({
       line: lastline,
-      from: first,
+      from: first.from_stop_id,
+      direction: last.trip_id,
       to: pointList[pointList.length - 1].from_stop_id,
       nbr: cpt - 2,
       travel_time: travel_time,
       depart: depart
     });
   
-    const fetchStopName = async (stopId) => {
+    const fetchStopName = async (stopId: string) => {
       if (hash[stopId]) {
         return hash[stopId];
       }
@@ -81,10 +83,26 @@ const Itineraire = () => {
         return stopId; // Fallback to stopId in case of error
       }
     };
+
+    const fetchDirection = async (tripIp: string) => {
+      if (hash[tripIp]) {
+        return hash[tripIp];
+      }
+      try {
+        const response = await fetch(`http://localhost:8000/trip/${tripIp}`);
+        const data = await response.json();
+        hash[tripIp] = data[0].headsign;
+        return hash[tripIp];
+      } catch (error) {
+        console.error(error);
+        return tripIp; // Fallback to stopId in case of error
+      }
+    };
   
     for (let i = 0; i < lst.length; i++) {
       lst[i].from = await fetchStopName(lst[i].from);
       lst[i].to = await fetchStopName(lst[i].to);
+      lst[i].direction = await fetchDirection(lst[i].direction);
     }
   
     return lst;
@@ -103,17 +121,17 @@ const Itineraire = () => {
       maxHeight: screenWidth < 700 ? 'calc(100vh - 450px)' : '100%',
       maxWidth: '100%',
       borderRadius: '10px',
-      padding: '10px',
+      padding: '5px',
       marginTop: '10px',
     }}>
       {
         !isEmpty(data) && data.points.map((obj: any, index: number) => (
-          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={"direction"} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
         ))
       }
-      <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
-        Arrivé à {!isEmpty(data) ? data.arrival : "xx:xx:xx"}
-      </Text>
+      {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
+        Arrivé à {data.arrival}
+      </Text>}
     </div>
   );
 
@@ -141,17 +159,17 @@ const Itineraire = () => {
   }, [DataPath]);
 
   return (
-    <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
-      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"33%"} h="100%" p={4}>
+    <Flex bg="#F6FBF9"flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100vh" overflow="hidden">
+      <Box w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>
               <Heading
                 fontFamily="Karla"
                 fontWeight="700"
-                marginTop={screenWidth < 700 ? "5%" : "15%"}
+                marginTop={screenWidth <450 ? "5%" : screenWidth < 700 ? "3%" :  screenWidth < 1300 ? "10%" : "15%"}
                 fontSize={screenWidth < 700 ? "5xl" : "4xl"}
-                marginBottom={"5%"}
+                marginBottom={screenWidth <450 ? "5%" : screenWidth < 700 ? "3%" : "5%"}
               >
                 CITYMAPPER
               </Heading>
@@ -211,18 +229,18 @@ const Itineraire = () => {
                           line={data.points[0].line}
                           textColor="black"
                           color="#F3A4BA"
-                          depart="depart"
+                          depart={additionSecondTime(data.departure, data.points[0].depart)} 
                           arrive={false}
-                          direction="direction"
+                          direction={data.points[0].direction}
                         />
                         <StopDetail
                           stop={data.points[data.points.length-1].to}
                           line={data.points[data.points.length-1].line}
                           textColor="black"
                           color="#F3A4BA"
-                          depart="depart"
+                          depart={additionSecondTime(data.departure, data.points[data.points.length-1].depart+data.points[data.points.length-1].travel_time)}
                           arrive={true}
-                          direction="direction"
+                          direction={data.points[data.points.length-1].direction}
                         />
                       </Stack>
                       <Text
@@ -252,6 +270,7 @@ const Itineraire = () => {
               borderRadius="15px"
               margin={0}
               marginTop={"5%"}
+              marginBottom={screenWidth <450 ? "5%" : screenWidth < 700 ? "0%" : "5%"}
             >
               Annuler
             </Button>
@@ -285,14 +304,14 @@ const Itineraire = () => {
       </Box>
       {
         screenWidth >= 700 && !moreDetails &&(
-          <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
+          <Box flexBasis="60%" flexShrink={1} h="100%" display="flex">
             <MapScreen />
           </Box>
         )
       }
       {
         screenWidth >= 700 && moreDetails && (
-          <Flex padding={"5%"} paddingY={"2%"} direction={"column"} flexBasis="67%" flexShrink={1} h="100%" display="flex" bg="white">
+          <Flex padding={"5%"} paddingY={"2%"} direction={"column"} flexBasis="60%" flexShrink={1} h="100%" display="flex" bg="white">
             <Text
               onClick={() => setMoreDetails(!moreDetails)}
               fontSize={"md"}

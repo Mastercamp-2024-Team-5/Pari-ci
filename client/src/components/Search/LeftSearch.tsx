@@ -28,7 +28,7 @@ const LeftSearch = () => {
       setItininerairePage(true);
       setDataPath({})
       const departure_ = "IDFM:70143";
-      const destination_ = "IDFM:71264";
+      const destination_ = "IDFM:69884";
       const date = "2024-06-17";
       const time = "08:00:00";
       fetch("http://127.0.0.1:8000/path?start_stop="+departure_+"&end_stop="+destination_+"&date="+date+"&time="+time)

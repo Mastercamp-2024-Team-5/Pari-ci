@@ -1,7 +1,6 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import Icon from "../Shared/Icon";
 const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string, arrive: boolean }) => {
-
     return (
         <Flex 
             flex={1} 
@@ -33,7 +32,7 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }:
                         margin={"0"} 
                         textColor={textColor} 
                         fontSize={"ls"} 
-                        fontWeight={"700"}
+                        fontWeight={"600"}
                     >
                         {stop}
                     </Text>
@@ -52,7 +51,7 @@ const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }:
                     marginLeft={"5%"}
                     textColor={textColor} 
                     borderRadius={"50%"}
-                    fontSize={"md"} 
+                    fontSize={"xs"} 
                     fontWeight={"500"}
                     whiteSpace={"nowrap"}
                 >

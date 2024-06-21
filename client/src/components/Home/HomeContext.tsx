@@ -11,7 +11,7 @@ interface HomeContextType {
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  ItininerairePage: boolean;
+  ItinerairePage: boolean;
   setItinerairePage: React.Dispatch<React.SetStateAction<boolean>>;
   DataPath: any;
   setDataPath: React.Dispatch<React.SetStateAction<any>>;
@@ -28,7 +28,7 @@ const defaultContext: HomeContextType = {
   setStartAt: () => {},
   endAt: '',
   setEndAt: () => {},
-  ItininerairePage: false,
+  ItinerairePage: false,
   setItinerairePage: () => {},
   DataPath: {},
   setDataPath: () => {},
@@ -64,7 +64,7 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    ItininerairePage: ItinerairePage,
+    ItinerairePage: ItinerairePage,
     setItinerairePage: setItinerairePage,
     DataPath,
     setDataPath,

@@ -71,7 +71,7 @@
 
   const MapScreen: React.FC = React.memo(() => {
     const [selectedButton, setSelectedButton] = useState<string>('metro');
-    const { ItininerairePage } = useHomeContext();
+    const { ItinerairePage } = useHomeContext();
 
     const handleSelectButton = (buttonType: string) => {
       setSelectedButton(buttonType);
@@ -91,11 +91,11 @@
           mapStyle="mapbox://styles/mapbox/streets-v9"
         >
           {
-            ItininerairePage ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
+            ItinerairePage ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
           }
         </Map>
         {
-          !ItininerairePage && <ControlButton selectedButton={selectedButton} onSelectButton={handleSelectButton} />
+          !ItinerairePage && <ControlButton selectedButton={selectedButton} onSelectButton={handleSelectButton} />
         }
       </>
     );

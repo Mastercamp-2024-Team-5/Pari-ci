@@ -3,42 +3,38 @@ import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
 import { Stop, Route } from "./MapScreen";
 import Icon from "../Shared/Icon";
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from "geojson";
+import { useHomeContext } from "../Home/HomeContext";
 
-interface ItineraireStop {
-  from_stop_id: string;
-  to_stop_id: string;
-  route_id: string | null;
-  route_short_name: string;
-  wait_time: number;
-  travel_time: number;
-}
+// interface ItineraireStop {
+//   from_stop_id: string;
+//   to_stop_id: string;
+//   route_id: string | null;
+//   route_short_name: string;
+//   wait_time: number;
+//   travel_time: number;
+// }
 
 const MapItineraire = () => {
-  const start_stop = 'IDFM:70143';
-  const end_stop = 'IDFM:71217';
-  const date = '2024-06-18';
-  const time = '09:00:00';
   const [markers, setMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<FeatureCollection | null>(null);
+  const { DataPath } = useHomeContext();
 
   useEffect(() => {
-    fetchItineraire();
-  }, []);
+    if (DataPath.length != undefined) {
+      fetchItineraire();
+    }
+  }, [DataPath]);
 
   async function fetchItineraire() {
-    const itineraire_response = await fetch(`http://127.0.0.1:8000/path?start_stop=${start_stop}&end_stop=${end_stop}&date=${date}&time=${time}`);
-    const itineraire: ItineraireStop[][] = await itineraire_response.json();
+    // const itineraire_response = await fetch(`http://127.0.0.1:8000/path?start_stop=${start_stop}&end_stop=${end_stop}&date=${date}&time=${time}`);
+    // const itineraire: ItineraireStop[][] = await itineraire_response.json();
 
     const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
     const stops: Stop[] = await stops_response.json();
 
     const routes_response = await fetch(`http://127.0.0.1:8000/routes?metro&rer&tram`);
     const routes: Route[] = await routes_response.json();
-
-    if (!Array.isArray(itineraire) || !itineraire.length) {
-      throw new Error('API response is not valid');
-    }
 
     const itineraire_stops: Stop[] = [];
     const colors: string[] = [];
@@ -56,7 +52,7 @@ const MapItineraire = () => {
       route_type: 0,
     };
 
-    for (const stop of itineraire[1]) {
+    for (const stop of DataPath[1]) {
       const stopData = stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
       itineraire_stops.push(stopData);
       const routeColor = stop.route_id ? `#${routes.find((r: Route) => r.route_id === stop.route_id)?.color}` : 'grey';
@@ -64,9 +60,9 @@ const MapItineraire = () => {
       colors.push(routeColor);
     }
     
-    const lastStopData = stops.find((s) => s.stop_id === itineraire[1][itineraire[1].length - 1].to_stop_id) || defaultStop;
+    const lastStopData = stops.find((s) => s.stop_id === DataPath[1][DataPath[1].length - 1].to_stop_id) || defaultStop;
     itineraire_stops.push(lastStopData);
-    lastStopData.color = `#${routes.find((r: Route) => r.route_id === itineraire[1][itineraire[1].length - 1].route_id)?.color || 'grey'}`;
+    lastStopData.color = `#${routes.find((r: Route) => r.route_id === DataPath[1][DataPath[1].length - 1].route_id)?.color || 'grey'}`;
 
     setMarkers(itineraire_stops);
 

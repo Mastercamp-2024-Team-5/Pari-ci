@@ -50,14 +50,22 @@ const LeftSearch = ({
       }
       setItinerairePage(true);
       setDataPath({});
-      const date = "2024-06-17";
-      const time = "08:00:00";
-      fetch("http://127.0.0.1:8000/path?start_stop="+departure_parent+"&end_stop="+destination_parent+"&date="+date+"&time="+time)
-        .then(response => response.json())
-        .then((data ) => {
-          setDataPath(data);
-        })
-        .catch(error => console.error(error));
+      if (endAt === "") {
+        fetch("http://127.0.0.1:8000/path?start_stop="+departure_parent+"&end_stop="+destination_parent+"&date="+startAt.split("T")[0]+"&time="+startAt.split("T")[1].split(":")[0]+":"+startAt.split("T")[1].split(":")[1]+":00")
+          .then(response => response.json())
+          .then((data ) => {
+            setDataPath(data);
+          })
+          .catch(error => console.error(error));
+      }
+      if (startAt === "") {
+        fetch("http://127.0.0.1:8000/path?start_stop="+departure_parent+"&end_stop="+destination_parent+"&date="+endAt.split("T")[0]+"&time="+endAt.split("T")[1].split(":")[0]+":"+endAt.split("T")[1].split(":")[1]+":00")
+          .then(response => response.json())
+          .then((data ) => {
+            setDataPath(data);
+          })
+          .catch(error => console.error(error));
+      }
     } catch (error) {
       alert(error);
     }

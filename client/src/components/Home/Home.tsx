@@ -20,7 +20,7 @@ import { Data } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 
 const HomeContent: React.FC = () => {
-  const { ItininerairePage } = useHomeContext();
+  const { ItinerairePage } = useHomeContext();
   const screenWidth = useScreenWidth();
   const [isDepartureFocus, setIsDepartureFocus] = useState<boolean>(false);
   const [isDestinationFocus, setIsDestinationFocus] = useState<boolean>(false);
@@ -74,7 +74,7 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      {!ItininerairePage && (
+      {!ItinerairePage && (
         screenWidth < 700 ? (
           <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
             <Box position="relative" minHeight="100vh">
@@ -153,7 +153,7 @@ const HomeContent: React.FC = () => {
           </Flex>
         )
       )}
-      {ItininerairePage && <Itineraire />}
+      {ItinerairePage && <Itineraire />}
     </>
   );
 };

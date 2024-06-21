@@ -23,7 +23,7 @@ const Itineraire = () => {
 
   const [moreDetails, setMoreDetails] = useState(false);
 
-  const getInfosFromData = async (pointList) => {
+  const getInfosFromData = async (pointList: any) => {
     let lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];
@@ -31,7 +31,7 @@ const Itineraire = () => {
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
-    let hash = {};
+    let hash: { [key: string]: string } = {};
   
     for (let i = 0; i < pointList.length; i++) {
       travel_time += pointList[i].travel_time;
@@ -69,7 +69,7 @@ const Itineraire = () => {
       depart: depart
     });
   
-    const fetchStopName = async (stopId) => {
+    const fetchStopName = async (stopId: string) => {
       if (hash[stopId]) {
         return hash[stopId];
       }
@@ -84,7 +84,7 @@ const Itineraire = () => {
       }
     };
 
-    const fetchDirection = async (tripIp) => {
+    const fetchDirection = async (tripIp: string) => {
       if (hash[tripIp]) {
         return hash[tripIp];
       }
@@ -129,9 +129,9 @@ const Itineraire = () => {
           <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
         ))
       }
-      <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
-        Arrivé à {!isEmpty(data) ? data.arrival : "xx:xx:xx"}
-      </Text>
+      {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
+        Arrivé à {data.arrival}
+      </Text>}
     </div>
   );
 

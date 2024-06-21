@@ -299,7 +299,7 @@ pub fn list_routes_trace(
         filter.push(0);
     }
     if train.unwrap_or(false) {
-        filter.push(3)
+        filter.push(2)
     }
     if filter.is_empty() {
         return Json(Vec::<models::RouteTrace>::new());

@@ -228,7 +228,7 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
             next_stop_id: i.next_stop_id.clone(),
             route_id: i.route_id.clone(),
             avg_travel_time: i.avg_travel_time,
-            avg_wait_time: (10 * 3600 / count) as i32,
+            avg_wait_time: (20 * 3600 / count) as i32,
         };
         average_times.push(average_time);
     }
@@ -442,9 +442,10 @@ pub fn real_time_path(
                     }
                     Err(_) => {
                         println!(
-                            "No transfer or trip found for {:?} -> {:?}",
-                            current_stop, stop_id
+                            "No transfer or trip found for {:?} -> {:?} at time {:?}",
+                            current_stop, stop_id, time
                         );
+                        println!("Actual path: {:#?}", new_path);
                         return Err(diesel::result::Error::NotFound);
                     }
                 }

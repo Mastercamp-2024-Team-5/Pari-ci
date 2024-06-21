@@ -224,7 +224,7 @@ fn main() {
     println!("Agencies deleted");
 
     // remove all routes that are not in the list
-    let routes_types = vec![0, 1, 2, 3];
+    let routes_types = vec![0, 1, 2];
     use crate::schema::routes::dsl as routes_dsl;
     diesel::delete(routes_dsl::routes.filter(routes_dsl::route_type.ne_all(&routes_types)))
         .execute(conn)

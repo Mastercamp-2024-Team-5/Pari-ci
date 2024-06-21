@@ -27,6 +27,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    trips_between_stops_per_hour (stop_id1, stop_id2, hour) {
+        stop_id1 -> Varchar,
+        stop_id2 -> Varchar,
+        hour -> Int4,
+        trip_exists -> Int4,
+    }
+}
+
+diesel::table! {
     stop_times_joined (trip_id, stop_id1, stop_id2) {
         trip_id -> Varchar,
         stop_id1 -> Varchar,

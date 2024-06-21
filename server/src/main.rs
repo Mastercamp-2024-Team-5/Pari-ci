@@ -62,6 +62,7 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_calendar])
         .mount("/", routes![services::list_calendar_dates])
         .mount("/", routes![services::get_stop,])
+        .mount("/", routes![services::get_trip])
         .mount("/", routes![services::list_stop_times])
         .mount("/", routes![services::list_routes_trace])
         .mount(

@@ -12,7 +12,7 @@ const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; te
             borderColor={"#273DFF"}
             borderRadius={"10px"}
             paddingX={6}
-            paddingY={2}
+            paddingY={0}
             bg={"white"}
             alignItems={"center"} // Ensure Flex container items are centered
         >

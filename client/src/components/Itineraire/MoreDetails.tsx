@@ -1,16 +1,9 @@
 import {
-  Center,
-  Stack,
-  Heading,
-  Button,
   Flex,
   Text,
   Box,
 } from "@chakra-ui/react";
-import useScreenWidth from "../Shared/useScreenWidth";
-import MapScreen from "../Map/MapScreen";
 import StopDetail from "./StopDetail";
-import { useState } from "react";
 import Icon from "../Shared/Icon";
 
 const MoreDetails = (

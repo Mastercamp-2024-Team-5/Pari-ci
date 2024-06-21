@@ -17,6 +17,7 @@ import { useHomeContext } from './../Home/HomeContext';
 
 const Itineraire = () => {
   const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
+  const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<any>({});
   const screenWidth = useScreenWidth();
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
@@ -275,7 +276,7 @@ const Itineraire = () => {
               Annuler
             </Button>
             {
-              screenWidth < 700 && (
+              screenWidth < 700 && !showMapMobile && (
                 <>
                   {renderMoreDetails()}
                   <Button
@@ -284,7 +285,7 @@ const Itineraire = () => {
                     _hover={{
                       bg: "#5eaf91",
                     }}
-                    onClick={() => setItininerairePage(false)}
+                    onClick={() => setShowMapMobile(true)}
                     padding={7}
                     fontSize={screenWidth < 700 ? "3xl" : "2xl"}
                     whiteSpace="wrap"
@@ -296,6 +297,33 @@ const Itineraire = () => {
                   >
                     Voir sur la carte
                   </Button>
+                </>
+              )
+            }
+            {
+              screenWidth < 700 && showMapMobile && (
+                <>
+                 <Flex h="55vh" width="92vw" direction="column">
+                  <MapScreen />
+                  <Button
+                    bg="#84C7AE"
+                    color="white"
+                    _hover={{
+                      bg: "#5eaf91",
+                    }}
+                    onClick={() => setShowMapMobile(false)}
+                    padding={7}
+                    fontSize={screenWidth < 700 ? "3xl" : "2xl"}
+                    whiteSpace="wrap"
+                    width={"90%"}
+                    alignSelf="center"
+                    borderRadius="15px"
+                    margin={0}
+                    marginTop={"5%"}
+                  >
+                    Come back
+                  </Button>
+                </Flex>
                 </>
               )
             }

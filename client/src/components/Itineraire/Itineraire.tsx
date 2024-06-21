@@ -173,8 +173,8 @@ const Itineraire = () => {
   }, [DataPath]);
 
   return (
-    <Flex bg="#F6FBF9"flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100vh" overflow="hidden">
-      <Box w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
+    <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
+      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Layer, Marker, Popup, Source } from 'react-map-gl';
 import Icon from '../Shared/Icon';
-import coordinates from './coordinates/coordinates';
 import { Stop, Route, RouteCollection, RouteTrace } from './MapScreen';
 
 interface MapElementsProps {
@@ -35,7 +34,16 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
         stop.color = `#${routes.find(route => route.route_id === stop.route_id)?.color}`;
       });
 
-      setUniqueMarkers(data.filter(stop => coordinates[buttonType].flat(2).includes(stop.stop_id)));
+      const uniqueData = data.reduce((acc: Stop[], current: Stop) => {
+        const x = acc.find(item => item.parent_station === current.parent_station && item.route_id === current.route_id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+
+      setUniqueMarkers(uniqueData);
     } catch (error) {
       console.error('Error:', error);
     }

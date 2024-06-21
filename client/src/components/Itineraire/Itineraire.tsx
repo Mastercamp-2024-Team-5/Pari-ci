@@ -16,7 +16,7 @@ import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
 
 const Itineraire = () => {
-  const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
+  const { departure, destination, startAt, endAt, setItinerairePage, DataPath } = useHomeContext();
   const [data, setData] = useState<any>({});
   const screenWidth = useScreenWidth();
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
@@ -243,7 +243,7 @@ const Itineraire = () => {
             <Button
               bg="#C78484"
               color="white"
-              onClick={() => setItininerairePage(false)}
+              onClick={() => setItinerairePage(false)}
               padding={7}
               fontSize={screenWidth < 700 ? "3xl" : "2xl"}
               whiteSpace="wrap"
@@ -265,7 +265,7 @@ const Itineraire = () => {
                     _hover={{
                       bg: "#5eaf91",
                     }}
-                    onClick={() => setItininerairePage(false)}
+                    onClick={() => setItinerairePage(false)}
                     padding={7}
                     fontSize={screenWidth < 700 ? "3xl" : "2xl"}
                     whiteSpace="wrap"

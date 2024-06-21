@@ -1,20 +1,30 @@
 import {
   Center,
   Stack,
-  Heading,
   VStack,
   Input,
   Button,
   Flex,
-  Text,
 } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import InstantMeiliSearchApp from "./InstantMeiliSearch";
 import { useHomeContext } from './../Home/HomeContext';
+import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
 
+type Props = {
+  fetchDepartureResults: (textQuery: string) => void;
+    fetchDestinationResults: (textQuery: string) => void;
+    setIsDepartureFocus: (value: boolean) => void;
+    setIsDestinationFocus: (value: boolean) => void;
+}
 
-const LeftSearch = () => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItininerairePage, setDataPath } = useHomeContext();
+const LeftSearch = ({
+    fetchDepartureResults,
+    fetchDestinationResults,
+    setIsDepartureFocus,
+    setIsDestinationFocus,
+}: Props) => {
+  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -25,7 +35,7 @@ const LeftSearch = () => {
       // destination !== "" &&
       // ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
     ) {
-      setItininerairePage(true);
+      setItinerairePage(true);
       setDataPath({})
       const departure_ = "IDFM:70143";
       const destination_ = "IDFM:71264";
@@ -44,35 +54,27 @@ const LeftSearch = () => {
     <Center>
       <Stack spacing={8} w="100%">
         <Stack align="center">
-          <Heading
-            fontFamily="Karla"
-            fontWeight="650"
-            marginTop={screenWidth < 700 ? "10%" : "15%"}
-            fontSize={screenWidth < 700 ? "5xl" : "4xl"}
-          >
-            CITYMAPPER
-          </Heading>
-          <Text fontSize={screenWidth < 700 ? "xl" : "lg"} marginBottom="5%">
-            Trouvez votre itinéraire
-          </Text>
+            <HeaderTitle />
         </Stack>
         <InstantMeiliSearchApp />
         <VStack spacing={15} w="90%" alignSelf="center">
           <Input
+            type="text"
+            placeholder="Départ"
+            onChange={(e) => fetchDestinationResults(e.target.value)}
+            onFocus={() => setIsDepartureFocus(true)}
+            onBlur={() => setIsDepartureFocus(false)}
             focusBorderColor="#5eaf91"
             fontFamily="Karla"
             variant="outline"
             border="2px"
             borderColor="gray.200"
             rounded="md"
-            type="text"
-            placeholder="Départ"
             fontSize={screenWidth < 700 ? "xl" : "lg"}
             p={8}
             bg="white"
             borderRadius="15"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
+            // value={departure} //TODO: maybe change this
           />
           <Input
             focusBorderColor="#5eaf91"
@@ -87,8 +89,10 @@ const LeftSearch = () => {
             p={8}
             bg="white"
             borderRadius="15"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
+            // value={destination}
+            onChange={(e) => fetchDepartureResults(e.target.value)}
+            onFocus={() => setIsDestinationFocus(true)}
+            onBlur={() => setIsDestinationFocus(false)}
           />
           <Flex
             maxW={"100%"}

@@ -1,5 +1,6 @@
 // HomeContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import {ActivePage} from "../Shared/enum.tsx";
 
 interface HomeContextType {
   departure: string;
@@ -11,9 +12,11 @@ interface HomeContextType {
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
   ItininerairePage: boolean;
-  setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
+  setItinerairePage: React.Dispatch<React.SetStateAction<boolean>>;
   DataPath: any;
-    setDataPath: React.Dispatch<React.SetStateAction<any>>;
+  setDataPath: React.Dispatch<React.SetStateAction<any>>;
+  activePage: ActivePage;
+  setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -26,9 +29,11 @@ const defaultContext: HomeContextType = {
   endAt: '',
   setEndAt: () => {},
   ItininerairePage: false,
-  setItininerairePage: () => {},
+  setItinerairePage: () => {},
   DataPath: {},
   setDataPath: () => {},
+  activePage: ActivePage.Map,
+  setActivePage: () => {},
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -46,8 +51,9 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [destination, setDestination] = useState('');
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
-  const [ItininerairePage, setItininerairePage] = useState(false);
+  const [ItinerairePage, setItinerairePage] = useState(false);
   const [DataPath, setDataPath] = useState({});
+  const [activePage, setActivePage] = useState(ActivePage.Map);
 
   const value: HomeContextType = {
     departure,
@@ -58,10 +64,12 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    ItininerairePage,
-    setItininerairePage,
+    ItininerairePage: ItinerairePage,
+    setItinerairePage: setItinerairePage,
     DataPath,
     setDataPath,
+    activePage,
+    setActivePage,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

@@ -1,16 +1,35 @@
 import { Data } from "../Shared/types";
 import { Box, Heading, Text, Button, VStack } from "@chakra-ui/react";
+import { useHomeContext } from "../Home/HomeContext";
 
 type Props = {
   results: Data | null;
   isDepartureFocus: boolean;
+  setIsDepartureFocus: (value: boolean) => void;
+  setIsDestinationFocus: (value: boolean) => void;
 };
 
-export function AutocompleteResults({ results, isDepartureFocus }: Props) {
-  console.log(results);
+export function AutocompleteResults({
+  results,
+  isDepartureFocus,
+  setIsDepartureFocus,
+  setIsDestinationFocus,
+}: Props) {
+  const { setDeparture, setDestination } = useHomeContext();
+
   if (!results || results.hits.length === 0) {
     return null;
   }
+
+  const handleSelect = (hit) => {
+    if (isDepartureFocus) {
+      setDeparture(hit.stop_name);
+      setIsDepartureFocus(false);
+    } else {
+      setDestination(hit.stop_name);
+      setIsDestinationFocus(false);
+    }
+  };
 
   return (
     <Box px={12} py={10}>
@@ -32,6 +51,7 @@ export function AutocompleteResults({ results, isDepartureFocus }: Props) {
             display="flex"
             gap={2}
             variant="outline"
+            onClick={() => handleSelect(hit)}
           >
             <span>{hit.route_short_names}</span>
             {hit.stop_name}

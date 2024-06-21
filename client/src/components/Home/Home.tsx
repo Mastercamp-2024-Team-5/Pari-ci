@@ -1,4 +1,3 @@
-// Home.tsx
 import {
   Flex,
   Box,
@@ -9,7 +8,7 @@ import {
   DrawerCloseButton,
   DrawerBody,
 } from "@chakra-ui/react";
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import useScreenWidth from '../Shared/useScreenWidth';
 import Itineraire from './../Itineraire/Itineraire';
 import { HomeProvider, useHomeContext } from './HomeContext';
@@ -18,7 +17,7 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
 import { ActivePage } from "../Shared/enum.tsx";
 import { Data } from "../Shared/types";
-import {AutocompleteResults} from "../Search/AutocompleteResults.tsx";
+import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 
 const HomeContent: React.FC = () => {
   const { ItininerairePage } = useHomeContext();
@@ -28,7 +27,6 @@ const HomeContent: React.FC = () => {
   const [departureResults, setDepartureResults] = useState<Data | null>(null);
   const [destinationResults, setDestinationResults] = useState<Data | null>(null);
   const { activePage, setActivePage } = useHomeContext();
-
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
   useEffect(() => {
@@ -73,7 +71,6 @@ const HomeContent: React.FC = () => {
   const handleDrawerOpen = () => {
     setIsDrawerOpen(true);
   };
-
 
   return (
     <>
@@ -133,19 +130,24 @@ const HomeContent: React.FC = () => {
           <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
             <Box bg="#F6FBF9" minWidth="350px" flexBasis="33%" flexShrink={0} h="100%" p={4}>
               <LeftSearch
-                  fetchDepartureResults={fetchDepartureResults}
-                  fetchDestinationResults={fetchDestinationResults}
-                  setIsDepartureFocus={setIsDepartureFocus}
-                  setIsDestinationFocus={setIsDestinationFocus}
+                fetchDepartureResults={fetchDepartureResults}
+                fetchDestinationResults={fetchDestinationResults}
+                setIsDepartureFocus={setIsDepartureFocus}
+                setIsDestinationFocus={setIsDestinationFocus}
               />
             </Box>
             <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
               {
                 activePage === ActivePage.Map ? (
-                    <MapScreen />
-                    ) : (
-                        <AutocompleteResults results={isDepartureFocus ? departureResults : destinationResults} isDepartureFocus={isDepartureFocus} />
-                    )
+                  <MapScreen />
+                ) : (
+                  <AutocompleteResults
+                    results={isDepartureFocus ? departureResults : destinationResults}
+                    isDepartureFocus={isDepartureFocus}
+                    setIsDepartureFocus={setIsDepartureFocus}
+                    setIsDestinationFocus={setIsDestinationFocus}
+                  />
+                )
               }
             </Box>
           </Flex>

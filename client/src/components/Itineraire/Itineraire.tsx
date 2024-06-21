@@ -159,17 +159,17 @@ const Itineraire = () => {
   }, [DataPath]);
 
   return (
-    <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
-      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
+    <Flex bg="#F6FBF9"flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100vh" overflow="hidden">
+      <Box w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>
               <Heading
                 fontFamily="Karla"
                 fontWeight="700"
-                marginTop={screenWidth < 700 ? "5%" : "15%"}
+                marginTop={screenWidth <450 ? "5%" : screenWidth < 700 ? "3%" :  screenWidth < 1300 ? "10%" : "15%"}
                 fontSize={screenWidth < 700 ? "5xl" : "4xl"}
-                marginBottom={"5%"}
+                marginBottom={screenWidth <450 ? "5%" : screenWidth < 700 ? "3%" : "5%"}
               >
                 CITYMAPPER
               </Heading>
@@ -270,6 +270,7 @@ const Itineraire = () => {
               borderRadius="15px"
               margin={0}
               marginTop={"5%"}
+              marginBottom={screenWidth <450 ? "5%" : screenWidth < 700 ? "0%" : "5%"}
             >
               Annuler
             </Button>

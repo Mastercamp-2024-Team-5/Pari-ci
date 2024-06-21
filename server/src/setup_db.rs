@@ -232,17 +232,6 @@ fn main() {
 
     println!("Routes deleted");
 
-    if task == Task::AddAll
-        || task == Task::AddRoutes
-        || task == Task::AddTrips
-        || task == Task::AddStops
-        || task == Task::AddStopTimes
-    {
-        // refresh the materialized view
-        refresh_materialized_view().unwrap();
-        println!("Materialized view refreshed");
-    }
-
     if task == Task::CorrectStopLocationWithTrace
         || task == Task::AddAll
         || task == Task::AddRoutesTrace
@@ -307,8 +296,18 @@ fn main() {
                 .execute(conn)
                 .expect("Error updating stop");
         }
+        println!("Stops location corrected");
+    }
+
+    if task == Task::AddAll
+        || task == Task::AddRoutes
+        || task == Task::AddTrips
+        || task == Task::AddStops
+        || task == Task::AddStopTimes
+    {
         // refresh the materialized view
         refresh_materialized_view().unwrap();
+        println!("Materialized view refreshed");
     }
 
     println!("Done!");

@@ -216,6 +216,12 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
         .load::<(String, String, i32)>(connection)
         .expect("Error loading stops");
 
+    use crate::views::schema::trips_between_stops_per_hour::dsl as tbspm_dsl;
+
+    let trips_per_hour_exist = tbspm_dsl::trips_between_stops_per_hour
+        .load::<models::TripsBetweenStopsPerHour>(connection)
+        .expect("Error loading stops");
+
     let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
     for i in results {
         let count = counts_by_id
@@ -223,12 +229,27 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
             .find(|x| x.0 == i.stop_id && x.1 == i.next_stop_id)
             .unwrap()
             .2;
+        let trip_per_hour = trips_per_hour_exist
+            .iter()
+            .filter(|x| {
+                x.stop_id1 == i.stop_id && x.stop_id2 == i.next_stop_id && x.trip_exists == 1
+            })
+            .map(|x| x.hour)
+            .collect::<Vec<i32>>();
+
+        // make an array of 30 elements with 1 if there is a trip between the two stops at the hour and 0 otherwise
+        let mut trip_per_hour_array = [0; 30];
+        for i in trip_per_hour {
+            trip_per_hour_array[i as usize] = 1;
+        }
+
         let average_time = models::AverageStopTimeWithWait {
             stop_id: i.stop_id.clone(),
             next_stop_id: i.next_stop_id.clone(),
             route_id: i.route_id.clone(),
             avg_travel_time: i.avg_travel_time,
             avg_wait_time: (20 * 3600 / count) as i32,
+            trip_per_hour: Some(trip_per_hour_array),
         };
         average_times.push(average_time);
     }
@@ -260,6 +281,7 @@ pub fn get_average_transfert_times() -> Vec<models::AverageStopTimeWithWait> {
             route_id: "".to_string(),
             avg_travel_time: i.min_transfer_time,
             avg_wait_time: 0,
+            trip_per_hour: None,
         };
         average_times.push(average_time);
     }
@@ -286,6 +308,7 @@ pub fn get_parent_transfers_times() -> Vec<models::AverageStopTimeWithWait> {
             route_id: "".to_string(),
             avg_travel_time: 0,
             avg_wait_time: 0,
+            trip_per_hour: None,
         };
         average_times.push(average_time);
     }
@@ -469,10 +492,11 @@ pub fn get_path(
 ) -> Json<(PrimitiveDateTime, Vec<PathNode>)> {
     let format_date = format_description!("[year]-[month]-[day]");
     let format_time = format_description!("[hour]:[minute]:[second]");
+    let time = Time::parse(time, &format_time).unwrap();
 
     // get the first child stop (we don't need to do it for the end stop because there is link from child to parent (not the other way around because else the graph would skip transfers))
     let start = get_first_child_stop(&start_stop);
-    let shortest_path = g.shortest_path(start, end_stop.to_string());
+    let shortest_path = g.shortest_path(start, end_stop.to_string(), time.hour() as usize);
 
     let shortest_path = match shortest_path {
         Some((cost, path)) => {
@@ -488,17 +512,11 @@ pub fn get_path(
 
     let path = real_time_path(
         shortest_path,
-        PrimitiveDateTime::new(
-            Date::parse(&date, &format_date).unwrap(),
-            Time::parse(&time, &format_time).unwrap(),
-        ),
+        PrimitiveDateTime::new(Date::parse(&date, &format_date).unwrap(), time),
     )
     .unwrap();
 
-    let mut endtime = PrimitiveDateTime::new(
-        Date::parse(date, &format_date).unwrap(),
-        Time::parse(time, &format_time).unwrap(),
-    );
+    let mut endtime = PrimitiveDateTime::new(Date::parse(date, &format_date).unwrap(), time);
     endtime = endtime.add(Duration::seconds(path.0 as i64));
 
     Json((endtime, path.1))
@@ -513,7 +531,9 @@ pub fn get_fast_path(
 ) -> Json<(Time, Vec<String>)> {
     let start = get_first_child_stop(start_stop);
     let end = get_first_child_stop(end_stop);
-    let shortest_path = g.shortest_path(start, end);
+    let format = format_description!("[hour]:[minute]:[second]");
+    let time = Time::parse(time, &format).unwrap();
+    let shortest_path = g.shortest_path(start, end, time.hour() as usize);
     let mut shortest_path = match shortest_path {
         Some((cost, path)) => {
             let path: Vec<String> = path.iter().map(|x| x.clone()).collect();
@@ -522,8 +542,6 @@ pub fn get_fast_path(
         None => (0, vec![]),
     };
     shortest_path = (shortest_path.0, remove_trailing_stops(shortest_path.1));
-    let format = format_description!("[hour]:[minute]:[second]");
-    let mut endtime = Time::parse(time, &format).unwrap();
-    endtime = endtime.add(Duration::seconds(shortest_path.0 as i64));
+    let endtime = time.add(Duration::seconds(shortest_path.0 as i64));
     Json((endtime, shortest_path.1))
 }

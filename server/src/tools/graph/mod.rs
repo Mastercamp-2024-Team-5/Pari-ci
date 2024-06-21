@@ -13,6 +13,7 @@ pub struct Edge {
     pub route: String,
     pub weight: u32,
     pub wait_time: u32,
+    pub trip_per_hour: Option<[i32; 30]>,
 }
 
 #[allow(dead_code)]
@@ -61,6 +62,7 @@ impl Graph {
         weight: u32,
         wait_time: u32,
         route: String,
+        trip_per_hour: Option<[i32; 30]>,
     ) {
         let from_index = self.node_indices[&from];
         let to_index = self.node_indices[&to];
@@ -69,6 +71,7 @@ impl Graph {
             route,
             weight,
             wait_time,
+            trip_per_hour,
         });
     }
 
@@ -76,6 +79,7 @@ impl Graph {
         &self,
         start: NodeIndex,
         goal: NodeIndex,
+        hour: usize,
     ) -> Option<(u32, Vec<NodeIndex>)> {
         let start_index = *self.node_indices.get(&start)?;
         let goal_index = *self.node_indices.get(&goal)?;
@@ -114,11 +118,18 @@ impl Graph {
             }
 
             for edge in &self.nodes[position].edges {
+                // check if there is a trip between the two stops at the current hour
+                if let Some(trip_per_hour) = &edge.trip_per_hour {
+                    let current_hour = hour + (cost / 3600) as usize;
+                    if trip_per_hour[current_hour % 30] == 0 {
+                        continue;
+                    }
+                }
                 let next = State {
                     cost: if prev_route == Some(edge.route.clone()) {
                         cost + edge.weight
                     } else {
-                        cost + edge.weight + edge.wait_time
+                        cost + edge.weight + edge.wait_time + 180 // add 3 minutes for augmenting the cost of changing routes
                     },
                     prev_route: Some(edge.route.clone()),
                     position: edge.destination,
@@ -147,6 +158,7 @@ impl Graph {
                 i.avg_travel_time as u32,
                 i.avg_wait_time as u32,
                 i.route_id.clone(),
+                i.trip_per_hour,
             );
         }
         graph
@@ -215,6 +227,7 @@ impl Graph {
                             edge.weight,
                             edge.wait_time,
                             edge.route.clone(),
+                            edge.trip_per_hour.clone(),
                         );
                     }
                 }
@@ -386,7 +399,7 @@ impl Graph {
         let start = "start".to_string();
         tree.add_node(start.clone());
         for node in starts {
-            tree.add_edge(start.clone(), node, 0, 0, "start".to_string());
+            tree.add_edge(start.clone(), node, 0, 0, "start".to_string(), None);
         }
 
         let mut stack = vec![start.clone()];

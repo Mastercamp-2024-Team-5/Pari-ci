@@ -117,7 +117,12 @@ const HomeContent: React.FC = () => {
                   <DrawerContent maxH={"90vh"}>
                     <DrawerCloseButton />
                     <DrawerBody>
-                      <LeftSearch/>
+                      <LeftSearch
+                        fetchDepartureResults={fetchDepartureResults}
+                        fetchDestinationResults={fetchDestinationResults}
+                        setIsDepartureFocus={setIsDepartureFocus}
+                        setIsDestinationFocus={setIsDestinationFocus}
+                      />
                     </DrawerBody>
                   </DrawerContent>
                 </Drawer>

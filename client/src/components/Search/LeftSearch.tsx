@@ -7,7 +7,6 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
-import InstantMeiliSearchApp from "./InstantMeiliSearch";
 import { useHomeContext } from './../Home/HomeContext';
 import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
 
@@ -24,16 +23,16 @@ const LeftSearch = ({
     setIsDepartureFocus,
     setIsDestinationFocus,
 }: Props) => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath } = useHomeContext();
+  const { departure, destination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
   const handleClickItineraire = () => {
     if (
-        true
-      // departure !== "" &&
-      // destination !== "" &&
-      // ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
+        // true
+      departure !== "" &&
+      destination !== "" &&
+      ((startAt !== "" && dateRegex.test(startAt)) || (endAt !== "" && dateRegex.test(endAt)))
     ) {
       setItinerairePage(true);
       setDataPath({})
@@ -56,12 +55,11 @@ const LeftSearch = ({
         <Stack align="center">
             <HeaderTitle />
         </Stack>
-        <InstantMeiliSearchApp />
         <VStack spacing={15} w="90%" alignSelf="center">
           <Input
             type="text"
             placeholder="Départ"
-            onChange={(e) => fetchDestinationResults(e.target.value)}
+            onChange={(e) => fetchDepartureResults(e.target.value)}
             onFocus={() => setIsDepartureFocus(true)}
             onBlur={() => setIsDepartureFocus(false)}
             focusBorderColor="#5eaf91"
@@ -90,7 +88,7 @@ const LeftSearch = ({
             bg="white"
             borderRadius="15"
             // value={destination}
-            onChange={(e) => fetchDepartureResults(e.target.value)}
+            onChange={(e) => fetchDestinationResults(e.target.value)}
             onFocus={() => setIsDestinationFocus(true)}
             onBlur={() => setIsDestinationFocus(false)}
           />

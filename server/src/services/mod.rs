@@ -205,6 +205,17 @@ pub fn get_stop(id: &str) -> Json<Vec<models::Stop>> {
     Json(results)
 }
 
+#[get("/trip/<id>")]
+pub fn get_trip(id: &str) -> Json<Vec<models::Trip>> {
+    use schema::trips::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let results = trips
+        .filter(trip_id.eq(id))
+        .load::<models::Trip>(connection)
+        .expect("Error loading stops");
+    Json(results)
+}
+
 pub fn add_stop(document: models::Stop) -> Result<(), diesel::result::Error> {
     use schema::stops::dsl::*;
     let connection = &mut establish_connection_pg();

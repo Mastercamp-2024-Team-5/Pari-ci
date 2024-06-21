@@ -14,8 +14,8 @@ interface ItineraireStop {
 }
 
 const MapItineraire = () => {
-  const start_stop = 'IDFM:69884';
-  const end_stop = 'IDFM:71292';
+  const start_stop = 'IDFM:70143';
+  const end_stop = 'IDFM:71217';
   const date = '2024-06-18';
   const time = '09:00:00';
   const [markers, setMarkers] = useState<Stop[]>([]);

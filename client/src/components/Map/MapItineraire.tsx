@@ -1,91 +1,82 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
 import { Stop, Route } from "./MapScreen";
 import Icon from "../Shared/Icon";
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from "geojson";
 import { useHomeContext } from "../Home/HomeContext";
 
-// interface ItineraireStop {
-//   from_stop_id: string;
-//   to_stop_id: string;
-//   route_id: string | null;
-//   route_short_name: string;
-//   wait_time: number;
-//   travel_time: number;
-// }
 
-const MapItineraire = () => {
+const MapItineraire: React.FC = React.memo(() => {
+
   const [markers, setMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<FeatureCollection | null>(null);
   const { DataPath } = useHomeContext();
 
-  useEffect(() => {
+  useEffect(() => {  
+    async function fetchItineraire() {
+      console.log("DataPath");
+      const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
+      const stops: Stop[] = await stops_response.json();
+
+      const routes_response = await fetch(`http://127.0.0.1:8000/routes?metro&rer&tram`);
+      const routes: Route[] = await routes_response.json();
+
+      const itineraire_stops: Stop[] = [];
+      const colors: string[] = [];
+      const defaultStop: Stop = {
+        stop_id: "",
+        stop_name: "",
+        stop_lat: 0,
+        stop_lon: 0,
+        route_id: "",
+        location_type: 0,
+        parent_station: "",
+        wheelchair_boarding: 0,
+        route_long_name: "",
+        route_short_name: "",
+        route_type: 0,
+      };
+
+      for (const stop of DataPath[1]) {
+        const stopData = stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
+        itineraire_stops.push(stopData);
+        const routeColor = stop.route_id ? `#${routes.find((r: Route) => r.route_id === stop.route_id)?.color}` : 'grey';
+        stopData.color = routeColor;
+        colors.push(routeColor);
+      }
+      
+      const lastStopData = stops.find((s) => s.stop_id === DataPath[1][DataPath[1].length - 1].to_stop_id) || defaultStop;
+      itineraire_stops.push(lastStopData);
+      lastStopData.color = `#${routes.find((r: Route) => r.route_id === DataPath[1][DataPath[1].length - 1].route_id)?.color || 'grey'}`;
+
+      setMarkers(itineraire_stops);
+
+      const features: Feature<Geometry, GeoJsonProperties>[] = itineraire_stops.slice(0, -1).map((stop, index) => ({
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [stop.stop_lon, stop.stop_lat],
+            [itineraire_stops[index + 1].stop_lon, itineraire_stops[index + 1].stop_lat],
+          ],
+        },
+        properties: {
+          color: colors[index],
+        },
+      }));
+
+      const geojson: FeatureCollection = {
+        type: "FeatureCollection",
+        features: features,
+      };
+      setGeojson(geojson);
+    }
+
     if (DataPath.length != undefined) {
       fetchItineraire();
     }
   }, [DataPath]);
-
-  async function fetchItineraire() {
-    // const itineraire_response = await fetch(`http://127.0.0.1:8000/path?start_stop=${start_stop}&end_stop=${end_stop}&date=${date}&time=${time}`);
-    // const itineraire: ItineraireStop[][] = await itineraire_response.json();
-
-    const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
-    const stops: Stop[] = await stops_response.json();
-
-    const routes_response = await fetch(`http://127.0.0.1:8000/routes?metro&rer&tram`);
-    const routes: Route[] = await routes_response.json();
-
-    const itineraire_stops: Stop[] = [];
-    const colors: string[] = [];
-    const defaultStop: Stop = {
-      stop_id: "",
-      stop_name: "",
-      stop_lat: 0,
-      stop_lon: 0,
-      route_id: "",
-      location_type: 0,
-      parent_station: "",
-      wheelchair_boarding: 0,
-      route_long_name: "",
-      route_short_name: "",
-      route_type: 0,
-    };
-
-    for (const stop of DataPath[1]) {
-      const stopData = stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
-      itineraire_stops.push(stopData);
-      const routeColor = stop.route_id ? `#${routes.find((r: Route) => r.route_id === stop.route_id)?.color}` : 'grey';
-      stopData.color = routeColor;
-      colors.push(routeColor);
-    }
-    
-    const lastStopData = stops.find((s) => s.stop_id === DataPath[1][DataPath[1].length - 1].to_stop_id) || defaultStop;
-    itineraire_stops.push(lastStopData);
-    lastStopData.color = `#${routes.find((r: Route) => r.route_id === DataPath[1][DataPath[1].length - 1].route_id)?.color || 'grey'}`;
-
-    setMarkers(itineraire_stops);
-
-    const features: Feature<Geometry, GeoJsonProperties>[] = itineraire_stops.slice(0, -1).map((stop, index) => ({
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [stop.stop_lon, stop.stop_lat],
-          [itineraire_stops[index + 1].stop_lon, itineraire_stops[index + 1].stop_lat],
-        ],
-      },
-      properties: {
-        color: colors[index],
-      },
-    }));
-
-    const geojson: FeatureCollection = {
-      type: "FeatureCollection",
-      features: features,
-    };
-    setGeojson(geojson);
-  }
 
   return (
     <Map
@@ -140,6 +131,7 @@ const MapItineraire = () => {
       )}
     </Map>
   );
-};
+});
 
+// const MapItineraireMemo = React.memo(MapItineraire);
 export default MapItineraire;

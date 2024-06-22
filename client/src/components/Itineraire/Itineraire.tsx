@@ -16,7 +16,7 @@ import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
 
 const Itineraire = () => {
-  const { departure, destination, startAt, endAt, setItininerairePage, DataPath } = useHomeContext();
+  const { departure, destination, startAt, endAt, setItinerairePage, DataPath } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<any>({});
   const screenWidth = useScreenWidth();

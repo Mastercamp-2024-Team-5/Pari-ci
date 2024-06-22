@@ -259,8 +259,8 @@ fn main() {
             .load::<views::models::StopRouteDetails>(conn)
             .expect("Error loading stops");
 
-        // parse the traces to keep only the first and last coordinates
-        let traces: Vec<Vec<(f64, f64)>> = traces
+        // parse the traces to keep only the first and last coordinates and the associated route
+        let traces: Vec<(Vec<(f64, f64)>, String)> = traces
             .iter()
             .map(|trace| {
                 let shape = trace.shape.clone().unwrap();
@@ -268,7 +268,7 @@ fn main() {
                 let coordinates = shape.coordinates;
                 let first = coordinates.first().unwrap();
                 let last = coordinates.last().unwrap();
-                vec![first.clone(), last.clone()]
+                (vec![first.clone(), last.clone()], trace.route_id.clone())
             })
             .collect();
 
@@ -277,8 +277,11 @@ fn main() {
             let stop_location = (stop.stop_lon, stop.stop_lat);
             let mut min_distance = f64::MAX;
             let mut closest_trace = (0_f64, 0_f64);
-            for trace in traces.iter() {
-                for coord in trace {
+            for trace in traces.iter().filter(|trace| trace.1 == stop.route_id) {
+                if stop.stop_id == "IDFM:monomodalStopPlace:415093" {
+                    println!("{:?}", trace);
+                }
+                for coord in trace.0.iter() {
                     let distance = tools::haversine_distance(stop_location, *coord);
                     if distance < min_distance {
                         min_distance = distance;

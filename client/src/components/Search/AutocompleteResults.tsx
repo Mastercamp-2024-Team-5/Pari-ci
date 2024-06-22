@@ -1,4 +1,4 @@
-import { Data } from "../Shared/types";
+import { Data, Hit } from "../Shared/types";
 import { Box, Heading, Text, Button, VStack } from "@chakra-ui/react";
 import { useHomeContext } from "../Home/HomeContext";
 
@@ -21,7 +21,7 @@ export function AutocompleteResults({
     return null;
   }
 
-  const handleSelect = (hit) => {
+  const handleSelect = (hit: Hit) => {
     if (isDepartureFocus) {
       setDeparture(hit.stop_name);
       setIsDepartureFocus(false);

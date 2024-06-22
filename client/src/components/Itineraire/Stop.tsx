@@ -1,7 +1,7 @@
 import { Flex, Text } from "@chakra-ui/react";
 import Icon from "../Shared/Icon";
 
-const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; textColor: string; color: string }) => {
+const Stop = ({ stop, line, textColor }: { stop: string; line: string; textColor: string; }) => {
     return (
         <Flex
             flex={1}

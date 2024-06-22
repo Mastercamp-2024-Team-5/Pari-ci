@@ -14,25 +14,26 @@ import StopDetail from "./StopDetail";
 import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
+import { TripInfo, Point, Trip } from "../Shared/types";
 
 const Itineraire = () => {
-  const { departure, destination, startAt, endAt, setItinerairePage, DataPath } = useHomeContext();
+  const { departure, destination, setItinerairePage, DataPath } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<TripInfo>({ departure: "", points: [], arrival: "" });
   const screenWidth = useScreenWidth();
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
   const [moreDetails, setMoreDetails] = useState(false);
 
-  const getInfosFromData = async (pointList: any) => {
-    let lst = [];
+  const getInfosFromData = async (pointList: Trip[]) => {
+    const lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];
     let last = pointList[0];
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
-    let hash: { [key: string]: string } = {};
+    const hash: { [key: string]: string } = {};
   
     for (let i = 0; i < pointList.length; i++) {
       travel_time += pointList[i].travel_time;
@@ -60,6 +61,7 @@ const Itineraire = () => {
         }
       }
     }
+
     lst.push({
       line: lastline,
       from: first.from_stop_id,
@@ -112,7 +114,7 @@ const Itineraire = () => {
   const additionSecondTime = (time: string, addition: number) => {
     const d = new Date(time);
     d.setSeconds(d.getSeconds() + addition);
-    let str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+    const str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
     return str;
   }
 
@@ -126,8 +128,8 @@ const Itineraire = () => {
       marginTop: '10px',
     }}>
       {
-        !isEmpty(data) && data.points.map((obj: any, index: number) => (
-          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} color={"#F3A4BA"} textColor={"black"} correspondance={index>0}/>
+        !isEmpty(data) && data.points.map((obj: Point, index: number) => (
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0}/>
         ))
       }
       {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
@@ -136,7 +138,7 @@ const Itineraire = () => {
     </div>
   );
 
-  const isEmpty = (obj: any) => {
+  const isEmpty = (obj: object) => {
     return Object.keys(obj).length === 0;
   };
 
@@ -180,13 +182,11 @@ const Itineraire = () => {
                 <Stop
                   stop={departure}
                   line={"7"}
-                  color={"pink.200"}
                   textColor={"black"}
                 />
                 <Stop
                   stop={destination}
                   line={"7"}
-                  color={"pink.200"}
                   textColor={"black"}
                 />
               </Stack>
@@ -229,7 +229,6 @@ const Itineraire = () => {
                           stop={data.points[0].from}
                           line={data.points[0].line}
                           textColor="black"
-                          color="#F3A4BA"
                           depart={additionSecondTime(data.departure, data.points[0].depart)} 
                           arrive={false}
                           direction={data.points[0].direction}
@@ -238,7 +237,6 @@ const Itineraire = () => {
                           stop={data.points[data.points.length-1].to}
                           line={data.points[data.points.length-1].line}
                           textColor="black"
-                          color="#F3A4BA"
                           depart={additionSecondTime(data.departure, data.points[data.points.length-1].depart+data.points[data.points.length-1].travel_time)}
                           arrive={true}
                           direction={data.points[data.points.length-1].direction}

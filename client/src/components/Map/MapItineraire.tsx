@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
-import { Stop, Route } from "./MapScreen";
+import { Stop, Route } from "../Shared/types";
 import Icon from "../Shared/Icon";
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from "geojson";
 import { useHomeContext } from "../Home/HomeContext";

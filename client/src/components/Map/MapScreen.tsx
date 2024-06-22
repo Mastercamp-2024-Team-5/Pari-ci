@@ -8,48 +8,6 @@
   import MapElements from './MapElements';
   import { useHomeContext } from '../Home/HomeContext';
 
-  export interface Stop {
-    stop_id: string;
-    stop_name: string;
-    stop_lat: number;
-    stop_lon: number;
-    location_type: number;
-    parent_station: string;
-    wheelchair_boarding: number;
-    route_id: string;
-    route_short_name: string;
-    route_long_name: string;
-    route_type: number;
-    color?: string;
-  }
-
-  export interface RouteTrace {
-    id: string;
-    route_id: string;
-    shape: string;
-    route_type: number;
-    color: string;
-  }
-
-  export interface Route {
-    route_id: string,
-    agency_id: string,
-    short_name: string,
-    long_name: string,
-    description?: string,
-    route_type: number,
-    url?: string,
-    color: string,
-    text_color?: string,
-    sort_order?: number
-  }
-
-  export interface RouteCollection {
-    collection: GeoJSON.FeatureCollection
-    route_id: string
-    route_color: string
-  }
-
   const ControlButton: React.FC<{ selectedButton: string; onSelectButton: (buttonType: string) => void; }> = ({ selectedButton, onSelectButton }) => {
     return (
       <div className="control-button">

@@ -49,7 +49,7 @@ const LeftSearch = ({
         throw new Error("Destination not found");
       }
       setItinerairePage(true);
-      setDataPath({});
+      setDataPath(["", []]);
       if (endAt === "") {
         fetch("http://127.0.0.1:8000/path?start_stop="+departure_parent+"&end_stop="+destination_parent+"&date="+startAt.split("T")[0]+"&time="+startAt.split("T")[1].split(":")[0]+":"+startAt.split("T")[1].split(":")[1]+":00")
           .then(response => response.json())

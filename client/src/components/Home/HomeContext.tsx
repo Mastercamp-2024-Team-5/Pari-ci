@@ -1,6 +1,7 @@
 // HomeContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {ActivePage} from "../Shared/enum.tsx";
+import { TripData } from '../Shared/types';
 
 interface HomeContextType {
   departure: string;
@@ -13,8 +14,8 @@ interface HomeContextType {
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
   ItinerairePage: boolean;
   setItinerairePage: React.Dispatch<React.SetStateAction<boolean>>;
-  DataPath: any;
-  setDataPath: React.Dispatch<React.SetStateAction<any>>;
+  DataPath: TripData;
+  setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
   activePage: ActivePage;
   setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
 }
@@ -30,7 +31,7 @@ const defaultContext: HomeContextType = {
   setEndAt: () => {},
   ItinerairePage: false,
   setItinerairePage: () => {},
-  DataPath: {},
+  DataPath: ["", []],
   setDataPath: () => {},
   activePage: ActivePage.Map,
   setActivePage: () => {},
@@ -52,7 +53,7 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
   const [ItinerairePage, setItinerairePage] = useState(false);
-  const [DataPath, setDataPath] = useState({});
+  const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
 
   const value: HomeContextType = {

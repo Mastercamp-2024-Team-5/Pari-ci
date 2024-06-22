@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Layer, Marker, Popup, Source } from 'react-map-gl';
 import Icon from '../Shared/Icon';
-import { Stop, Route, RouteCollection, RouteTrace } from './MapScreen';
+import { Route, RouteTrace, Stop, RouteCollection } from '../Shared/types';
 
 interface MapElementsProps {
   selectedButton: string;

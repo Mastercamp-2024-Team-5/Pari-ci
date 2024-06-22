@@ -1,12 +1,13 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import AccessibleScreen from "./components/Pages/WheelchairConvenientPage";
 import Home from "./components/Home/Home";
 
 function App() {
   const [accessibleScreen, setAccessibleScreen] = useState<boolean>(false);
-  const [stationAccessibleOnly, setStationAccessibleOnly] =
-    useState<boolean>(false);
+  const [stationAccessibleOnly, setStationAccessibleOnly] = useState<boolean>(false);
+
+  console.log(stationAccessibleOnly);
 
   return (
     <ChakraProvider>
@@ -26,7 +27,6 @@ function App() {
           <AccessibleScreen
             setAccessibleScreen={setAccessibleScreen}
             setStationAccessibleOnly={setStationAccessibleOnly}
-            stationAccessibleOnly={stationAccessibleOnly}
           />
         )}
       </Container>

@@ -1,6 +1,6 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import Icon from "../Shared/Icon";
-const StopDetail = ({ stop, line, color, textColor, depart, direction, arrive }: { stop: string; line: string; textColor: string; color: string, depart: string, direction: string, arrive: boolean }) => {
+const StopDetail = ({ stop, line, textColor, depart, direction, arrive }: { stop: string; line: string; textColor: string; depart: string, direction: string, arrive: boolean }) => {
     return (
         <Flex 
             flex={1} 

@@ -7,7 +7,7 @@ import StopDetail from "./StopDetail";
 import Icon from "../Shared/Icon";
 
 const MoreDetails = (
-    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, color, textColor, correspondance}:
+    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance}:
     { 
         ligne: string;
         arret1: string;
@@ -16,7 +16,6 @@ const MoreDetails = (
         arrive: string;
         direction: string;
         nbrArrets: number;
-        color: string;
         textColor: string;
         correspondance: boolean;
     }
@@ -42,7 +41,6 @@ const MoreDetails = (
         <StopDetail 
           stop={arret1} 
           line={ligne} 
-          color={color} 
           textColor={textColor} 
           depart={depart} 
           direction={direction}
@@ -57,7 +55,6 @@ const MoreDetails = (
         <StopDetail 
           stop={arret2}
           line={ligne}
-          color={color}
           textColor={textColor}
           depart={arrive}
           direction={direction}

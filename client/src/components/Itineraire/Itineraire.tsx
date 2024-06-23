@@ -192,12 +192,10 @@ const Itineraire = () => {
               <Stack marginX={"0%"} maxW={"100%"}>
                 <Stop
                   stop={departure}
-                  line={"7"}
                   textColor={"black"}
                 />
                 <Stop
                   stop={destination}
-                  line={"7"}
                   textColor={"black"}
                 />
               </Stack>

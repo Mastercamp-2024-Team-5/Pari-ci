@@ -47,7 +47,6 @@ const Itineraire = () => {
   
     for (let i = 0; i < pointList.length; i++) {
       travel_time += pointList[i].travel_time;
-      travel_time += pointList[i].wait_time;
       if (pointList[i].route_short_name) {
         if (pointList[i].route_short_name === lastline) {
           cpt += 1;
@@ -58,16 +57,17 @@ const Itineraire = () => {
             direction: first.trip_id,
             to: pointList[i-1].to_stop_id,
             nbr: cpt - 1,
-            travel_time: travel_time,
+            travel_time: travel_time- pointList[i].wait_time,
             depart: depart
           });
           lastline = pointList[i].route_short_name;
-          first = pointList[i-1];
+          first = pointList[i];
           cpt = 1;
           depart = travel_time + depart;
           travel_time = 0;
         }
       }
+      travel_time += pointList[i].wait_time;
     }
 
     lst.push({
@@ -76,7 +76,7 @@ const Itineraire = () => {
       direction: pointList[pointList.length - 1].trip_id,
       to: pointList[pointList.length - 1].to_stop_id,
       nbr: cpt-1,
-      travel_time: travel_time,
+      travel_time: travel_time+pointList[pointList.length - 1].wait_time,
       depart: depart
     });
   
@@ -121,10 +121,15 @@ const Itineraire = () => {
     return lst;
   };
 
+  function getTime(time: number) {
+    // convert 1 to 01 for example
+    return time < 10 ? '0' + time : time;
+  }
+
   const additionSecondTime = (time: string, addition: number) => {
     const d = new Date(time);
     d.setSeconds(d.getSeconds() + addition);
-    const str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+    const str = getTime(d.getHours()) + ":" + getTime(d.getMinutes()) + ":" + getTime(d.getSeconds());
     return str;
   }
 
@@ -155,6 +160,7 @@ const Itineraire = () => {
   useEffect(() => {
     console.log(DataPath)
     const fetchData = async () => {
+      console.log(DataPath)
       if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
         let dt = 0;

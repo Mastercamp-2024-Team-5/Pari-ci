@@ -40,7 +40,6 @@ const Itineraire = () => {
     const lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];
-    let last = pointList[0];
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
@@ -51,22 +50,20 @@ const Itineraire = () => {
       travel_time += pointList[i].wait_time;
       if (pointList[i].route_short_name) {
         if (pointList[i].route_short_name === lastline) {
-          last = pointList[i];
           cpt += 1;
         } else {
           lst.push({
             line: lastline,
             from: first.from_stop_id,
-            direction: last.trip_id,
-            to: last.from_stop_id,
-            nbr: cpt - 2,
+            direction: first.trip_id,
+            to: pointList[i-1].to_stop_id,
+            nbr: cpt - 1,
             travel_time: travel_time,
             depart: depart
           });
           lastline = pointList[i].route_short_name;
-          first = last;
-          last = pointList[i];
-          cpt = 2;
+          first = pointList[i-1];
+          cpt = 1;
           depart = travel_time + depart;
           travel_time = 0;
         }
@@ -76,13 +73,14 @@ const Itineraire = () => {
     lst.push({
       line: lastline,
       from: first.from_stop_id,
-      direction: last.trip_id,
-      to: pointList[pointList.length - 1].from_stop_id,
-      nbr: cpt - 2,
+      direction: pointList[pointList.length - 1].trip_id,
+      to: pointList[pointList.length - 1].to_stop_id,
+      nbr: cpt-1,
       travel_time: travel_time,
       depart: depart
     });
   
+
     const fetchStopName = async (stopId: string) => {
       if (hash[stopId]) {
         return hash[stopId];
@@ -118,6 +116,7 @@ const Itineraire = () => {
       lst[i].to = await fetchStopName(lst[i].to);
       lst[i].direction = await fetchDirection(lst[i].direction);
     }
+    console.log(lst); 
   
     return lst;
   };
@@ -154,6 +153,7 @@ const Itineraire = () => {
   };
 
   useEffect(() => {
+    console.log(DataPath)
     const fetchData = async () => {
       if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);

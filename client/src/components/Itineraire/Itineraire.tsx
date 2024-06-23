@@ -24,10 +24,11 @@ const Itineraire = () => {
     depart: 0,
     travel_time: 0,
     direction: "",
-    nbr: 0
+    nbr: 0,
+    marche: 0
   };
 
-  const { departure, destination, setItinerairePage, DataPath } = useHomeContext();
+  const { departure, destination, setItinerairePage, DataPath, errorWhileFetching } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<TripInfo>({ departure: "", points: [defaultPoint], arrival: "" });
   // const [data, setData] = useState<TripData>({});
@@ -43,10 +44,12 @@ const Itineraire = () => {
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
+    let marche=0;
     const hash: { [key: string]: string } = {};
   
     for (let i = 0; i < pointList.length; i++) {
       travel_time += pointList[i].travel_time;
+      travel_time += pointList[i].wait_time;
       if (pointList[i].route_short_name) {
         if (pointList[i].route_short_name === lastline) {
           cpt += 1;
@@ -57,17 +60,19 @@ const Itineraire = () => {
             direction: first.trip_id,
             to: pointList[i-1].to_stop_id,
             nbr: cpt - 1,
-            travel_time: travel_time- pointList[i].wait_time,
-            depart: depart
+            travel_time: travel_time - pointList[i-1].travel_time,
+            depart: depart,
+            marche: marche
           });
           lastline = pointList[i].route_short_name;
           first = pointList[i];
           cpt = 1;
           depart = travel_time + depart;
           travel_time = 0;
+          marche = Math.round(pointList[i-1].travel_time / 60);
         }
       }
-      travel_time += pointList[i].wait_time;
+      
     }
 
     lst.push({
@@ -76,8 +81,9 @@ const Itineraire = () => {
       direction: pointList[pointList.length - 1].trip_id,
       to: pointList[pointList.length - 1].to_stop_id,
       nbr: cpt-1,
-      travel_time: travel_time+pointList[pointList.length - 1].wait_time,
-      depart: depart
+      travel_time: travel_time+pointList[pointList.length - 1].travel_time + pointList[pointList.length - 1].wait_time,
+      depart: depart,
+      marche:marche
     });
   
 
@@ -144,7 +150,7 @@ const Itineraire = () => {
     }}>
       {
         !isEmpty(data) && data.points.map((obj: Point, index: number) => (
-          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0}/>
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0} marche={obj.marche}/>
         ))
       }
       {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
@@ -179,7 +185,7 @@ const Itineraire = () => {
   }, [DataPath]);
 
   return (
-    <Flex flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
+    <Flex bg="#F6FBF9" flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
       <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
@@ -205,6 +211,7 @@ const Itineraire = () => {
                   textColor={"black"}
                 />
               </Stack>
+
               {
                 screenWidth >= 700 && !isEmpty(data) && (
                   <>
@@ -288,8 +295,22 @@ const Itineraire = () => {
             >
               Annuler
             </Button>
+              {
+                errorWhileFetching && (
+                  <Text
+                    fontSize={"lg"}
+                    color={"red"}
+                    alignSelf={"center"}
+                    _hover={{ cursor: "pointer" }}
+                    textAlign={"center"}
+                    margin={'5%'}
+                  >
+                    An error occured while computing the path, please be sure that the subway stations are oppended
+                  </Text>
+                )
+              }
             {
-              screenWidth < 700 && !showMapMobile && (
+              screenWidth < 700 && !errorWhileFetching && !showMapMobile && (
                 <>
                   {renderMoreDetails()}
                   <Button

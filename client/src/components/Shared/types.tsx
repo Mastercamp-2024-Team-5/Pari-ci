@@ -35,6 +35,7 @@ export interface Point {
   nbr: number;
   travel_time: number;
   depart: number;
+  marche: number;
 }
 
 export interface TripInfo {

@@ -7,7 +7,7 @@ import StopDetail from "./StopDetail";
 import Icon from "../Shared/Icon";
 
 const MoreDetails = (
-    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance}:
+    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance, marche}:
     { 
         ligne: string;
         arret1: string;
@@ -18,6 +18,7 @@ const MoreDetails = (
         nbrArrets: number;
         textColor: string;
         correspondance: boolean;
+        marche: number;
     }
 
 ) => {
@@ -38,7 +39,7 @@ const MoreDetails = (
   return (
     <Box>
       <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="4" marginLeft={"4%"}>
-        {correspondance?"Correspondance":"Prenez la ligne"} {ligne} à {arret1}
+        {correspondance?"Correspondance":"Prenez la ligne"} {ligne} à {arret1}{correspondance?", "+marche+" min de marche":""}
       </Text>
       <Flex 
         flex={1} 
@@ -63,7 +64,7 @@ const MoreDetails = (
         <Flex w="100%" direction={"row"} alignItems="center" justifyContent="space-between" marginLeft={"7px"}>
           <Flex direction={"row"} alignItems="center" justifyContent={"start"}>
             <Icon item="barre" size="30px" color={ligne} />
-            <Text marginLeft="6%" fontSize="md" fontWeight="500" whiteSpace={"nowrap"}>
+            <Text marginLeft="3.3vw" fontSize="md" fontWeight="500" whiteSpace={"nowrap"}>
               {nbrArrets} arrêt{nbrArrets>1?"s":""}
             </Text>
           </Flex>

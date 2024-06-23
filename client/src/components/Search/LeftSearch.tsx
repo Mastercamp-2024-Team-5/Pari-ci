@@ -29,7 +29,7 @@ const LeftSearch = ({
   setIsDepartureFocus,
   setIsDestinationFocus,
 }: Props) => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath } = useHomeContext();
+  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath, setErrorWhileFetching } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -54,13 +54,14 @@ const LeftSearch = ({
       }
       setItinerairePage(true);
       setDataPath(["", []]);
+      setErrorWhileFetching(false);
       if (endAt === "") {
         fetch(`http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${startAt.split("T")[0]}&time=${startAt.split("T")[1].split(":")[0]}:${startAt.split("T")[1].split(":")[1]}:00`)
             .then(response => response.json())
             .then((data) => {
               setDataPath(data);
             })
-            .catch(error => console.error(error));
+            .catch(error => {setErrorWhileFetching(true);console.error(error)});
       }
       if (startAt === "") {
         fetch(`http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${endAt.split("T")[0]}&time=${endAt.split("T")[1].split(":")[0]}:${endAt.split("T")[1].split(":")[1]}:00`)
@@ -68,7 +69,7 @@ const LeftSearch = ({
             .then((data) => {
               setDataPath(data);
             })
-            .catch(error => console.error(error));
+            .catch(error => {setErrorWhileFetching(true);console.error(error)});
       }
     } catch (error) {
       alert(error);

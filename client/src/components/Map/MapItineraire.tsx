@@ -15,7 +15,6 @@ const MapItineraire: React.FC = React.memo(() => {
 
   useEffect(() => {  
     async function fetchItineraire() {
-      console.log("DataPath");
       const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
       const stops: Stop[] = await stops_response.json();
 
@@ -73,7 +72,7 @@ const MapItineraire: React.FC = React.memo(() => {
       setGeojson(geojson);
     }
 
-    if (DataPath.length != undefined) {
+    if (DataPath[1][0] != undefined) {
       fetchItineraire();
     }
   }, [DataPath]);

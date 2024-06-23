@@ -17,9 +17,20 @@ import { useHomeContext } from './../Home/HomeContext';
 import { TripInfo, Point, Trip } from "../Shared/types";
 
 const Itineraire = () => {
+  const defaultPoint: Point = {
+    line: "",
+    from: "",
+    to: "",
+    depart: 0,
+    travel_time: 0,
+    direction: "",
+    nbr: 0
+  };
+
   const { departure, destination, setItinerairePage, DataPath } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
-  const [data, setData] = useState<TripInfo>({ departure: "", points: [], arrival: "" });
+  const [data, setData] = useState<TripInfo>({ departure: "", points: [defaultPoint], arrival: "" });
+  // const [data, setData] = useState<TripData>({});
   const screenWidth = useScreenWidth();
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
@@ -93,8 +104,8 @@ const Itineraire = () => {
       }
       try {
         const response = await fetch(`http://localhost:8000/trip/${tripIp}`);
-        const data = await response.json();
-        hash[tripIp] = data[0].headsign;
+        const dataTrip = await response.json();
+        hash[tripIp] = dataTrip[0].headsign;
         return hash[tripIp];
       } catch (error) {
         console.error(error);
@@ -138,13 +149,13 @@ const Itineraire = () => {
     </div>
   );
 
-  const isEmpty = (obj: object) => {
-    return Object.keys(obj).length === 0;
+  const isEmpty = (obj: TripInfo) => {
+    return obj.departure === '' && obj.points.length === 1 && obj.points[0].line === '' && obj.arrival === '';
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      if (DataPath.length > 0) {
+      if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
         let dt = 0;
         for (let i = 0; i < points.length; i++) {

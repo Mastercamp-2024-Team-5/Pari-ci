@@ -1,6 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react";
 
-const Stop = ({ stop, textColor }: { stop: string; textColor: string; }) => {
+const Stop = ({ stop, textColor }: { stop: string; textColor: string }) => {
     return (
         <Flex
             flex={1}
@@ -17,7 +17,6 @@ const Stop = ({ stop, textColor }: { stop: string; textColor: string; }) => {
             minHeight={"63px"}
         >
             <Text
-                marginLeft={"5%"}
                 width={"85%"}
                 alignContent={"center"}
                 justifyContent={"center"}

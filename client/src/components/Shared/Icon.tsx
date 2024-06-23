@@ -15,6 +15,9 @@ interface IconProps {
 const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="", onMouseEnter, onMouseLeave }) => {
   item = item.toLowerCase();
   //Check if icon is in the css component of config.json data in the glyphs[].css
+  if (item == "7b" || item == "3b") {
+    item = item.replace('b', 'bis');
+  }
   if (!data.glyphs.some(glyph => glyph.css === item)) {
     return <Text style={{ color: "red"}}>Icon {item} not found</Text>;
   }

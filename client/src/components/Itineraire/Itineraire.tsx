@@ -122,7 +122,6 @@ const Itineraire = () => {
       lst[i].to = await fetchStopName(lst[i].to);
       lst[i].direction = await fetchDirection(lst[i].direction);
     }
-    console.log(lst); 
   
     return lst;
   };
@@ -164,9 +163,7 @@ const Itineraire = () => {
   };
 
   useEffect(() => {
-    console.log(DataPath)
     const fetchData = async () => {
-      console.log(DataPath)
       if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
         let dt = 0;

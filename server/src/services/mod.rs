@@ -49,20 +49,21 @@ pub fn add_agencies(documents: &Vec<models::Agency>) -> Result<(), diesel::resul
 }
 
 // return a list of routes in JSON format
-#[get("/routes?<metro>&<rer>&<tram>")]
+#[get("/routes?<metro>&<rer>&<tram>&<train>")]
 pub fn list_routes(
     metro: Option<bool>,
     rer: Option<bool>,
     tram: Option<bool>,
+    train: Option<bool>,
 ) -> Json<Vec<models::Route>> {
     use schema::routes::dsl::*;
     let connection = &mut establish_connection_pg();
-    let results = routes.into_boxed();
+    let mut results = routes.into_boxed();
     let mut filters = Vec::<i32>::new();
     if metro.unwrap_or(false) {
         filters.push(1);
     }
-    if rer.unwrap_or(false) {
+    if rer.unwrap_or(false) || train.unwrap_or(false) {
         filters.push(2);
     }
     if tram.unwrap_or(false) {
@@ -75,6 +76,11 @@ pub fn list_routes(
                 .load::<models::Route>(connection)
                 .expect("Error loading routes"),
         );
+    }
+    if rer.unwrap_or(false) && !train.unwrap_or(false) {
+        results = results.filter(agency_id.ne("IDFM:1046"));
+    } else if train.unwrap_or(false) && !rer.unwrap_or(false) {
+        results = results.filter(agency_id.eq("IDFM:1046"));
     }
     let results = results
         .filter(route_type.eq_any(filters))
@@ -299,6 +305,11 @@ pub fn list_routes_trace(
     tram: Option<bool>,
     train: Option<bool>,
 ) -> Json<Vec<models::RouteTrace>> {
+    use schema::routes_trace::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let mut results = routes_trace
+        .inner_join(schema::routes::table.inner_join(schema::agency::table))
+        .into_boxed();
     let mut filter = Vec::<i32>::new();
     if metro.unwrap_or(false) {
         filter.push(1);
@@ -312,13 +323,17 @@ pub fn list_routes_trace(
     if train.unwrap_or(false) {
         filter.push(2)
     }
+    if rer.unwrap_or(false) && !train.unwrap_or(false) {
+        results = results.filter(schema::agency::dsl::agency_id.ne("IDFM:1046"));
+    } else if train.unwrap_or(false) && !rer.unwrap_or(false) {
+        results = results.filter(schema::agency::dsl::agency_id.eq("IDFM:1046"));
+    }
     if filter.is_empty() {
         return Json(Vec::<models::RouteTrace>::new());
     }
-    use schema::routes_trace::dsl::*;
-    let connection = &mut establish_connection_pg();
-    let results = routes_trace
+    let results = results
         .filter(route_type.eq_any(filter))
+        .select(routes_trace::all_columns())
         .load::<models::RouteTrace>(connection)
         .expect("Error loading routes_trace");
     Json(results)

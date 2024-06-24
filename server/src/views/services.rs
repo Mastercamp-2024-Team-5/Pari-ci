@@ -31,6 +31,9 @@ pub fn list_stops(
     train: Option<bool>,
 ) -> Json<Vec<models::StopRouteDetails>> {
     use schema::stop_route_details::dsl::*;
+    let mut results = stop_route_details
+        .inner_join(crate::schema::agency::table.on(agency_id.eq(crate::schema::agency::agency_id)))
+        .into_boxed();
     let connection = &mut establish_connection_pg();
     let mut filters = Vec::<i32>::new();
     if metro.unwrap_or(false) {
@@ -46,8 +49,15 @@ pub fn list_stops(
         // send everything
         return Json(Vec::new());
     }
-    let results = stop_route_details
+    if rer.unwrap_or(false) && !train.unwrap_or(false) {
+        println!("rer");
+        results = results.filter(crate::schema::agency::dsl::agency_id.ne("IDFM:1046"));
+    } else if train.unwrap_or(false) && !rer.unwrap_or(false) {
+        results = results.filter(crate::schema::agency::dsl::agency_id.eq("IDFM:1046"));
+    }
+    let results = results
         .filter(route_type.eq_any(&filters))
+        .select(stop_route_details::all_columns())
         .load::<models::StopRouteDetails>(connection)
         .expect("Error loading stops");
     Json(results)

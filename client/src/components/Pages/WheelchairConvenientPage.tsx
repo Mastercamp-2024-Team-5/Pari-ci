@@ -19,16 +19,10 @@ import Icon from "../Shared/Icon";
 import accessibility1 from "./../../assets/accessibility1.jpg";
 import accessibility2 from "./../../assets/accessibility2.jpg";
 import accessibility3 from "./../../assets/accessibility3.jpg";
+import { useHomeContext } from './../Home/HomeContext';
 
-type AccessibleScreenProps = {
-  setAccessibleScreen: (value: boolean) => void;
-  setStationAccessibleOnly: (value: boolean) => void;
-};
 
-const AccessibleScreen = ({
-  setAccessibleScreen,
-  setStationAccessibleOnly,
-}: AccessibleScreenProps) => {
+const AccessibleScreen = () => {
   const settings = {
     dots: true,
     infinite: true,
@@ -39,6 +33,7 @@ const AccessibleScreen = ({
     autoplaySpeed: 3000,
   };
   const screenWidth = useScreenWidth();
+  const { setStationAccessibleOnly, setAccessibleScreen } = useHomeContext();
 
   // Set width and height for the images
   const width_picture = "100%";
@@ -98,7 +93,7 @@ const AccessibleScreen = ({
               marginBottom={screenWidth < 700 ? "0" : "5%"}
               p={6}
               onClick={() => (
-                setStationAccessibleOnly(true), setAccessibleScreen(true)
+                setStationAccessibleOnly(true), setAccessibleScreen(false)
               )}
               marginTop={screenWidth < 700 ? "10%" : "20%"}
             >

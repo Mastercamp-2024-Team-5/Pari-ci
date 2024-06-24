@@ -15,6 +15,8 @@ import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
 import { useHomeContext } from './../Home/HomeContext';
 import { TripInfo, Point, Trip } from "../Shared/types";
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const Itineraire = () => {
   const defaultPoint: Point = {
@@ -28,7 +30,13 @@ const Itineraire = () => {
     marche: 0
   };
 
-  const { departure, destination, setItinerairePage, DataPath, errorWhileFetching } = useHomeContext();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const handleNavigate = () => {
+    navigate('/'); // Replace 'someData' with the actual data you want to pass
+  };
+
+  const { setAccessibleScreen,departure, setDeparture, destination, setDestination, DataPath, setDataPath, errorWhileFetching, startAt, setStartAt } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<TripInfo>({ departure: "", points: [defaultPoint], arrival: "" });
   // const [data, setData] = useState<TripData>({});
@@ -37,7 +45,107 @@ const Itineraire = () => {
 
   const [moreDetails, setMoreDetails] = useState(false);
 
+  function getTime(time: number) {
+    // convert 1 to 01 for example
+    return time < 10 ? '0' + time : time;
+  }
+
+  const additionSecondTime = (time: string, addition: number) => {
+    const d = new Date(time);
+    d.setSeconds(d.getSeconds() + addition);
+    const str = getTime(d.getHours()) + ":" + getTime(d.getMinutes()) + ":" + getTime(d.getSeconds());
+    return str;
+  }
+
+  const additionSecondDate = (date: string, addition: number) => {
+    const d= new Date(date);
+    d.setSeconds(d.getSeconds() + addition);
+    return d.toISOString();
+  }
+
+
+  const renderMoreDetails = () => (
+    <div style={{
+      overflowY: 'auto',
+      maxHeight: screenWidth < 700 ? 'calc(100vh - 450px)' : '100%',
+      maxWidth: '100%',
+      borderRadius: '10px',
+      padding: '5px',
+      marginTop: '10px',
+    }}>
+      {
+        !isEmpty(data) && data.points.map((obj: Point, index: number) => (
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0} marche={obj.marche}/>
+        ))
+      }
+      {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
+        Arrivé à {getTimeFromDate(data.arrival)}
+      </Text>}
+    </div>
+  );
+
+  const isEmpty = (obj: TripInfo) => {
+    return obj.departure === '' && obj.points.length === 1 && obj.points[0].line === '' && obj.arrival === '';
+  };
+
+  function getTimeFromDate(date: string) {
+    const d = new Date(date);
+    return getTime(d.getHours()) + ":" + getTime(d.getMinutes()) + ":" + getTime(d.getSeconds());
+  }
+
+  function convertDateTime(input: string) {
+    // Create a new Date object from the input string
+    const date = new Date(input);
+  
+    // Get the year, month, day, hours, and minutes
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  
+    // Format the output string
+    const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+  
+    return formattedDateTime;
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      
+      if (DataPath[1][0] != undefined && DataPath.length > 0) {
+        
+        const points = await getInfosFromData(DataPath[1]);
+        let dt=0;
+        dt += points[points.length -1].travel_time + points[points.length -1].depart;
+        console.log("dt : ", dt)
+        setData({
+          departure: additionSecondDate(DataPath[0], -dt),
+          points: points,
+          arrival: DataPath[0]
+        });
+        if (id) {
+          console.log(points[0].from)
+          setDeparture(points[0].from);
+          setDestination(points[data.points.length - 1].to);
+          setStartAt(convertDateTime(additionSecondDate(DataPath[0], -dt)));
+          setAccessibleScreen(false);
+        }
+      }
+      
+    };
+
+    fetchData();
+    
+  }, [DataPath]);
+
+  useEffect(() => {
+    if (id)
+      setDataPath(["2004-11-11 09:40:00.0",[{"from_stop_id":"IDFM:22400","to_stop_id":"IDFM:22401","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22401","to_stop_id":"IDFM:463323","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463323","to_stop_id":"IDFM:463107","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463107","to_stop_id":"IDFM:22385","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22385","to_stop_id":"IDFM:22370","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22370","to_stop_id":"IDFM:463026","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463026","to_stop_id":"IDFM:463216","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463216","to_stop_id":"IDFM:22391","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22391","to_stop_id":"IDFM:22366","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22366","to_stop_id":"IDFM:22386","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:22386","to_stop_id":"IDFM:463265","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463265","to_stop_id":"IDFM:463231","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":60,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"},{"from_stop_id":"IDFM:463231","to_stop_id":"IDFM:22364","route_id":"IDFM:C01377","route_short_name":"7","wait_time":0,"travel_time":120,"trip_id":"IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45"}]]);
+  }, [id]);
+
   const getInfosFromData = async (pointList: Trip[]) => {
+    console.log(pointList);
     const lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];
@@ -126,61 +234,6 @@ const Itineraire = () => {
     return lst;
   };
 
-  function getTime(time: number) {
-    // convert 1 to 01 for example
-    return time < 10 ? '0' + time : time;
-  }
-
-  const additionSecondTime = (time: string, addition: number) => {
-    const d = new Date(time);
-    d.setSeconds(d.getSeconds() + addition);
-    const str = getTime(d.getHours()) + ":" + getTime(d.getMinutes()) + ":" + getTime(d.getSeconds());
-    return str;
-  }
-
-  const renderMoreDetails = () => (
-    <div style={{
-      overflowY: 'auto',
-      maxHeight: screenWidth < 700 ? 'calc(100vh - 450px)' : '100%',
-      maxWidth: '100%',
-      borderRadius: '10px',
-      padding: '5px',
-      marginTop: '10px',
-    }}>
-      {
-        !isEmpty(data) && data.points.map((obj: Point, index: number) => (
-          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0} marche={obj.marche}/>
-        ))
-      }
-      {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
-        Arrivé à {data.arrival}
-      </Text>}
-    </div>
-  );
-
-  const isEmpty = (obj: TripInfo) => {
-    return obj.departure === '' && obj.points.length === 1 && obj.points[0].line === '' && obj.arrival === '';
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (DataPath[1][0] != undefined && DataPath.length > 0) {
-        const points = await getInfosFromData(DataPath[1]);
-        let dt = 0;
-        for (let i = 0; i < points.length; i++) {
-          dt += points[i].travel_time;
-        }
-        setData({
-          departure: DataPath[0],
-          points: points,
-          arrival: additionSecondTime(DataPath[0], dt)
-        });
-      }
-    };
-
-    fetchData();
-  }, [DataPath]);
-
   return (
     <Flex bg="#F6FBF9" flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
       <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
@@ -241,7 +294,7 @@ const Itineraire = () => {
                         fontSize="2xl"
                         marginBottom="2%"
                       >
-                        Arrivé à {data.arrival}
+                        Arrivé à {getTimeFromDate(data.arrival)}
                       </Heading>
                       <Stack spacing={0}>
                         <StopDetail
@@ -279,7 +332,7 @@ const Itineraire = () => {
             <Button
               bg="#C78484"
               color="white"
-              onClick={() => setItinerairePage(false)}
+              onClick={() => handleNavigate()}
               padding={7}
               fontSize={screenWidth < 700 ? "3xl" : "2xl"}
               whiteSpace="wrap"
@@ -290,7 +343,7 @@ const Itineraire = () => {
               marginTop={"5%"}
               marginBottom={screenWidth <450 ? "5%" : screenWidth < 700 ? "0%" : "5%"}
             >
-              Annuler
+              Retour
             </Button>
               {
                 errorWhileFetching && (

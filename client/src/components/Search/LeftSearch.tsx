@@ -10,6 +10,7 @@ import {
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from './../Home/HomeContext';
 import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   fetchDepartureResults: (textQuery: string) => void;
@@ -29,13 +30,18 @@ const LeftSearch = ({
   setIsDepartureFocus,
   setIsDestinationFocus,
 }: Props) => {
-  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setItinerairePage, setDataPath, setErrorWhileFetching } = useHomeContext();
+  const { departure, setDeparture, destination, setDestination, startAt, setStartAt, endAt, setEndAt, setDataPath, setErrorWhileFetching } = useHomeContext();
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
   // Refs to handle the focus
   const departureBlurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const destinationBlurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const navigate = useNavigate();
+  const handleNavigate = () => {
+    navigate('/path/'); // Replace 'someData' with the actual data you want to pass
+  };
 
   const handleClickItineraire = async () => {
     try {
@@ -52,7 +58,7 @@ const LeftSearch = ({
       if (!destination_parent) {
         throw new Error("Destination not found");
       }
-      setItinerairePage(true);
+      handleNavigate();
       setDataPath(["", []]);
       setErrorWhileFetching(false);
       if (endAt === "") {

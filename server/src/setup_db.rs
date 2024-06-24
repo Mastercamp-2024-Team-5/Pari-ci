@@ -307,6 +307,8 @@ fn main() {
         || task == Task::AddTrips
         || task == Task::AddStops
         || task == Task::AddStopTimes
+        || task == Task::AddRoutesTrace
+        || task == Task::CorrectStopLocationWithTrace
     {
         // refresh the materialized view
         refresh_materialized_view().unwrap();

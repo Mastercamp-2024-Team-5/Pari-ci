@@ -55,7 +55,7 @@ export function AutocompleteResults({
                   display="flex"
                   alignItems="center"
                   variant="outline"
-                  onClick={() => handleSelect(hit)}
+                  onMouseDown={() => handleSelect(hit)}
               >
                 {hit.route_short_names.split(',').map((route, index) => (
                     <Icon key={route.trim()} item={route.trim()} size="24px" style={{ marginRight: index !== hit.route_short_names.split(',').length - 1 ? '-4px' : '8px' }} />

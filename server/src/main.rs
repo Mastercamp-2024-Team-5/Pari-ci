@@ -80,9 +80,6 @@ fn rocket() -> _ {
                 views::services::list_average_stop_times
             ],
         )
-        .mount(
-            "/",
-            routes![views::services::get_path, views::services::get_fast_path],
-        )
+        .mount("/", routes![views::services::get_path])
         .register("/", catchers![not_found])
 }

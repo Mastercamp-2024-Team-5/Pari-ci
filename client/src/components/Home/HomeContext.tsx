@@ -18,6 +18,8 @@ interface HomeContextType {
   setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
   activePage: ActivePage;
   setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
+  errorWhileFetching: boolean;
+  setErrorWhileFetching: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -35,6 +37,8 @@ const defaultContext: HomeContextType = {
   setDataPath: () => {},
   activePage: ActivePage.Map,
   setActivePage: () => {},
+  errorWhileFetching: false,
+  setErrorWhileFetching: () => {},
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -55,6 +59,8 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [ItinerairePage, setItinerairePage] = useState(false);
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
+  const [errorWhileFetching, setErrorWhileFetching] = useState(false);
+
 
   const value: HomeContextType = {
     departure,
@@ -71,6 +77,8 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setDataPath,
     activePage,
     setActivePage,
+    errorWhileFetching,
+    setErrorWhileFetching,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

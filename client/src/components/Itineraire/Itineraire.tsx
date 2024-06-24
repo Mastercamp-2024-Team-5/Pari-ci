@@ -17,9 +17,21 @@ import { useHomeContext } from './../Home/HomeContext';
 import { TripInfo, Point, Trip } from "../Shared/types";
 
 const Itineraire = () => {
-  const { departure, destination, setItinerairePage, DataPath } = useHomeContext();
+  const defaultPoint: Point = {
+    line: "",
+    from: "",
+    to: "",
+    depart: 0,
+    travel_time: 0,
+    direction: "",
+    nbr: 0,
+    marche: 0
+  };
+
+  const { departure, destination, setItinerairePage, DataPath, errorWhileFetching } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
-  const [data, setData] = useState<TripInfo>({ departure: "", points: [], arrival: "" });
+  const [data, setData] = useState<TripInfo>({ departure: "", points: [defaultPoint], arrival: "" });
+  // const [data, setData] = useState<TripData>({});
   const screenWidth = useScreenWidth();
     //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
@@ -29,10 +41,10 @@ const Itineraire = () => {
     const lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];
-    let last = pointList[0];
     let cpt = 0;
     let travel_time = 0;
     let depart = 0;
+    let marche=0;
     const hash: { [key: string]: string } = {};
   
     for (let i = 0; i < pointList.length; i++) {
@@ -40,38 +52,41 @@ const Itineraire = () => {
       travel_time += pointList[i].wait_time;
       if (pointList[i].route_short_name) {
         if (pointList[i].route_short_name === lastline) {
-          last = pointList[i];
           cpt += 1;
         } else {
           lst.push({
             line: lastline,
             from: first.from_stop_id,
-            direction: last.trip_id,
-            to: last.from_stop_id,
-            nbr: cpt - 2,
-            travel_time: travel_time,
-            depart: depart
+            direction: first.trip_id,
+            to: pointList[i-1].to_stop_id,
+            nbr: cpt - 1,
+            travel_time: travel_time - pointList[i-1].travel_time,
+            depart: depart,
+            marche: marche
           });
           lastline = pointList[i].route_short_name;
-          first = last;
-          last = pointList[i];
-          cpt = 2;
+          first = pointList[i];
+          cpt = 1;
           depart = travel_time + depart;
           travel_time = 0;
+          marche = Math.round(pointList[i-1].travel_time / 60);
         }
       }
+      
     }
 
     lst.push({
       line: lastline,
       from: first.from_stop_id,
-      direction: last.trip_id,
-      to: pointList[pointList.length - 1].from_stop_id,
-      nbr: cpt - 2,
-      travel_time: travel_time,
-      depart: depart
+      direction: pointList[pointList.length - 1].trip_id,
+      to: pointList[pointList.length - 1].to_stop_id,
+      nbr: cpt-1,
+      travel_time: travel_time+pointList[pointList.length - 1].travel_time + pointList[pointList.length - 1].wait_time,
+      depart: depart,
+      marche:marche
     });
   
+
     const fetchStopName = async (stopId: string) => {
       if (hash[stopId]) {
         return hash[stopId];
@@ -93,8 +108,8 @@ const Itineraire = () => {
       }
       try {
         const response = await fetch(`http://localhost:8000/trip/${tripIp}`);
-        const data = await response.json();
-        hash[tripIp] = data[0].headsign;
+        const dataTrip = await response.json();
+        hash[tripIp] = dataTrip[0].headsign;
         return hash[tripIp];
       } catch (error) {
         console.error(error);
@@ -111,10 +126,15 @@ const Itineraire = () => {
     return lst;
   };
 
+  function getTime(time: number) {
+    // convert 1 to 01 for example
+    return time < 10 ? '0' + time : time;
+  }
+
   const additionSecondTime = (time: string, addition: number) => {
     const d = new Date(time);
     d.setSeconds(d.getSeconds() + addition);
-    const str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+    const str = getTime(d.getHours()) + ":" + getTime(d.getMinutes()) + ":" + getTime(d.getSeconds());
     return str;
   }
 
@@ -129,7 +149,7 @@ const Itineraire = () => {
     }}>
       {
         !isEmpty(data) && data.points.map((obj: Point, index: number) => (
-          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0}/>
+          <MoreDetails key={index} ligne={obj.line} arret1={obj.from} arret2={obj.to} depart={additionSecondTime(data.departure, obj.depart)} arrive={additionSecondTime(data.departure, obj.depart+obj.travel_time)} direction={obj.direction} nbrArrets={obj.nbr} textColor={"black"} correspondance={index>0} marche={obj.marche}/>
         ))
       }
       {!isEmpty(data) && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="5%" marginLeft={"4%"}>
@@ -138,13 +158,13 @@ const Itineraire = () => {
     </div>
   );
 
-  const isEmpty = (obj: object) => {
-    return Object.keys(obj).length === 0;
+  const isEmpty = (obj: TripInfo) => {
+    return obj.departure === '' && obj.points.length === 1 && obj.points[0].line === '' && obj.arrival === '';
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      if (DataPath.length > 0) {
+      if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
         let dt = 0;
         for (let i = 0; i < points.length; i++) {
@@ -162,8 +182,8 @@ const Itineraire = () => {
   }, [DataPath]);
 
   return (
-    <Flex bg="#F6FBF9"flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100vh" overflow="hidden">
-      <Box w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
+    <Flex bg="#F6FBF9" flex={1} direction={screenWidth < 700 ? "column" : "row"} w="100%" h="100%" overflow="hidden">
+      <Box bg="#F6FBF9" w={screenWidth < 700 ? "100%" : ""} minWidth={screenWidth<700?"0":"400px"} flexBasis={screenWidth<700?"0":"40%"} h="100%" p={4}>
         <Center>
           <Stack spacing={0} w="100%">
             <Stack align="center" margin={0} padding={0}>
@@ -181,15 +201,14 @@ const Itineraire = () => {
               <Stack marginX={"0%"} maxW={"100%"}>
                 <Stop
                   stop={departure}
-                  line={"7"}
                   textColor={"black"}
                 />
                 <Stop
                   stop={destination}
-                  line={"7"}
                   textColor={"black"}
                 />
               </Stack>
+
               {
                 screenWidth >= 700 && !isEmpty(data) && (
                   <>
@@ -273,8 +292,22 @@ const Itineraire = () => {
             >
               Annuler
             </Button>
+              {
+                errorWhileFetching && (
+                  <Text
+                    fontSize={"lg"}
+                    color={"red"}
+                    alignSelf={"center"}
+                    _hover={{ cursor: "pointer" }}
+                    textAlign={"center"}
+                    margin={'5%'}
+                  >
+                    An error occured while computing the path, please be sure that the subway stations are oppended
+                  </Text>
+                )
+              }
             {
-              screenWidth < 700 && !showMapMobile && (
+              screenWidth < 700 && !errorWhileFetching && !showMapMobile && (
                 <>
                   {renderMoreDetails()}
                   <Button

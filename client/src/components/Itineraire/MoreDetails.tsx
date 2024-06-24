@@ -7,7 +7,7 @@ import StopDetail from "./StopDetail";
 import Icon from "../Shared/Icon";
 
 const MoreDetails = (
-    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance}:
+    { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance, marche}:
     { 
         ligne: string;
         arret1: string;
@@ -18,13 +18,28 @@ const MoreDetails = (
         nbrArrets: number;
         textColor: string;
         correspondance: boolean;
+        marche: number;
     }
 
 ) => {
+  function getTimeDifference(depart: string, arrive: string) {
+    // Helper function to convert HH:mm:ss to total seconds
+    function timeStringToSeconds(time: string) {
+      const [hours, minutes, seconds] = time.split(':').map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+  
+    const departSeconds = timeStringToSeconds(depart);
+    const arriveSeconds = timeStringToSeconds(arrive);
+    const diffSeconds = Math.abs(arriveSeconds - departSeconds);
+    const minutes = Math.floor(diffSeconds / 60);
+  
+    return minutes;
+  }
   return (
     <Box>
       <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="4" marginLeft={"4%"}>
-        {correspondance?"Correspondance":"Prenez la ligne"} {ligne} à {arret1}
+        {correspondance?"Correspondance":"Prenez la ligne"} {ligne} à {arret1}{correspondance?", "+marche+" min de marche":""}
       </Text>
       <Flex 
         flex={1} 
@@ -46,12 +61,17 @@ const MoreDetails = (
           direction={direction}
           arrive={false}
         />
-        <Box w="100%" display="flex" alignItems="center" justifyContent="flex-start" marginLeft={"7px"}>
-          <Icon item="barre" size="30px" color={ligne} />
-          <Text marginLeft="6%" fontSize="md" fontWeight="500">
-            {nbrArrets} arrêt{nbrArrets>1?"s":""}
+        <Flex w="100%" direction={"row"} alignItems="center" justifyContent="space-between" marginLeft={"7px"}>
+          <Flex direction={"row"} alignItems="center" justifyContent={"start"}>
+            <Icon item="barre" size="30px" color={ligne} />
+            <Text marginLeft="3.3vw" fontSize="md" fontWeight="500" whiteSpace={"nowrap"}>
+              {nbrArrets} arrêt{nbrArrets>1?"s":""}
+            </Text>
+          </Flex>
+          <Text marginRight="6%" fontSize="md" fontWeight="500">
+              {getTimeDifference(depart, arrive)} min
           </Text>
-        </Box>
+        </Flex>
         <StopDetail 
           stop={arret2}
           line={ligne}

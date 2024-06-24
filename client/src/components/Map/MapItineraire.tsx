@@ -15,7 +15,6 @@ const MapItineraire: React.FC = React.memo(() => {
 
   useEffect(() => {  
     async function fetchItineraire() {
-      console.log("DataPath");
       const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
       const stops: Stop[] = await stops_response.json();
 
@@ -39,7 +38,7 @@ const MapItineraire: React.FC = React.memo(() => {
       };
 
       for (const stop of DataPath[1]) {
-        const stopData = stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
+        const stopData = stops.find((s) => s.stop_id === stop.from_stop_id && s.route_id === stop.route_id) || stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
         itineraire_stops.push(stopData);
         const routeColor = stop.route_id ? `#${routes.find((r: Route) => r.route_id === stop.route_id)?.color}` : 'grey';
         stopData.color = routeColor;
@@ -73,7 +72,7 @@ const MapItineraire: React.FC = React.memo(() => {
       setGeojson(geojson);
     }
 
-    if (DataPath.length != undefined) {
+    if (DataPath[1][0] != undefined) {
       fetchItineraire();
     }
   }, [DataPath]);

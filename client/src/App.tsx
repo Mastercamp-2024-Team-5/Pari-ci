@@ -1,14 +1,10 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import { useState } from "react";
-import AccessibleScreen from "./components/Pages/WheelchairConvenientPage";
-import Home from "./components/Home/Home";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
+import Itineraire from "./components/Itineraire/Itineraire";
+import {  HomeProvider } from './components/Home/HomeContext';
+import HomeOrAccessible from "./components/Pages/HomeOrAccessible";
 function App() {
-  const [accessibleScreen, setAccessibleScreen] = useState<boolean>(false);
-  const [stationAccessibleOnly, setStationAccessibleOnly] = useState<boolean>(false);
-
-  console.log(stationAccessibleOnly);
-
   return (
     <ChakraProvider>
       <Container
@@ -21,14 +17,15 @@ function App() {
         height="100vh"
         bg="gray.100"
       >
-        {accessibleScreen ? (
-          <Home />
-        ) : (
-          <AccessibleScreen
-            setAccessibleScreen={setAccessibleScreen}
-            setStationAccessibleOnly={setStationAccessibleOnly}
-          />
-        )}
+        <HomeProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<HomeOrAccessible />} />
+              <Route path="/path/:id?" element={<Itineraire />} />
+              <Route path="*" element={<HomeOrAccessible />} />
+            </Routes>
+          </Router>
+        </HomeProvider>
       </Container>
     </ChakraProvider>
   );

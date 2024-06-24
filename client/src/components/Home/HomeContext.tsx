@@ -12,14 +12,16 @@ interface HomeContextType {
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  ItinerairePage: boolean;
-  setItinerairePage: React.Dispatch<React.SetStateAction<boolean>>;
   DataPath: TripData;
   setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
   activePage: ActivePage;
   setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
   errorWhileFetching: boolean;
   setErrorWhileFetching: React.Dispatch<React.SetStateAction<boolean>>;
+  accessibleScreen: boolean;
+  setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>>;
+  stationAccessibleOnly: boolean;
+  setStationAccessibleOnly: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -31,14 +33,16 @@ const defaultContext: HomeContextType = {
   setStartAt: () => {},
   endAt: '',
   setEndAt: () => {},
-  ItinerairePage: false,
-  setItinerairePage: () => {},
   DataPath: ["", []],
   setDataPath: () => {},
   activePage: ActivePage.Map,
   setActivePage: () => {},
   errorWhileFetching: false,
   setErrorWhileFetching: () => {},
+  accessibleScreen: false,
+  setAccessibleScreen: () => {},
+  stationAccessibleOnly: false,
+  setStationAccessibleOnly: () => {},
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -56,11 +60,11 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [destination, setDestination] = useState('');
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
-  const [ItinerairePage, setItinerairePage] = useState(false);
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
   const [errorWhileFetching, setErrorWhileFetching] = useState(false);
-
+  const [accessibleScreen, setAccessibleScreen] = useState(true);
+  const [stationAccessibleOnly, setStationAccessibleOnly] = useState(false);
 
   const value: HomeContextType = {
     departure,
@@ -71,14 +75,16 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    ItinerairePage: ItinerairePage,
-    setItinerairePage: setItinerairePage,
     DataPath,
     setDataPath,
     activePage,
     setActivePage,
     errorWhileFetching,
     setErrorWhileFetching,
+    accessibleScreen,
+    setAccessibleScreen,
+    stationAccessibleOnly,
+    setStationAccessibleOnly,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

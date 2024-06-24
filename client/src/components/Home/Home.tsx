@@ -10,8 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import useScreenWidth from '../Shared/useScreenWidth';
-import Itineraire from './../Itineraire/Itineraire';
-import { HomeProvider, useHomeContext } from './HomeContext';
+import {  useHomeContext } from './HomeContext';
 import MapScreen from "../Map/MapScreen";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
@@ -19,8 +18,7 @@ import { ActivePage } from "../Shared/enum.tsx";
 import { Data } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 
-const HomeContent: React.FC = () => {
-  const { ItinerairePage } = useHomeContext();
+const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
   const [isDepartureFocus, setIsDepartureFocus] = useState<boolean>(false);
   const [isDestinationFocus, setIsDestinationFocus] = useState<boolean>(false);
@@ -74,7 +72,7 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      {!ItinerairePage && (
+      {
         screenWidth < 700 ? (
           <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
             <Box position="relative" minHeight="100vh">
@@ -152,16 +150,9 @@ const HomeContent: React.FC = () => {
             </Box>
           </Flex>
         )
-      )}
-      {ItinerairePage && <Itineraire />}
+      }
     </>
   );
 };
-
-const Home: React.FC = () => (
-  <HomeProvider>
-    <HomeContent />
-  </HomeProvider>
-);
 
 export default Home;

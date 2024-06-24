@@ -608,14 +608,13 @@ pub fn real_time_path_reverse(
     Ok((cost, new_path))
 }
 
-#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>&<_handicap>")]
+#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>")]
 pub fn get_path(
     start_stop: &str,
     end_stop: &str,
     date: &str,
     time: &str,
     reverse: Option<bool>,
-    _handicap: Option<bool>,
     g: &State<Graph>,
 ) -> Result<Json<(PrimitiveDateTime, Vec<PathNode>)>, NotFound<String>> {
     let format_date = format_description!("[year]-[month]-[day]");

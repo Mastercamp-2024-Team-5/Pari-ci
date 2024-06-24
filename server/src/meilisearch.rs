@@ -35,7 +35,7 @@ pub fn get_stopentries() -> Vec<StopEntry> {
             ),
         )
         .filter(schema::stops::location_type.eq(0))
-        .filter(schema::agency::agency_id.eq_any(vec!["IDFM:71", "IDFM:Operator_100", "IDFM:1046"]))
+        .filter(schema::agency::agency_id.ne("IDFM:93"))
         .filter(schema::routes::route_type.eq_any(vec![0, 1, 2]))
         .select((
             parent_station,

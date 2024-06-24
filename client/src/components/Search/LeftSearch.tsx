@@ -12,11 +12,6 @@ type Props = {
   setIsDestinationFocus: (value: boolean) => void;
 };
 
-type Stop = {
-  stop_name: string;
-  parent_station: string;
-};
-
 const LeftSearch = ({
   fetchDepartureResults,
   fetchDestinationResults,
@@ -61,7 +56,7 @@ const LeftSearch = ({
       setErrorWhileFetching(false);
       if (endAt === "") {
         fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
+          `http://127.0.0.1:8000/path?start_stop=${departure}&end_stop=${destination}&date=${
             startAt.split("T")[0]
           }&time=${startAt.split("T")[1].split(":")[0]}:${
             startAt.split("T")[1].split(":")[1]
@@ -78,7 +73,7 @@ const LeftSearch = ({
       }
       if (startAt === "") {
         fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
+          `http://127.0.0.1:8000/path?start_stop=${departure}&end_stop=${destination}&date=${
             endAt.split("T")[0]
           }&time=${endAt.split("T")[1].split(":")[0]}:${
             endAt.split("T")[1].split(":")[1]

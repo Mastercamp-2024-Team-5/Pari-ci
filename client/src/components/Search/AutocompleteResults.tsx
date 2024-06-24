@@ -24,10 +24,10 @@ export function AutocompleteResults({
 
   const handleSelect = (hit: Hit) => {
     if (isDepartureFocus) {
-      setDeparture(hit.stop_id);
+      setDeparture(hit.stop_name);
       setIsDepartureFocus(false);
     } else {
-      setDestination(hit.stop_id);
+      setDestination(hit.stop_name);
       setIsDestinationFocus(false);
     }
   };

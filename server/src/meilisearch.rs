@@ -54,7 +54,10 @@ pub fn get_stopentries() -> Vec<StopEntry> {
     let mut output_stops: Vec<StopEntry> = Vec::new();
     for stop in result {
         // id is a base64 encoding of the stop_id
-        let id = general_purpose::URL_SAFE_NO_PAD.encode(stop.0.as_bytes());
+        let mut id = general_purpose::URL_SAFE_NO_PAD.encode(stop.0.as_bytes());
+        id += general_purpose::URL_SAFE_NO_PAD
+            .encode((stop.1).as_bytes())
+            .as_str();
         let stop_result = StopEntry {
             id,
             stop_id: stop.0.clone(),

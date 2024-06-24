@@ -33,6 +33,7 @@ const Itineraire = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const handleNavigate = () => {
+    setDataPath(["", []]);
     navigate('/'); // Replace 'someData' with the actual data you want to pass
   };
 

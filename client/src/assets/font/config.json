@@ -694,7 +694,7 @@
     },
     {
       "uid": "2820a137e5eed69d4f8dbe80c9e96373",
-      "css": "T1",
+      "css": "t1",
       "code": 59441,
       "src": "custom_icons",
       "selected": true,
@@ -703,7 +703,7 @@
         "width": 1000
       },
       "search": [
-        "T1"
+        "t1"
       ]
     },
     {

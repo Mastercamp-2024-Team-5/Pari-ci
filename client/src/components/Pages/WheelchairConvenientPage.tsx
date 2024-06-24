@@ -113,7 +113,7 @@ const AccessibleScreen = () => {
               borderRadius="10"
               p={6}
               onClick={() => (
-                setStationAccessibleOnly(false), setAccessibleScreen(true)
+                setStationAccessibleOnly(false), setAccessibleScreen(false)
               )}
             >
               Non

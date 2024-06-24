@@ -119,7 +119,6 @@ const Itineraire = () => {
         const points = await getInfosFromData(DataPath[1]);
         let dt=0;
         dt += points[points.length -1].travel_time + points[points.length -1].depart;
-        console.log("dt : ", dt)
         setData({
           departure: additionSecondDate(DataPath[0], -dt),
           points: points,
@@ -146,7 +145,6 @@ const Itineraire = () => {
   }, [id]);
 
   const getInfosFromData = async (pointList: Trip[]) => {
-    console.log(pointList);
     const lst = [];
     let lastline = pointList[0].route_short_name;
     let first = pointList[0];

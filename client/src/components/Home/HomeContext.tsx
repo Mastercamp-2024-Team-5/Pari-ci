@@ -1,7 +1,7 @@
 // HomeContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import {ActivePage} from "../Shared/enum.tsx";
-import { TripData } from '../Shared/types';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { ActivePage } from "../Shared/enum.tsx";
+import { TripData } from "../Shared/types";
 
 interface HomeContextType {
   departure: string;
@@ -25,13 +25,13 @@ interface HomeContextType {
 }
 
 const defaultContext: HomeContextType = {
-  departure: '',
+  departure: "",
   setDeparture: () => {},
-  destination: '',
+  destination: "",
   setDestination: () => {},
-  startAt: '',
+  startAt: "",
   setStartAt: () => {},
-  endAt: '',
+  endAt: "",
   setEndAt: () => {},
   DataPath: ["", []],
   setDataPath: () => {},
@@ -56,10 +56,10 @@ interface HomeProviderProps {
 }
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
-  const [departure, setDeparture] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startAt, setStartAt] = useState('');
-  const [endAt, setEndAt] = useState('');
+  const [departure, setDeparture] = useState("");
+  const [destination, setDestination] = useState("");
+  const [startAt, setStartAt] = useState("");
+  const [endAt, setEndAt] = useState("");
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
   const [errorWhileFetching, setErrorWhileFetching] = useState(false);

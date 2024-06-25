@@ -1,4 +1,4 @@
-# Use official Rust image as the base image
+# Rust base image
 FROM rust:latest AS builder
 
 # Install nightly toolchain
@@ -7,10 +7,10 @@ RUN rustup toolchain install nightly
 # Set the nightly toolchain as default
 RUN rustup default nightly
 
-# Set the working directory
+# working directory
 WORKDIR /usr/src/app
 
-# Copy the source code and configuration files
+# Copy the code
 COPY . .
 
 # Build the application

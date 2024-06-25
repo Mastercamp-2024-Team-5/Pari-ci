@@ -27,3 +27,4 @@ data.ms
 meilisearch
 src/data/*
 dumps
+meili_data

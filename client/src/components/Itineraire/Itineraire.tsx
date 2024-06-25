@@ -13,7 +13,6 @@ import MapScreen from "../Map/MapScreen";
 import StopDetail from "./StopDetail";
 import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
-import { useHomeContext } from "./../Home/HomeContext";
 import { TripInfo, Point, Trip } from "../Shared/types";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -37,26 +36,13 @@ const Itineraire = () => {
     navigate("/"); // Replace 'someData' with the actual data you want to pass
   };
 
-  const {
-    setAccessibleScreen,
-    departure,
-    setDeparture,
-    destination,
-    setDestination,
-    DataPath,
-    setDataPath,
-    errorWhileFetching,
-    setStartAt,
-  } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<TripInfo>({
     departure: "",
     points: [defaultPoint],
     arrival: "",
   });
-  // const [data, setData] = useState<TripData>({});
   const screenWidth = useScreenWidth();
-  //http://localhost:8000/path?start_stop=IDFM:70143&end_stop=IDFM:71264&date=2024-06-14&time=08:00:00
 
   const [moreDetails, setMoreDetails] = useState(false);
 
@@ -168,8 +154,8 @@ const Itineraire = () => {
     const fetchData = async () => {
       if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
-        let dt=0;
-        dt += points[points.length -1].travel_time + points[points.length -1].depart;
+        let dt = 0;
+        dt += points[points.length - 1].travel_time + points[points.length - 1].depart;
         setData({
           departure: additionSecondDate(DataPath[0], -dt),
           points: points,
@@ -358,7 +344,7 @@ const Itineraire = () => {
       direction: pointList[pointList.length - 1].trip_id,
       to: pointList[pointList.length - 1].to_stop_id,
       nbr: cpt - 1,
-      travel_time:travel_time,
+      travel_time: travel_time,
       depart: depart,
       marche: marche,
     });
@@ -429,10 +415,10 @@ const Itineraire = () => {
                   screenWidth < 450
                     ? "5%"
                     : screenWidth < 700
-                    ? "3%"
-                    : screenWidth < 1300
-                    ? "10%"
-                    : "15%"
+                      ? "3%"
+                      : screenWidth < 1300
+                        ? "10%"
+                        : "15%"
                 }
                 fontSize={screenWidth < 700 ? "5xl" : "4xl"}
                 marginBottom={
@@ -500,7 +486,7 @@ const Itineraire = () => {
                         depart={additionSecondTime(
                           data.departure,
                           data.points[data.points.length - 1].depart +
-                            data.points[data.points.length - 1].travel_time
+                          data.points[data.points.length - 1].travel_time
                         )}
                         arrive={true}
                         direction={

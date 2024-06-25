@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ActivePage } from "../Shared/enum.tsx";
 import { InputStop, TripData } from "../Shared/types";
-import { getCookie, setCookie } from "../../manageCookies.tsx";
 
 interface HomeContextType {
   departure: InputStop;
@@ -17,14 +16,6 @@ interface HomeContextType {
   setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
   activePage: ActivePage;
   setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
-  errorWhileFetching: boolean;
-  setErrorWhileFetching: React.Dispatch<React.SetStateAction<boolean>>;
-  accessibleScreen: boolean;
-  setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>>;
-  stationAccessibleOnly: boolean;
-  setStationAccessibleOnly: React.Dispatch<React.SetStateAction<boolean>>;
-  parentId: string;
-  setParentId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -40,18 +31,11 @@ const defaultContext: HomeContextType = {
   setDataPath: () => { },
   activePage: ActivePage.Map,
   setActivePage: () => { },
-  errorWhileFetching: false,
-  setErrorWhileFetching: () => { },
-  accessibleScreen: false,
-  setAccessibleScreen: () => { },
-  stationAccessibleOnly: false,
-  setStationAccessibleOnly: () => { },
-  parentId: "",
-  setParentId: () => { },
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHomeContext = () => {
   return useContext(HomeContext);
 };
@@ -61,12 +45,6 @@ interface HomeProviderProps {
 }
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
-  if (getCookie("stationAccessibleOnly") === null) {
-    setCookie("stationAccessibleOnly", false);
-  }
-  if (getCookie("accessibleScreen") === null) {
-    setCookie("accessibleScreen", true);
-  }
 
   const [departure, setDeparture] = useState<InputStop>({ id: "", name: "" });
   const [destination, setDestination] = useState<InputStop>({ id: "", name: "" });
@@ -74,28 +52,6 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [endAt, setEndAt] = useState("");
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
-  const [errorWhileFetching, setErrorWhileFetching] = useState(false);
-  const [accessibleScreen, setAccessibleScreenState] = useState(
-    getCookie("accessibleScreen")
-  );
-  const [stationAccessibleOnly, setStationAccessibleOnlyState] = useState(
-    getCookie("stationAccessibleOnly")
-  );
-  const [parentId, setParentId] = useState("");
-
-  const setStationAccessibleOnly: React.Dispatch<
-    React.SetStateAction<boolean>
-  > = (value) => {
-    setCookie("stationAccessibleOnly", value);
-    setStationAccessibleOnlyState(value);
-  };
-
-  const setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>> = (
-    value
-  ) => {
-    setCookie("accessibleScreen", value);
-    setAccessibleScreenState(value);
-  };
 
   const value: HomeContextType = {
     departure,
@@ -110,14 +66,6 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setDataPath,
     activePage,
     setActivePage,
-    errorWhileFetching,
-    setErrorWhileFetching,
-    accessibleScreen,
-    setAccessibleScreen,
-    stationAccessibleOnly,
-    setStationAccessibleOnly,
-    parentId,
-    setParentId,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

@@ -2,7 +2,6 @@ import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";
 import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
-import { useNavigate } from "react-router-dom";
 import { ActivePage } from "../Shared/enum.tsx";
 import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState } from "react";
@@ -24,7 +23,6 @@ const LeftSearch = ({
     endAt,
     setEndAt,
     setDataPath,
-    setErrorWhileFetching,
     setActivePage,
   } = useHomeContext();
 
@@ -42,20 +40,12 @@ const LeftSearch = ({
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
-  const navigate = useNavigate();
-
-  // const handleNavigate = () => {
-  //   navigate("/path/"); // Replace 'someData' with the actual data you want to pass
-  // };
-
   const handleClickItineraire = async () => {
     try {
       if (startAt === "" && endAt === "") {
         throw new Error("Please fill in the date and time"); //TODO: Make it more user-friendly
       }
-      // handleNavigate();
       setDataPath(["", []]);
-      setErrorWhileFetching(false);
       const date_string = startAt === "" ? endAt : startAt;
       // parse date
       const date = new Date(date_string);
@@ -66,10 +56,12 @@ const LeftSearch = ({
         .then((response) => response.json())
         .then((data) => {
           setDataPath(data);
+          setActivePage(ActivePage.Itineraire);
         })
         .catch((error) => {
-          setErrorWhileFetching(true);
-          console.error(error);
+          if (error.status === 404) {
+            throw new Error("An error occurred while fetching the data");
+          }
         });
     } catch (error) {
       alert(error);
@@ -91,6 +83,7 @@ const LeftSearch = ({
               setDepartureInput(e.target.value)
             }}
             onFocus={(e) => {
+              console.log("onFocus", ActivePage.MeilisearchResults);
               setActivePage(ActivePage.MeilisearchResults)
               setSelectedSearch(ActiveSearchInput.Departure)
               e.target.select()
@@ -176,6 +169,7 @@ const LeftSearch = ({
                 onFocus={(e) => {
                   // set default value to current date and time
                   if (startAt === "") {
+                    setEndAt("");
                     setStartAt(new Date().toISOString().slice(0, 16));
                   } else {
                     e.target.select();
@@ -211,6 +205,7 @@ const LeftSearch = ({
                 onFocus={(e) => {
                   // set default value to current date and time
                   if (endAt === "") {
+                    setStartAt("");
                     setEndAt(new Date().toISOString().slice(0, 16));
                   } else {
                     e.target.select();

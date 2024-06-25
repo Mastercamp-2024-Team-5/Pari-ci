@@ -3,3 +3,8 @@ export enum ActivePage {
     Itineraire,
     MeilisearchResults,
 }
+
+export enum ActiveRoutes {
+    Metro = "metro",
+    Rer = "rer",
+}

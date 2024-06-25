@@ -17,6 +17,8 @@ import LeftSearch from "../Search/LeftSearch";
 import { ActivePage } from "../Shared/enum.tsx";
 import { ActiveSearchInput, Data } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
+import { useLoaderData } from "react-router-dom";
+import Itineraire from "../Itineraire/Itineraire.tsx";
 
 const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
@@ -24,6 +26,7 @@ const Home: React.FC = () => {
   const { activePage } = useHomeContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(ActiveSearchInput.Departure);
+  const shared = useLoaderData();
 
   async function fetchMeilisearchResults(textQuery: string) {
     const query = {
@@ -45,6 +48,13 @@ const Home: React.FC = () => {
   useEffect(() => {
     setMeilisearchResults(null);
   }, [selectedSearch]);
+
+
+  if (activePage === ActivePage.Itineraire) {
+    return (
+      <Itineraire />
+    );
+  }
 
   return (
     <>
@@ -108,9 +118,12 @@ const Home: React.FC = () => {
             </Box>
             <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
               {
-                activePage === ActivePage.Map ? (
+                activePage === ActivePage.Map && (
                   <MapScreen />
-                ) : (
+                )
+              }
+              {
+                activePage === ActivePage.MeilisearchResults && (
                   <AutocompleteResults
                     results={meilisearchResults}
                     selected={selectedSearch}

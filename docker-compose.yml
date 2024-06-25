@@ -20,6 +20,15 @@ services:
     volumes:
       - ./meili_data:/meili_data
 
+  diesel:
+      build:
+        context: ./server
+      depends_on:
+        - postgres
+      environment:
+        DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+      command: ["diesel", "migration", "run"]
+
   backend:
     build:
       context: ./server

@@ -49,3 +49,4 @@ target/
 
 # Environment file
 */.env
+meili_data/

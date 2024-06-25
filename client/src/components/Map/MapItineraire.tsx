@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
+import { Marker, Popup, Source, Layer } from "react-map-gl";
 import { Stop, RouteTrace, RouteCollection } from "../Shared/types";
 import Icon from "../Shared/Icon";
 import { useHomeContext } from "../Home/HomeContext";
@@ -10,10 +10,13 @@ const MapItineraire: React.FC = React.memo(() => {
   const [markers, setMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<RouteCollection[] | null>(null);
-  const { dataPath: DataPath } = useHomeContext();
+  const { dataPath } = useHomeContext();
 
   useEffect(() => {
     async function fetchItineraire() {
+      if (dataPath === null) {
+        return;
+      }
       const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
       const stops: Stop[] = await stops_response.json();
 
@@ -38,7 +41,7 @@ const MapItineraire: React.FC = React.memo(() => {
 
       const route_part: RouteTrace[] = [];
       let part;
-      for (const stop of DataPath[1]) {
+      for (const stop of dataPath[1]) {
         const stopData = stops.find((s) => s.stop_id === stop.from_stop_id && s.route_id === stop.route_id) || stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
         const nextStopData = stops.find((s) => s.stop_id === stop.to_stop_id) || defaultStop;
         part = (routes.find((r) => ((JSON.parse(r.shape).coordinates[0].toString() === [stopData.stop_lon, stopData.stop_lat].toString()) && (JSON.parse(r.shape).coordinates[JSON.parse(r.shape).coordinates.length - 1].toString() === [nextStopData.stop_lon, nextStopData.stop_lat].toString())) || ((JSON.parse(r.shape).coordinates[JSON.parse(r.shape).coordinates.length - 1].toString()) === [stopData.stop_lon, stopData.stop_lat].toString() && JSON.parse(r.shape).coordinates[0].toString() === [nextStopData.stop_lon, nextStopData.stop_lat].toString())));
@@ -57,9 +60,9 @@ const MapItineraire: React.FC = React.memo(() => {
         stopData.color = routeColor;
       }
 
-      const lastStopData = stops.find((s) => s.stop_id === DataPath[1][DataPath[1].length - 1].to_stop_id) || defaultStop;
+      const lastStopData = stops.find((s) => s.stop_id === dataPath[1][dataPath[1].length - 1].to_stop_id) || defaultStop;
       itineraire_stops.push(lastStopData);
-      lastStopData.color = `#${routes.find((r) => r.route_id === DataPath[1][DataPath[1].length - 1].route_id)?.color || 'grey'}`;
+      lastStopData.color = `#${routes.find((r) => r.route_id === dataPath[1][dataPath[1].length - 1].route_id)?.color || 'grey'}`;
 
       setMarkers(itineraire_stops);
 
@@ -87,23 +90,13 @@ const MapItineraire: React.FC = React.memo(() => {
       setGeojson(geojson_output);
     }
 
-    if (DataPath[1][0] != undefined) {
+    if (dataPath?.[1][0] != undefined && dataPath !== null) {
       fetchItineraire();
     }
-  }, [DataPath]);
+  }, [dataPath]);
 
   return (
-    <Map
-      mapboxAccessToken={import.meta.env.VITE_REACT_APP_MAPBOX_TOKEN}
-      initialViewState={{
-        latitude: 48.8566,
-        longitude: 2.3522,
-        zoom: 11,
-      }}
-      style={{ flex: 1, margin: 0, padding: 0 }}
-      reuseMaps
-      mapStyle="mapbox://styles/mapbox/streets-v9"
-    >
+    <>
       {markers.map((stop, index) => (
         <Marker
           key={index}
@@ -152,7 +145,7 @@ const MapItineraire: React.FC = React.memo(() => {
           }
         </Source>
       ))}
-    </Map>
+    </>
   );
 });
 

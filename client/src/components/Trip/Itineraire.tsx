@@ -452,11 +452,9 @@ const Itineraire = () => {
           </Stack>
         </Center>
       </Box>
-      {screenWidth >= 700 && !moreDetails && (
-        <Box flexBasis="60%" flexShrink={1} h="100%" display="flex">
-          <MapScreen />
-        </Box>
-      )}
+      <Box flexBasis="60%" flexShrink={1} h="100%" display="flex" style={{ display: moreDetails ? 'none' : 'block' }}>
+        <MapScreen />
+      </Box>
       {screenWidth >= 700 && moreDetails && (
         <Flex
           padding={"5%"}

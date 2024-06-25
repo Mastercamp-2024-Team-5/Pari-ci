@@ -5,6 +5,7 @@ import Home from "./components/Home/Home";
 import { getCookie } from "./manageCookies";
 import { useEffect, useState } from "react";
 import { HomeProvider } from "./components/Home/HomeContext";
+import AccessibleScreen from "./components/Pages/WheelchairConvenientPage";
 
 const router = createBrowserRouter(
   [
@@ -61,7 +62,7 @@ function App() {
           height="100vh"
           bg="gray.100"
         >
-          {/* <AccessibleScreen setAccessibleScreen={setAccessibleScreen} /> */}
+          <AccessibleScreen setAccessibleScreen={setAccessibleScreen} />
         </Container>
       </ChakraProvider>
     );

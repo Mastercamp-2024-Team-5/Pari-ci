@@ -1,36 +1,44 @@
 // HomeContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ActivePage } from "../Shared/enum.tsx";
-import { InputStop, TripData } from "../Shared/types";
+import { ActiveLeftPage, ActiveRightPage } from "../Shared/enum.tsx";
+import { InputStop, TripData, TripInfo } from "../Shared/types";
 
 interface HomeContextType {
-  departure: InputStop;
-  setDeparture: React.Dispatch<React.SetStateAction<InputStop>>;
-  destination: InputStop;
-  setDestination: React.Dispatch<React.SetStateAction<InputStop>>;
+  departure: InputStop | null;
+  setDeparture: React.Dispatch<React.SetStateAction<InputStop | null>>;
+  destination: InputStop | null;
+  setDestination: React.Dispatch<React.SetStateAction<InputStop | null>>;
   startAt: string;
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  dataPath: TripData;
-  setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
-  activePage: ActivePage;
-  setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
+  dataPath: TripData | null;
+  setDataPath: React.Dispatch<React.SetStateAction<TripData | null>>;
+  activeRightPage: ActiveRightPage;
+  setActiveRightPage: React.Dispatch<React.SetStateAction<ActiveRightPage>>;
+  activeLeftPage: ActiveLeftPage;
+  setActiveLeftPage: React.Dispatch<React.SetStateAction<ActiveLeftPage>>;
+  dataTrip: TripInfo | null;
+  setDataTrip: React.Dispatch<React.SetStateAction<TripInfo | null>>;
 }
 
 const defaultContext: HomeContextType = {
-  departure: { id: "", name: "" },
+  departure: null,
   setDeparture: () => { },
-  destination: { id: "", name: "" },
+  destination: null,
   setDestination: () => { },
   startAt: "",
   setStartAt: () => { },
   endAt: "",
   setEndAt: () => { },
-  dataPath: ["", []],
+  dataPath: null,
   setDataPath: () => { },
-  activePage: ActivePage.Map,
-  setActivePage: () => { },
+  activeRightPage: ActiveRightPage.Map,
+  setActiveRightPage: () => { },
+  activeLeftPage: ActiveLeftPage.Search,
+  setActiveLeftPage: () => { },
+  dataTrip: null,
+  setDataTrip: () => { },
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -46,12 +54,14 @@ interface HomeProviderProps {
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
 
-  const [departure, setDeparture] = useState<InputStop>({ id: "", name: "" });
-  const [destination, setDestination] = useState<InputStop>({ id: "", name: "" });
+  const [departure, setDeparture] = useState<InputStop | null>(null);
+  const [destination, setDestination] = useState<InputStop | null>(null);
   const [startAt, setStartAt] = useState("");
   const [endAt, setEndAt] = useState("");
-  const [DataPath, setDataPath] = useState<TripData>(["", []]);
-  const [activePage, setActivePage] = useState(ActivePage.Map);
+  const [dataPath, setDataPath] = useState<TripData | null>(null);
+  const [activeRightPage, setActiveRightPage] = useState(ActiveRightPage.Map);
+  const [activeLeftPage, setActiveLeftPage] = useState(ActiveLeftPage.Search);
+  const [dataTrip, setDataTrip] = useState<TripInfo | null>(null);
 
   const value: HomeContextType = {
     departure,
@@ -62,10 +72,14 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    dataPath: DataPath,
+    dataPath,
     setDataPath,
-    activePage,
-    setActivePage,
+    activeRightPage,
+    setActiveRightPage,
+    activeLeftPage,
+    setActiveLeftPage,
+    dataTrip,
+    setDataTrip,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

@@ -2,7 +2,7 @@ import { ActiveSearchInput, Data, Hit } from "../Shared/types";
 import { Box, Heading, Text, Button, VStack } from "@chakra-ui/react";
 import { useHomeContext } from "../Home/HomeContext";
 import Icon from "../Shared/Icon";
-import { ActivePage } from "../Shared/enum";
+import { ActiveRightPage } from "../Shared/enum";
 import { useCallback, useEffect } from "react";
 
 type Props = {
@@ -14,7 +14,7 @@ export function AutocompleteResults({
   results,
   selected,
 }: Props) {
-  const { setDeparture, setDestination, setActivePage } = useHomeContext();
+  const { setDeparture, setDestination, setActiveRightPage: setActiveRightPage } = useHomeContext();
 
   // Handle selection of a stop
   const handleSelect = useCallback((hit: Hit) => {
@@ -23,8 +23,8 @@ export function AutocompleteResults({
     } else {
       setDestination({ id: hit.stop_id, name: hit.stop_name });
     }
-    setActivePage(ActivePage.Map);
-  }, [setDeparture, setDestination, setActivePage, selected]);
+    setActiveRightPage(ActiveRightPage.Map);
+  }, [setDeparture, setDestination, setActiveRightPage, selected]);
 
   // Handle Enter key press
   useEffect(() => {

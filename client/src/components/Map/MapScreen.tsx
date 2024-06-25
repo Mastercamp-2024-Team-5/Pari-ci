@@ -7,7 +7,7 @@ import './MapScreen.css';
 import MapItineraire from './MapItineraire';
 import MapElements from './MapElements';
 import { useHomeContext } from '../Home/HomeContext';
-import { ActivePage, ActiveRoutes } from '../Shared/enum';
+import { ActiveRightPage, ActiveRoutes } from '../Shared/enum';
 
 const ControlButton: React.FC<{ selectedButton: ActiveRoutes; onSelectButton: (buttonType: ActiveRoutes) => void; }> = ({ selectedButton, onSelectButton }) => {
   return (
@@ -30,7 +30,7 @@ const ControlButton: React.FC<{ selectedButton: ActiveRoutes; onSelectButton: (b
 
 const MapScreen: React.FC = () => {
   const [selectedButton, setSelectedButton] = useState<ActiveRoutes>(ActiveRoutes.Metro);
-  const { activePage } = useHomeContext();
+  const { activeRightPage: activeRightPage } = useHomeContext();
 
   return (
     <>
@@ -46,11 +46,11 @@ const MapScreen: React.FC = () => {
         mapStyle="mapbox://styles/mapbox/streets-v9"
       >
         {
-          activePage === ActivePage.Itineraire ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
+          activeRightPage === ActiveRightPage.Trip ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
         }
       </Map>
       {
-        activePage === ActivePage.Map && <ControlButton selectedButton={selectedButton} onSelectButton={setSelectedButton} />
+        activeRightPage === ActiveRightPage.Map && <ControlButton selectedButton={selectedButton} onSelectButton={setSelectedButton} />
       }
     </>
   );

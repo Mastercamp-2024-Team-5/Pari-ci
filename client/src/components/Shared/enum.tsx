@@ -1,7 +1,13 @@
-export enum ActivePage {
+export enum ActiveRightPage {
     Map,
-    Itineraire,
+    Trip,
     MeilisearchResults,
+    TripDetails
+}
+
+export enum ActiveLeftPage {
+    Trip,
+    Search,
 }
 
 export enum ActiveRoutes {

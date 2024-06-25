@@ -2,7 +2,7 @@ import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";
 import { HeaderTitle } from "./HeaderTitle.tsx";
-import { ActivePage } from "../Shared/enum.tsx";
+import { ActiveRightPage } from "../Shared/enum.tsx";
 import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState } from "react";
 
@@ -23,18 +23,26 @@ const LeftSearch = ({
     endAt,
     setEndAt,
     setDataPath,
-    setActivePage,
+    setActiveRightPage: setRightactiveRightPage,
   } = useHomeContext();
 
   const [departureInput, setDepartureInput] = useState("");
   const [destinationInput, setDestinationInput] = useState("");
 
   useEffect(() => {
-    setDepartureInput(departure.name);
+    if (departure === null) {
+      setDepartureInput("");
+    } else {
+      setDepartureInput(departure.name);
+    }
   }, [departure]);
 
   useEffect(() => {
-    setDestinationInput(destination.name);
+    if (destination === null) {
+      setDestinationInput("");
+    } else {
+      setDestinationInput(destination.name);
+    }
   }, [destination]);
 
   const screenWidth = useScreenWidth();
@@ -42,7 +50,7 @@ const LeftSearch = ({
 
   const handleClickItineraire = async () => {
     try {
-      if (startAt === "" && endAt === "") {
+      if (startAt === "" && endAt === "" || departure === null || destination === null) {
         throw new Error("Please fill in the date and time"); //TODO: Make it more user-friendly
       }
       setDataPath(["", []]);
@@ -56,7 +64,7 @@ const LeftSearch = ({
         .then((response) => response.json())
         .then((data) => {
           setDataPath(data);
-          setActivePage(ActivePage.Itineraire);
+          setRightactiveRightPage(ActiveRightPage.Trip);
         })
         .catch((error) => {
           if (error.status === 404) {
@@ -83,12 +91,12 @@ const LeftSearch = ({
               setDepartureInput(e.target.value)
             }}
             onFocus={(e) => {
-              setActivePage(ActivePage.MeilisearchResults)
+              setRightactiveRightPage(ActiveRightPage.MeilisearchResults)
               setSelectedSearch(ActiveSearchInput.Departure)
               e.target.select()
             }}
             onBlur={() => {
-              setActivePage(ActivePage.Map)
+              setRightactiveRightPage(ActiveRightPage.Map)
             }}
             focusBorderColor="#5eaf91"
             fontFamily="Karla"
@@ -120,12 +128,12 @@ const LeftSearch = ({
               setDestinationInput(e.target.value)
             }}
             onFocus={(e) => {
-              setActivePage(ActivePage.MeilisearchResults)
+              setRightactiveRightPage(ActiveRightPage.MeilisearchResults)
               setSelectedSearch(ActiveSearchInput.Destination)
               e.target.select()
             }}
             onBlur={() => {
-              setActivePage(ActivePage.Map)
+              setRightactiveRightPage(ActiveRightPage.Map)
             }}
             value={destinationInput}
           />

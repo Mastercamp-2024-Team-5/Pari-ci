@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ActivePage } from "../Shared/enum.tsx";
 import { TripData } from "../Shared/types";
+import { getCookie, setCookie } from "../../manageCookies.tsx";
 
 interface HomeContextType {
   departure: string;
@@ -56,6 +57,14 @@ interface HomeProviderProps {
 }
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
+
+  if (getCookie("stationAccessibleOnly") === null) {
+    setCookie("stationAccessibleOnly", false);
+  }
+  if (getCookie("accessibleScreen") === null) {
+    setCookie("accessibleScreen", true);
+  }
+
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
   const [startAt, setStartAt] = useState("");
@@ -63,8 +72,18 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
   const [errorWhileFetching, setErrorWhileFetching] = useState(false);
-  const [accessibleScreen, setAccessibleScreen] = useState(true);
-  const [stationAccessibleOnly, setStationAccessibleOnly] = useState(false);
+  const [accessibleScreen, setAccessibleScreenState] = useState(getCookie("accessibleScreen"));
+  const [stationAccessibleOnly, setStationAccessibleOnlyState] = useState(getCookie("stationAccessibleOnly"));
+
+  const setStationAccessibleOnly: React.Dispatch<React.SetStateAction<boolean>>  = (value) => {
+    setCookie("stationAccessibleOnly", value);
+    setStationAccessibleOnlyState(value);
+  };
+
+  const setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>> = (value) => {
+    setCookie("accessibleScreen", value);
+    setAccessibleScreenState(value);
+  };
 
   const value: HomeContextType = {
     departure,

@@ -3,12 +3,18 @@ extern crate diesel;
 extern crate rocket;
 use crate::models;
 use crate::schema;
+use crate::views::services::PathNode;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use rocket::get;
+use rocket::post;
+use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+use serde::Serialize;
 use std::env;
+use time::OffsetDateTime;
+use time::PrimitiveDateTime;
 
 pub fn establish_connection_pg() -> PgConnection {
     dotenv().ok();
@@ -365,4 +371,68 @@ pub fn add_routes_trace(
         }
     }
     Ok(1)
+}
+
+fn add_shared_trip(document: models::SharedTable) -> Result<(), diesel::result::Error> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(shared_table)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+fn get_shared_trip(document_id: &str) -> Result<models::SharedTable, diesel::result::Error> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let result = shared_table
+        .filter(id.eq(document_id))
+        .first::<models::SharedTable>(connection);
+    result
+}
+
+#[get("/share/<id>")]
+pub fn get_share_trip(
+    id: &str,
+) -> Result<Json<(PrimitiveDateTime, Vec<PathNode>)>, NotFound<String>> {
+    let result = get_shared_trip(id);
+    match result {
+        Ok(shared_trip) => {
+            let path_content: Result<(PrimitiveDateTime, Vec<PathNode>), serde_json::error::Error> =
+                serde_json::from_str(&shared_trip.content);
+            match path_content {
+                Ok(path) => Ok(Json(path)),
+                Err(e) => Err(NotFound(format!(
+                    "Error parsing shared trip content: {}",
+                    e
+                ))),
+            }
+        }
+        Err(_) => Err(NotFound(format!("No shared trip found with id {}", id))),
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct SharedTripResponse {
+    id: String,
+}
+
+#[post("/share", data = "<document>", format = "json")]
+pub fn post_share_trip(
+    document: Json<(PrimitiveDateTime, Vec<PathNode>)>,
+) -> Result<Json<SharedTripResponse>, NotFound<String>> {
+    let document_id = uuid::Uuid::new_v4().as_simple().to_string();
+    let datetime = OffsetDateTime::now_utc();
+    let shared_trip = models::SharedTable {
+        id: document_id.clone(),
+        content: serde_json::to_string(&document.into_inner()).unwrap(),
+        created_at: PrimitiveDateTime::new(datetime.date(), datetime.time()),
+    };
+    let result = add_shared_trip(shared_trip);
+    match result {
+        Ok(_) => Ok(Json(SharedTripResponse {
+            id: document_id.clone(),
+        })),
+        Err(e) => Err(NotFound(format!("Error sharing trip: {}", e))),
+    }
 }

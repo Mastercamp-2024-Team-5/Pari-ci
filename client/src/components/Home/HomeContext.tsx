@@ -23,6 +23,8 @@ interface HomeContextType {
   setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>>;
   stationAccessibleOnly: boolean;
   setStationAccessibleOnly: React.Dispatch<React.SetStateAction<boolean>>;
+  parentId: string;
+  setParentId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -44,6 +46,8 @@ const defaultContext: HomeContextType = {
   setAccessibleScreen: () => {},
   stationAccessibleOnly: false,
   setStationAccessibleOnly: () => {},
+  parentId: "",
+  setParentId: () => {},
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -57,7 +61,6 @@ interface HomeProviderProps {
 }
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
-
   if (getCookie("stationAccessibleOnly") === null) {
     setCookie("stationAccessibleOnly", false);
   }
@@ -72,15 +75,24 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [DataPath, setDataPath] = useState<TripData>(["", []]);
   const [activePage, setActivePage] = useState(ActivePage.Map);
   const [errorWhileFetching, setErrorWhileFetching] = useState(false);
-  const [accessibleScreen, setAccessibleScreenState] = useState(getCookie("accessibleScreen"));
-  const [stationAccessibleOnly, setStationAccessibleOnlyState] = useState(getCookie("stationAccessibleOnly"));
+  const [accessibleScreen, setAccessibleScreenState] = useState(
+    getCookie("accessibleScreen")
+  );
+  const [stationAccessibleOnly, setStationAccessibleOnlyState] = useState(
+    getCookie("stationAccessibleOnly")
+  );
+  const [parentId, setParentId] = useState("");
 
-  const setStationAccessibleOnly: React.Dispatch<React.SetStateAction<boolean>>  = (value) => {
+  const setStationAccessibleOnly: React.Dispatch<
+    React.SetStateAction<boolean>
+  > = (value) => {
     setCookie("stationAccessibleOnly", value);
     setStationAccessibleOnlyState(value);
   };
 
-  const setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>> = (value) => {
+  const setAccessibleScreen: React.Dispatch<React.SetStateAction<boolean>> = (
+    value
+  ) => {
     setCookie("accessibleScreen", value);
     setAccessibleScreenState(value);
   };
@@ -104,6 +116,8 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setAccessibleScreen,
     stationAccessibleOnly,
     setStationAccessibleOnly,
+    parentId,
+    setParentId,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

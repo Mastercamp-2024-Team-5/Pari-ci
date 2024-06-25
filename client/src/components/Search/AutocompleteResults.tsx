@@ -16,13 +16,14 @@ export function AutocompleteResults({
   setIsDepartureFocus,
   setIsDestinationFocus,
 }: Props) {
-  const { setDeparture, setDestination } = useHomeContext();
+  const { setDeparture, setDestination, setParentId } = useHomeContext();
 
   if (!results || results.hits.length === 0) {
     return null;
   }
 
   const handleSelect = (hit: Hit) => {
+    setParentId(hit.stop_id);
     if (isDepartureFocus) {
       setDeparture(hit.stop_name);
       setIsDepartureFocus(false);

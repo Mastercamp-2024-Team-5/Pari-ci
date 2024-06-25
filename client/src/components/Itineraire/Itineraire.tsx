@@ -168,17 +168,14 @@ const Itineraire = () => {
     const fetchData = async () => {
       if (DataPath[1][0] != undefined && DataPath.length > 0) {
         const points = await getInfosFromData(DataPath[1]);
-        let dt = 0;
-        dt +=
-          points[points.length - 1].travel_time +
-          points[points.length - 1].depart;
+        let dt=0;
+        dt += points[points.length -1].travel_time + points[points.length -1].depart;
         setData({
           departure: additionSecondDate(DataPath[0], -dt),
           points: points,
           arrival: DataPath[0],
         });
         if (id) {
-          console.log(points[0].from);
           setDeparture(points[0].from);
           setDestination(points[data.points.length - 1].to);
           setStartAt(convertDateTime(additionSecondDate(DataPath[0], -dt)));
@@ -190,12 +187,6 @@ const Itineraire = () => {
     fetchData();
   }, [
     DataPath,
-    data.points.length,
-    id,
-    setAccessibleScreen,
-    setDeparture,
-    setDestination,
-    setStartAt,
   ]);
 
   useEffect(() => {
@@ -367,10 +358,7 @@ const Itineraire = () => {
       direction: pointList[pointList.length - 1].trip_id,
       to: pointList[pointList.length - 1].to_stop_id,
       nbr: cpt - 1,
-      travel_time:
-        travel_time +
-        pointList[pointList.length - 1].travel_time +
-        pointList[pointList.length - 1].wait_time,
+      travel_time:travel_time,
       depart: depart,
       marche: marche,
     });

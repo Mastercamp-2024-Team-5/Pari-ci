@@ -1,37 +1,47 @@
-import { Data, Hit } from "../Shared/types";
+import { ActiveSearchInput, Data, Hit } from "../Shared/types";
 import { Box, Heading, Text, Button, VStack } from "@chakra-ui/react";
 import { useHomeContext } from "../Home/HomeContext";
 import Icon from "../Shared/Icon";
+import { ActivePage } from "../Shared/enum";
+import { useCallback, useEffect } from "react";
 
 type Props = {
   results: Data | null;
-  isDepartureFocus: boolean;
-  setIsDepartureFocus: (value: boolean) => void;
-  setIsDestinationFocus: (value: boolean) => void;
+  selected: ActiveSearchInput;
 };
 
 export function AutocompleteResults({
   results,
-  isDepartureFocus,
-  setIsDepartureFocus,
-  setIsDestinationFocus,
+  selected,
 }: Props) {
-  const { setDeparture, setDestination, setParentId } = useHomeContext();
+  const { setDeparture, setDestination, setActivePage } = useHomeContext();
 
-  if (!results || results.hits.length === 0) {
-    return null;
-  }
-
-  const handleSelect = (hit: Hit) => {
-    setParentId(hit.stop_id);
-    if (isDepartureFocus) {
-      setDeparture(hit.stop_name);
-      setIsDepartureFocus(false);
+  // Handle selection of a stop
+  const handleSelect = useCallback((hit: Hit) => {
+    if (selected === ActiveSearchInput.Departure) {
+      setDeparture({ id: hit.stop_id, name: hit.stop_name });
     } else {
-      setDestination(hit.stop_name);
-      setIsDestinationFocus(false);
+      setDestination({ id: hit.stop_id, name: hit.stop_name });
     }
-  };
+    setActivePage(ActivePage.Map);
+  }, [setDeparture, setDestination, setActivePage, selected]);
+
+  // Handle Enter key press
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        if (results && results.hits.length > 0) {
+          handleSelect(results.hits[0]);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [results, handleSelect]);
 
   return (
     <Box px={12} py={10} height="100vh" width="100%" overflowY="scroll">
@@ -39,10 +49,10 @@ export function AutocompleteResults({
         Résultats :
       </Heading>
       <Text fontSize="md" fontWeight="medium" color="gray.500">
-        {isDepartureFocus ? "Départ" : "Arrivée"}
+        {selected == ActiveSearchInput.Departure ? "Départ" : "Arrivée"}
       </Text>
       <VStack spacing={2} py={8} align="stretch">
-        {results.hits.map((hit) => (
+        {results?.hits.map((hit) => (
           <Button
             key={hit.id}
             width="full"

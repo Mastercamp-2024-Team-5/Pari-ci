@@ -1,14 +1,14 @@
 // HomeContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ActivePage } from "../Shared/enum.tsx";
-import { TripData } from "../Shared/types";
+import { InputStop, TripData } from "../Shared/types";
 import { getCookie, setCookie } from "../../manageCookies.tsx";
 
 interface HomeContextType {
-  departure: string;
-  setDeparture: React.Dispatch<React.SetStateAction<string>>;
-  destination: string;
-  setDestination: React.Dispatch<React.SetStateAction<string>>;
+  departure: InputStop;
+  setDeparture: React.Dispatch<React.SetStateAction<InputStop>>;
+  destination: InputStop;
+  setDestination: React.Dispatch<React.SetStateAction<InputStop>>;
   startAt: string;
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
@@ -28,26 +28,26 @@ interface HomeContextType {
 }
 
 const defaultContext: HomeContextType = {
-  departure: "",
-  setDeparture: () => {},
-  destination: "",
-  setDestination: () => {},
+  departure: { id: "", name: "" },
+  setDeparture: () => { },
+  destination: { id: "", name: "" },
+  setDestination: () => { },
   startAt: "",
-  setStartAt: () => {},
+  setStartAt: () => { },
   endAt: "",
-  setEndAt: () => {},
+  setEndAt: () => { },
   DataPath: ["", []],
-  setDataPath: () => {},
+  setDataPath: () => { },
   activePage: ActivePage.Map,
-  setActivePage: () => {},
+  setActivePage: () => { },
   errorWhileFetching: false,
-  setErrorWhileFetching: () => {},
+  setErrorWhileFetching: () => { },
   accessibleScreen: false,
-  setAccessibleScreen: () => {},
+  setAccessibleScreen: () => { },
   stationAccessibleOnly: false,
-  setStationAccessibleOnly: () => {},
+  setStationAccessibleOnly: () => { },
   parentId: "",
-  setParentId: () => {},
+  setParentId: () => { },
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -68,8 +68,8 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setCookie("accessibleScreen", true);
   }
 
-  const [departure, setDeparture] = useState("");
-  const [destination, setDestination] = useState("");
+  const [departure, setDeparture] = useState<InputStop>({ id: "", name: "" });
+  const [destination, setDestination] = useState<InputStop>({ id: "", name: "" });
   const [startAt, setStartAt] = useState("");
   const [endAt, setEndAt] = useState("");
   const [DataPath, setDataPath] = useState<TripData>(["", []]);

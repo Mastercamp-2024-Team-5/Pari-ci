@@ -1,30 +1,30 @@
 export interface Hit {
-    id: string;
-    route_ids: string;
-    route_short_names: string;
-    stop_id: string;
-    stop_name: string;
+  id: string;
+  route_ids: string;
+  route_short_names: string;
+  stop_id: string;
+  stop_name: string;
 }
 
 export interface Data {
-    estimatedTotalHits: number;
-    hits: Hit[];
-    limit: number;
-    offset: number;
-    processingTimeMs: number;
-    query: string;
+  estimatedTotalHits: number;
+  hits: Hit[];
+  limit: number;
+  offset: number;
+  processingTimeMs: number;
+  query: string;
 }
 
 export interface Trip {
-    from_stop_id: string;
-    to_stop_id: string;
-    route_id: string;
-    route_short_name: string;
-    wait_time: number;
-    travel_time: number;
-    trip_id: string;
-  }
-  
+  from_stop_id: string;
+  to_stop_id: string;
+  route_id: string;
+  route_short_name: string;
+  wait_time: number;
+  travel_time: number;
+  trip_id: string;
+}
+
 export type TripData = [string, Trip[]];
 
 export interface Point {
@@ -84,4 +84,14 @@ export interface RouteCollection {
   collection: GeoJSON.FeatureCollection
   route_id: string
   route_color: string
+}
+
+export enum ActiveSearchInput {
+  Departure = "Departure",
+  Destination = "Destination",
+}
+
+export interface InputStop {
+  name: string;
+  id: string;
 }

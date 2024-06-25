@@ -1,136 +1,78 @@
-import { useRef } from "react";
 import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";
 import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
 import { useNavigate } from "react-router-dom";
+import { ActivePage } from "../Shared/enum.tsx";
+import { ActiveSearchInput } from "../Shared/types.tsx";
+import { useEffect, useState } from "react";
 
 type Props = {
-  fetchDepartureResults: (textQuery: string) => void;
-  fetchDestinationResults: (textQuery: string) => void;
-  setIsDepartureFocus: (value: boolean) => void;
-  setIsDestinationFocus: (value: boolean) => void;
-};
-
-type Stop = {
-  stop_name: string;
-  parent_station: string;
+  fetchMeilisearchResults: (textQuery: string) => void;
+  setSelectedSearch: (selectedSearch: ActiveSearchInput) => void;
 };
 
 const LeftSearch = ({
-  fetchDepartureResults,
-  fetchDestinationResults,
-  setIsDepartureFocus,
-  setIsDestinationFocus,
+  fetchMeilisearchResults,
+  setSelectedSearch,
 }: Props) => {
   const {
     departure,
-    setDeparture,
     destination,
-    setDestination,
     startAt,
     setStartAt,
     endAt,
     setEndAt,
     setDataPath,
     setErrorWhileFetching,
+    setActivePage,
   } = useHomeContext();
+
+  const [departureInput, setDepartureInput] = useState("");
+  const [destinationInput, setDestinationInput] = useState("");
+
+  useEffect(() => {
+    setDepartureInput(departure.name);
+  }, [departure]);
+
+  useEffect(() => {
+    setDestinationInput(destination.name);
+  }, [destination]);
+
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
-  // Refs to handle the focus
-  const departureBlurTimeout = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  const destinationBlurTimeout = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-
   const navigate = useNavigate();
-  const handleNavigate = () => {
-    navigate("/path/"); // Replace 'someData' with the actual data you want to pass
-  };
+
+  // const handleNavigate = () => {
+  //   navigate("/path/"); // Replace 'someData' with the actual data you want to pass
+  // };
 
   const handleClickItineraire = async () => {
     try {
       if (startAt === "" && endAt === "") {
-        throw new Error("Please fill in the date and time");
+        throw new Error("Please fill in the date and time"); //TODO: Make it more user-friendly
       }
-      const response = await fetch(
-        "http://127.0.0.1:8000/stops?metro&rer&tram"
-      );
-      const data: Stop[] = await response.json();
-      const departure_parent = data.find(
-        (stop) => stop.stop_name === departure
-      )?.parent_station;
-      if (!departure_parent) {
-        throw new Error("Departure not found");
-      }
-      const destination_parent = data.find(
-        (stop) => stop.stop_name === destination
-      )?.parent_station;
-      if (!destination_parent) {
-        throw new Error("Destination not found");
-      }
-      handleNavigate();
+      // handleNavigate();
       setDataPath(["", []]);
       setErrorWhileFetching(false);
-      if (endAt === "") {
-        fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
-            startAt.split("T")[0]
-          }&time=${startAt.split("T")[1].split(":")[0]}:${
-            startAt.split("T")[1].split(":")[1]
-          }:00`
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            setDataPath(data);
-          })
-          .catch((error) => {
-            setErrorWhileFetching(true);
-            console.error(error);
-          });
-      }
-      if (startAt === "") {
-        fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
-            endAt.split("T")[0]
-          }&time=${endAt.split("T")[1].split(":")[0]}:${
-            endAt.split("T")[1].split(":")[1]
-          }:00`
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            setDataPath(data);
-          })
-          .catch((error) => {
-            setErrorWhileFetching(true);
-            console.error(error);
-          });
-      }
+      const date_string = startAt === "" ? endAt : startAt;
+      // parse date
+      const date = new Date(date_string);
+      // custom format YYYYMMDD and HH:MM:SS
+      fetch(
+        `http://127.0.0.1:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toLocaleTimeString()}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setDataPath(data);
+        })
+        .catch((error) => {
+          setErrorWhileFetching(true);
+          console.error(error);
+        });
     } catch (error) {
       alert(error);
-    }
-  };
-
-  const changeDeparture = (value: string) => {
-    setDeparture(value);
-    fetchDepartureResults(value);
-    if (value) {
-      setIsDepartureFocus(true);
-    } else {
-      setIsDepartureFocus(false);
-    }
-  };
-
-  const changeDestination = (value: string) => {
-    setDestination(value);
-    fetchDestinationResults(value);
-    if (value) {
-      setIsDestinationFocus(true);
-    } else {
-      setIsDestinationFocus(false);
     }
   };
 
@@ -144,20 +86,17 @@ const LeftSearch = ({
           <Input
             type="text"
             placeholder="Départ"
-            onChange={(e) => changeDeparture(e.target.value)}
-            onFocus={() => {
-              if (departureBlurTimeout.current) {
-                clearTimeout(departureBlurTimeout.current);
-                departureBlurTimeout.current = null;
-              }
-              if (departure) {
-                setIsDepartureFocus(true);
-              }
+            onChange={(e) => {
+              fetchMeilisearchResults(e.target.value)
+              setDepartureInput(e.target.value)
+            }}
+            onFocus={(e) => {
+              setActivePage(ActivePage.MeilisearchResults)
+              setSelectedSearch(ActiveSearchInput.Departure)
+              e.target.select()
             }}
             onBlur={() => {
-              departureBlurTimeout.current = setTimeout(() => {
-                setIsDepartureFocus(false);
-              }, 200);
+              setActivePage(ActivePage.Map)
             }}
             focusBorderColor="#5eaf91"
             fontFamily="Karla"
@@ -169,7 +108,7 @@ const LeftSearch = ({
             p={8}
             bg="white"
             borderRadius="15"
-            value={departure}
+            value={departureInput}
           />
           <Input
             focusBorderColor="#5eaf91"
@@ -184,22 +123,19 @@ const LeftSearch = ({
             p={8}
             bg="white"
             borderRadius="15"
-            value={destination}
-            onChange={(e) => changeDestination(e.target.value)}
-            onFocus={() => {
-              if (destinationBlurTimeout.current) {
-                clearTimeout(destinationBlurTimeout.current);
-                destinationBlurTimeout.current = null;
-              }
-              if (destination) {
-                setIsDestinationFocus(true);
-              }
+            onChange={(e) => {
+              fetchMeilisearchResults(e.target.value)
+              setDestinationInput(e.target.value)
+            }}
+            onFocus={(e) => {
+              setActivePage(ActivePage.MeilisearchResults)
+              setSelectedSearch(ActiveSearchInput.Destination)
+              e.target.select()
             }}
             onBlur={() => {
-              destinationBlurTimeout.current = setTimeout(() => {
-                setIsDestinationFocus(false);
-              }, 200);
+              setActivePage(ActivePage.Map)
             }}
+            value={destinationInput}
           />
           <Flex
             maxW={"100%"}
@@ -237,6 +173,14 @@ const LeftSearch = ({
                   setEndAt("");
                   setStartAt(e.target.value);
                 }}
+                onFocus={(e) => {
+                  // set default value to current date and time
+                  if (startAt === "") {
+                    setStartAt(new Date().toISOString().slice(0, 16));
+                  } else {
+                    e.target.select();
+                  }
+                }}
               />
             </div>
             <div style={{ minWidth: "48%" }}>
@@ -263,6 +207,14 @@ const LeftSearch = ({
                 onChange={(e) => {
                   setStartAt("");
                   setEndAt(e.target.value);
+                }}
+                onFocus={(e) => {
+                  // set default value to current date and time
+                  if (endAt === "") {
+                    setEndAt(new Date().toISOString().slice(0, 16));
+                  } else {
+                    e.target.select();
+                  }
                 }}
               />
             </div>

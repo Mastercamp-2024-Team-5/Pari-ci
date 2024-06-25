@@ -10,49 +10,27 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import useScreenWidth from '../Shared/useScreenWidth';
-import {  useHomeContext } from './HomeContext';
+import { useHomeContext } from './HomeContext';
 import MapScreen from "../Map/MapScreen";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
 import { ActivePage } from "../Shared/enum.tsx";
-import { Data } from "../Shared/types";
+import { ActiveSearchInput, Data } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 
 const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
-  const [isDepartureFocus, setIsDepartureFocus] = useState<boolean>(false);
-  const [isDestinationFocus, setIsDestinationFocus] = useState<boolean>(false);
-  const [departureResults, setDepartureResults] = useState<Data | null>(null);
-  const [destinationResults, setDestinationResults] = useState<Data | null>(null);
-  const { activePage, setActivePage } = useHomeContext();
+  const [meilisearchResults, setMeilisearchResults] = useState<Data | null>(null);
+  const { activePage } = useHomeContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(ActiveSearchInput.Departure);
 
-  useEffect(() => {
-    if (isDepartureFocus || isDestinationFocus) {
-      setActivePage(ActivePage.MeilisearchResults);
-    } else {
-      setActivePage(ActivePage.Map);
-    }
-  }, [isDepartureFocus, isDestinationFocus, setActivePage]);
-
-  async function fetchDepartureResults(textQuery: string) {
-    const response = await fetchStops(textQuery);
-    const data: Data = await response.json();
-    setDepartureResults(data);
-  }
-
-  async function fetchDestinationResults(textQuery: string) {
-    const response = await fetchStops(textQuery);
-    const data: Data = await response.json();
-    setDestinationResults(data);
-  }
-
-  async function fetchStops(textQuery: string) {
+  async function fetchMeilisearchResults(textQuery: string) {
     const query = {
       q: textQuery,
     };
 
-    return await fetch("http://localhost:7700/indexes/stops/search", {
+    const response = await fetch("http://localhost:7700/indexes/stops/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,15 +38,13 @@ const Home: React.FC = () => {
       },
       body: JSON.stringify(query),
     });
+    const data: Data = await response.json();
+    setMeilisearchResults(data);
   }
 
-  const handleDrawerClose = () => {
-    setIsDrawerOpen(false);
-  };
-
-  const handleDrawerOpen = () => {
-    setIsDrawerOpen(true);
-  };
+  useEffect(() => {
+    setMeilisearchResults(null);
+  }, [selectedSearch]);
 
   return (
     <>
@@ -96,7 +72,7 @@ const Home: React.FC = () => {
                   display={isDrawerOpen ? "none" : "flex"}
                   alignItems="center"
                   justifyContent="space-between"
-                  onClick={handleDrawerOpen}
+                  onClick={() => setIsDrawerOpen(true)}
                 >
                   <span>Search Options</span>
                   <IconButton icon={<ArrowBackIcon />} aria-label="Open drawer" />
@@ -105,7 +81,7 @@ const Home: React.FC = () => {
                 {/* Full Drawer Content */}
                 <Drawer
                   placement="bottom"
-                  onClose={handleDrawerClose}
+                  onClose={() => setIsDrawerOpen(false)}
                   isOpen={isDrawerOpen}
                 >
                   <DrawerOverlay />
@@ -113,10 +89,8 @@ const Home: React.FC = () => {
                     <DrawerCloseButton />
                     <DrawerBody>
                       <LeftSearch
-                        fetchDepartureResults={fetchDepartureResults}
-                        fetchDestinationResults={fetchDestinationResults}
-                        setIsDepartureFocus={setIsDepartureFocus}
-                        setIsDestinationFocus={setIsDestinationFocus}
+                        fetchMeilisearchResults={fetchMeilisearchResults}
+                        setSelectedSearch={setSelectedSearch}
                       />
                     </DrawerBody>
                   </DrawerContent>
@@ -128,10 +102,8 @@ const Home: React.FC = () => {
           <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
             <Box bg="#F6FBF9" minWidth="350px" flexBasis="33%" flexShrink={0} h="100%" p={4}>
               <LeftSearch
-                fetchDepartureResults={fetchDepartureResults}
-                fetchDestinationResults={fetchDestinationResults}
-                setIsDepartureFocus={setIsDepartureFocus}
-                setIsDestinationFocus={setIsDestinationFocus}
+                fetchMeilisearchResults={fetchMeilisearchResults}
+                setSelectedSearch={setSelectedSearch}
               />
             </Box>
             <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
@@ -140,10 +112,8 @@ const Home: React.FC = () => {
                   <MapScreen />
                 ) : (
                   <AutocompleteResults
-                    results={isDepartureFocus ? departureResults : destinationResults}
-                    isDepartureFocus={isDepartureFocus}
-                    setIsDepartureFocus={setIsDepartureFocus}
-                    setIsDestinationFocus={setIsDestinationFocus}
+                    results={meilisearchResults}
+                    selected={selectedSearch}
                   />
                 )
               }

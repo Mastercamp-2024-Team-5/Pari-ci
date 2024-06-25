@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";

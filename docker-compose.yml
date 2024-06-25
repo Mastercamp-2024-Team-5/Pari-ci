@@ -16,7 +16,7 @@ services:
     image: getmeili/meilisearch:latest
     restart: always
     ports:
-      - 7700:7700
+      - "7700:7700"
     volumes:
       - ./meili_data:/meili_data
 
@@ -41,3 +41,4 @@ services:
 
 volumes:
   postgres_data:
+  meili_data:

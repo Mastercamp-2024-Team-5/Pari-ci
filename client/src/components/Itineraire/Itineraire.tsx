@@ -46,7 +46,6 @@ const Itineraire = () => {
     DataPath,
     setDataPath,
     errorWhileFetching,
-    startAt,
     setStartAt,
   } = useHomeContext();
   const [showMapMobile, setShowMapMobile] = useState(false);

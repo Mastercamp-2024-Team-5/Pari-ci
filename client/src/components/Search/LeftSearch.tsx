@@ -56,12 +56,28 @@ const LeftSearch = ({
       if (startAt === "" && endAt === "") {
         throw new Error("Please fill in the date and time");
       }
+      const response = await fetch(
+        "http://127.0.0.1:8000/stops?metro&rer&tram"
+      );
+      const data: Stop[] = await response.json();
+      const departure_parent = data.find(
+        (stop) => stop.stop_name === departure
+      )?.parent_station;
+      if (!departure_parent) {
+        throw new Error("Departure not found");
+      }
+      const destination_parent = data.find(
+        (stop) => stop.stop_name === destination
+      )?.parent_station;
+      if (!destination_parent) {
+        throw new Error("Destination not found");
+      }
       handleNavigate();
       setDataPath(["", []]);
       setErrorWhileFetching(false);
       if (endAt === "") {
         fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure}&end_stop=${destination}&date=${
+          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
             startAt.split("T")[0]
           }&time=${startAt.split("T")[1].split(":")[0]}:${
             startAt.split("T")[1].split(":")[1]
@@ -78,7 +94,7 @@ const LeftSearch = ({
       }
       if (startAt === "") {
         fetch(
-          `http://127.0.0.1:8000/path?start_stop=${departure}&end_stop=${destination}&date=${
+          `http://127.0.0.1:8000/path?start_stop=${departure_parent}&end_stop=${destination_parent}&date=${
             endAt.split("T")[0]
           }&time=${endAt.split("T")[1].split(":")[0]}:${
             endAt.split("T")[1].split(":")[1]

@@ -1,6 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react";
 
-const Stop = ({ stop, textColor }: { stop: string; textColor: string }) => {
+const Stop = ({ name, textColor }: { name: string; textColor: string }) => {
     return (
         <Flex
             flex={1}
@@ -24,7 +24,7 @@ const Stop = ({ stop, textColor }: { stop: string; textColor: string }) => {
                 fontSize={"lg"} // Increased font size
                 fontWeight={"500"} // Added font weight
             >
-                {stop}
+                {name}
             </Text>
         </Flex>
     );

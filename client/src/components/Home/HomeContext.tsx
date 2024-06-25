@@ -12,7 +12,7 @@ interface HomeContextType {
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  DataPath: TripData;
+  dataPath: TripData;
   setDataPath: React.Dispatch<React.SetStateAction<TripData>>;
   activePage: ActivePage;
   setActivePage: React.Dispatch<React.SetStateAction<ActivePage>>;
@@ -27,7 +27,7 @@ const defaultContext: HomeContextType = {
   setStartAt: () => { },
   endAt: "",
   setEndAt: () => { },
-  DataPath: ["", []],
+  dataPath: ["", []],
   setDataPath: () => { },
   activePage: ActivePage.Map,
   setActivePage: () => { },
@@ -62,7 +62,7 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    DataPath,
+    dataPath: DataPath,
     setDataPath,
     activePage,
     setActivePage,

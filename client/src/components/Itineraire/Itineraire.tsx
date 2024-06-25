@@ -14,8 +14,7 @@ import StopDetail from "./StopDetail";
 import { useState, useEffect } from "react";
 import MoreDetails from "./MoreDetails";
 import { TripInfo, Point, Trip } from "../Shared/types";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useHomeContext } from "../Home/HomeContext";
 
 const Itineraire = () => {
   const defaultPoint: Point = {
@@ -29,12 +28,7 @@ const Itineraire = () => {
     marche: 0,
   };
 
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const handleNavigate = () => {
-    setDataPath(["", []]);
-    navigate("/"); // Replace 'someData' with the actual data you want to pass
-  };
+  const { dataPath, departure, destination } = useHomeContext();
 
   const [showMapMobile, setShowMapMobile] = useState(false);
   const [data, setData] = useState<TripInfo>({
@@ -152,154 +146,22 @@ const Itineraire = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (DataPath[1][0] != undefined && DataPath.length > 0) {
-        const points = await getInfosFromData(DataPath[1]);
+      if (dataPath[1][0] != undefined && dataPath.length > 0) {
+        const points = await getInfosFromData(dataPath[1]);
         let dt = 0;
         dt += points[points.length - 1].travel_time + points[points.length - 1].depart;
         setData({
-          departure: additionSecondDate(DataPath[0], -dt),
+          departure: additionSecondDate(dataPath[0], -dt),
           points: points,
-          arrival: DataPath[0],
+          arrival: dataPath[0],
         });
-        if (id) {
-          setDeparture(points[0].from);
-          setDestination(points[data.points.length - 1].to);
-          setStartAt(convertDateTime(additionSecondDate(DataPath[0], -dt)));
-          setAccessibleScreen(false);
-        }
       }
     };
 
     fetchData();
   }, [
-    DataPath,
+    dataPath,
   ]);
-
-  useEffect(() => {
-    if (id)
-      setDataPath([
-        "2004-11-11 09:40:00.0",
-        [
-          {
-            from_stop_id: "IDFM:22400",
-            to_stop_id: "IDFM:22401",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22401",
-            to_stop_id: "IDFM:463323",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463323",
-            to_stop_id: "IDFM:463107",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463107",
-            to_stop_id: "IDFM:22385",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22385",
-            to_stop_id: "IDFM:22370",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22370",
-            to_stop_id: "IDFM:463026",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463026",
-            to_stop_id: "IDFM:463216",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463216",
-            to_stop_id: "IDFM:22391",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22391",
-            to_stop_id: "IDFM:22366",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22366",
-            to_stop_id: "IDFM:22386",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:22386",
-            to_stop_id: "IDFM:463265",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463265",
-            to_stop_id: "IDFM:463231",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 60,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-          {
-            from_stop_id: "IDFM:463231",
-            to_stop_id: "IDFM:22364",
-            route_id: "IDFM:C01377",
-            route_short_name: "7",
-            wait_time: 0,
-            travel_time: 120,
-            trip_id: "IDFM:RATP:127257-C01377-COU_RATP_5084061_2467807_45",
-          },
-        ],
-      ]);
-  }, [id]);
 
   const getInfosFromData = async (pointList: Trip[]) => {
     const lst = [];
@@ -430,8 +292,8 @@ const Itineraire = () => {
             </Stack>
             <Stack spacing={5}>
               <Stack marginX={"0%"} maxW={"100%"}>
-                <Stop stop={departure} textColor={"black"} />
-                <Stop stop={destination} textColor={"black"} />
+                <Stop name={departure.name} textColor={"black"} />
+                <Stop name={destination.name} textColor={"black"} />
               </Stack>
 
               {screenWidth >= 700 && !isEmpty(data) && (
@@ -511,7 +373,7 @@ const Itineraire = () => {
             <Button
               bg="#C78484"
               color="white"
-              onClick={() => handleNavigate()}
+              onClick={() => null}
               padding={7}
               fontSize={screenWidth < 700 ? "3xl" : "2xl"}
               whiteSpace="wrap"
@@ -526,7 +388,7 @@ const Itineraire = () => {
             >
               Retour
             </Button>
-            {errorWhileFetching && (
+            {/* {errorWhileFetching && (
               <Text
                 fontSize={"lg"}
                 color={"red"}
@@ -538,8 +400,8 @@ const Itineraire = () => {
                 An error occured while computing the path, please be sure that
                 the subway stations are oppended
               </Text>
-            )}
-            {screenWidth < 700 && !errorWhileFetching && !showMapMobile && (
+            )} */}
+            {screenWidth < 700 && !showMapMobile && (
               <>
                 {renderMoreDetails()}
                 <Button

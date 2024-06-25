@@ -23,7 +23,6 @@ export function AutocompleteResults({
     } else {
       setDestination({ id: hit.stop_id, name: hit.stop_name });
     }
-    console.log("here");
     setActivePage(ActivePage.Map);
   }, [setDeparture, setDestination, setActivePage, selected]);
 

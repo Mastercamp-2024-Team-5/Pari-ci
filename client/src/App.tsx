@@ -1,5 +1,5 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import { BrowserRouter as Router, Route, Routes, createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Home from "./components/Home/Home";
 import { getCookie } from "./manageCookies";
@@ -9,14 +9,26 @@ import { HomeProvider } from "./components/Home/HomeContext";
 const router = createBrowserRouter(
   [
     {
-      path: "/",
+      index: true,
       element: <Home />,
-
+      ErrorBoundary: () => <div>
+        <center>
+          <h1>404</h1>
+          <p>Page not found</p>
+        </center>
+      </div>
     },
     {
       path: "/path/:id?",
       element: <Home />,
-      loader: () => null
+      loader: async ({ params }) => {
+        return fetch("http://localhost:8000/share/" + params.id).then((response) => {
+          if (!response.ok) {
+            return null;
+          }
+          return response.json();
+        });
+      }
     }
   ]
 )

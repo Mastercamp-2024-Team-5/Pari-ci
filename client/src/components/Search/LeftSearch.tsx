@@ -1,7 +1,7 @@
 import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";
-import { HeaderTitle } from "../Shared/HeaderTitle.tsx";
+import { HeaderTitle } from "./HeaderTitle.tsx";
 import { ActivePage } from "../Shared/enum.tsx";
 import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState } from "react";
@@ -83,7 +83,6 @@ const LeftSearch = ({
               setDepartureInput(e.target.value)
             }}
             onFocus={(e) => {
-              console.log("onFocus", ActivePage.MeilisearchResults);
               setActivePage(ActivePage.MeilisearchResults)
               setSelectedSearch(ActiveSearchInput.Departure)
               e.target.select()

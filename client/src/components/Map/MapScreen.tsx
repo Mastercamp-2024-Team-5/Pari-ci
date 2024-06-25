@@ -28,7 +28,7 @@ const ControlButton: React.FC<{ selectedButton: ActiveRoutes; onSelectButton: (b
   );
 };
 
-const MapScreen: React.FC = React.memo(() => {
+const MapScreen: React.FC = () => {
   const [selectedButton, setSelectedButton] = useState<ActiveRoutes>(ActiveRoutes.Metro);
   const { activePage } = useHomeContext();
 
@@ -54,6 +54,6 @@ const MapScreen: React.FC = React.memo(() => {
       }
     </>
   );
-});
+};
 
 export default MapScreen;

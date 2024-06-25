@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { Layer, Marker, Popup, Source } from 'react-map-gl';
 import Icon from '../Shared/Icon';
 import { Route, RouteTrace, Stop, RouteCollection } from '../Shared/types';
+import { ActiveRoutes } from '../Shared/enum';
 
 interface MapElementsProps {
-  selectedButton: string;
+  selectedButton: ActiveRoutes;
 }
 
 const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
@@ -18,7 +19,7 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
     fetchGeojson(selectedButton);
   }, [selectedButton]);
 
-  const fetchStops = async (buttonType: string) => {
+  const fetchStops = async (buttonType: ActiveRoutes) => {
     try {
       const route_response = await fetch(`http://localhost:8000/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
@@ -49,7 +50,7 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
     }
   };
 
-  const fetchGeojson = async (buttonType: string) => {
+  const fetchGeojson = async (buttonType: ActiveRoutes) => {
     try {
       const route_response = await fetch(`http://localhost:8000/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
@@ -122,5 +123,4 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
   );
 };
 
-const MemoizedMapElements = React.memo(MapElements);
-export default MemoizedMapElements;
+export default MapElements;

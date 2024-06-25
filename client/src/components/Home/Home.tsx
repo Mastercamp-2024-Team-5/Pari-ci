@@ -23,7 +23,7 @@ import Itineraire from "../Itineraire/Itineraire.tsx";
 const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
   const [meilisearchResults, setMeilisearchResults] = useState<Data | null>(null);
-  const { activePage } = useHomeContext();
+  const { activePage, setActivePage } = useHomeContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(ActiveSearchInput.Departure);
   const shared = useLoaderData();
@@ -49,6 +49,11 @@ const Home: React.FC = () => {
     setMeilisearchResults(null);
   }, [selectedSearch]);
 
+  useEffect(() => {
+    if (shared) {
+      setActivePage(ActivePage.Itineraire);
+    }
+  }, [shared, setActivePage]);
 
   if (activePage === ActivePage.Itineraire) {
     return (
@@ -117,11 +122,14 @@ const Home: React.FC = () => {
               />
             </Box>
             <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
-              {
-                activePage === ActivePage.Map && (
-                  <MapScreen />
-                )
-              }
+              <div style={{
+                display: activePage === ActivePage.Map ? "block" : "none",
+                flex: 1,
+                width: "100%",
+                height: "100%",
+              }}>
+                <MapScreen />
+              </div>
               {
                 activePage === ActivePage.MeilisearchResults && (
                   <AutocompleteResults

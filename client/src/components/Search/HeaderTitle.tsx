@@ -1,6 +1,6 @@
 import React from 'react';
-import {Heading, Text} from "@chakra-ui/react";
-import useScreenWidth from "./useScreenWidth.tsx";
+import { Heading, Text } from "@chakra-ui/react";
+import useScreenWidth from "../Shared/useScreenWidth.tsx";
 
 
 export function HeaderTitle(): React.ReactElement {

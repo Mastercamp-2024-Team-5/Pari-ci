@@ -12,6 +12,11 @@ type Props = {
   setIsDestinationFocus: (value: boolean) => void;
 };
 
+type Stop = {
+  stop_name: string;
+  parent_station: string;
+};
+
 const LeftSearch = ({
   fetchDepartureResults,
   fetchDestinationResults,

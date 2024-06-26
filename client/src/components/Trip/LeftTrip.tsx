@@ -8,14 +8,18 @@ import {
 } from "@chakra-ui/react";
 import Stop from "./Stop";
 import StopDetail from "./StopDetail";
-import { useEffect } from "react";
+import {useEffect} from "react";
 import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
+import Rating from "./rating.tsx";
 
 const LeftTrip = () => {
+    const { rated, setRated, showRating, setShowRating, departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
 
-    const { departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
+    const handleTextClick = () => {
+        setShowRating(true);
+    };
 
     useEffect(() => {
         async function refreshData() {
@@ -141,17 +145,16 @@ const LeftTrip = () => {
     }
 
     return (
-        <Center>
+        <Center style={{justifyContent: "center", alignItems: "center"}}>
             <Stack spacing={0} w="100%">
-                <Stack align="center" margin={0} padding={0}>
+
+                    <Stack align="center" margin={0} padding={0}>
                     <Heading
                         fontFamily="Karla"
                         fontWeight="700"
-                        marginTop={"15%"}
+                        marginTop={"5%"}
                         fontSize={"4xl"}
-                        marginBottom={
-                            "5%"
-                        }
+                        marginBottom={"5%"}
                     >
                         CITYMAPPER
                     </Heading>
@@ -231,10 +234,15 @@ const LeftTrip = () => {
                         </Text>
                     </Flex>
                 </Stack>
+
                 <Button
                     bg="#C78484"
                     color="white"
-                    onClick={() => setActiveRightPage(ActiveRightPage.Map)}
+                    onClick={() => {
+                        setActiveRightPage(ActiveRightPage.Map);
+                        setRated(false);
+                        setShowRating(false);
+                    }}
                     padding={7}
                     fontSize={"2xl"}
                     whiteSpace="wrap"
@@ -244,11 +252,26 @@ const LeftTrip = () => {
                     margin={0}
                     marginTop={"5%"}
                     marginBottom={
-                        "5%"
+                        "2%"
                     }
                 >
                     Retour
                 </Button>
+
+                <>
+                    {!showRating && !rated &&
+                        <Text
+                            onClick={handleTextClick}
+                            fontSize={"md"}
+                            color={"#273DFF"}
+                            textDecoration={"underline"}
+                            alignSelf={"center"}
+                            _hover={{ cursor: "pointer" }}
+                        >
+                            Notez votre trajet
+                        </Text>}
+                    {showRating && <Rating totalStars={5} initialRating={5} />}
+                </>
                 {/* {errorWhileFetching && (
               <Text
                 fontSize={"lg"}

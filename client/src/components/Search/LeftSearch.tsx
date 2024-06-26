@@ -11,10 +11,7 @@ type Props = {
   setSelectedSearch: (selectedSearch: ActiveSearchInput) => void;
 };
 
-const LeftSearch = ({
-  fetchMeilisearchResults,
-  setSelectedSearch,
-}: Props) => {
+const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
   const {
     departure,
     destination,
@@ -51,8 +48,14 @@ const LeftSearch = ({
 
   const handleClickItineraire = async () => {
     try {
-      if (startAt === "" && endAt === "" || departure === null || destination === null) {
-        throw new Error("Please fill in the date and time"); //TODO: Make it more user-friendly
+      if (startAt === "" && endAt === "") {
+        throw new Error("Please select a date and time");
+      }
+      if (departure === null) {
+        throw new Error("Please select a departure stop");
+      }
+      if (destination === null) {
+        throw new Error("Please select a destination stop");
       }
       setDataPath(["", []]);
       const date_string = startAt === "" ? endAt : startAt;
@@ -64,7 +67,9 @@ const LeftSearch = ({
       )
         .then((response) => {
           if (response.status === 404) {
-            throw new Error("No path has been found between these two stops at this time");
+            throw new Error(
+              "No path has been found between these two stops at this time"
+            );
           } else if (!response.ok) {
             throw new Error("An error occurred while fetching the data");
           } else {
@@ -96,16 +101,17 @@ const LeftSearch = ({
             type="text"
             placeholder="Départ"
             onChange={(e) => {
-              fetchMeilisearchResults(e.target.value)
-              setDepartureInput(e.target.value)
+              fetchMeilisearchResults(e.target.value);
+              setDepartureInput(e.target.value);
             }}
             onFocus={(e) => {
-              setRightactiveRightPage(ActiveRightPage.MeilisearchResults)
-              setSelectedSearch(ActiveSearchInput.Departure)
-              e.target.select()
+              setRightactiveRightPage(ActiveRightPage.MeilisearchResults);
+              setSelectedSearch(ActiveSearchInput.Departure);
+              fetchMeilisearchResults(e.target.value);
+              e.target.select();
             }}
             onBlur={() => {
-              setRightactiveRightPage(ActiveRightPage.Map)
+              setRightactiveRightPage(ActiveRightPage.Map);
             }}
             focusBorderColor="#5eaf91"
             fontFamily="Karla"
@@ -133,16 +139,17 @@ const LeftSearch = ({
             bg="white"
             borderRadius="15"
             onChange={(e) => {
-              fetchMeilisearchResults(e.target.value)
-              setDestinationInput(e.target.value)
+              fetchMeilisearchResults(e.target.value);
+              setDestinationInput(e.target.value);
             }}
             onFocus={(e) => {
-              setRightactiveRightPage(ActiveRightPage.MeilisearchResults)
-              setSelectedSearch(ActiveSearchInput.Destination)
-              e.target.select()
+              setRightactiveRightPage(ActiveRightPage.MeilisearchResults);
+              setSelectedSearch(ActiveSearchInput.Destination);
+              fetchMeilisearchResults(e.target.value);
+              e.target.select();
             }}
             onBlur={() => {
-              setRightactiveRightPage(ActiveRightPage.Map)
+              setRightactiveRightPage(ActiveRightPage.Map);
             }}
             value={destinationInput}
           />

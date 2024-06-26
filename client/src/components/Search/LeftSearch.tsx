@@ -28,6 +28,7 @@ const LeftSearch = ({
 
   const [departureInput, setDepartureInput] = useState("");
   const [destinationInput, setDestinationInput] = useState("");
+  const [errorMessages, setErrorMessages] = useState<string | null>(null);
 
   useEffect(() => {
     if (departure === null) {
@@ -61,18 +62,26 @@ const LeftSearch = ({
       fetch(
         `http://127.0.0.1:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toLocaleTimeString()}${endAt === "" ? "" : "&reverse"}`
       )
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.status === 404) {
+            throw new Error("No path has been found between these two stops at this time");
+          } else if (!response.ok) {
+            throw new Error("An error occurred while fetching the data");
+          } else {
+            return response.json();
+          }
+        })
         .then((data) => {
           setDataPath(data);
           setRightactiveRightPage(ActiveRightPage.Trip);
         })
         .catch((error) => {
-          if (error.status === 404) {
-            throw new Error("An error occurred while fetching the data");
-          }
+          setErrorMessages(error.message);
         });
-    } catch (error) {
-      alert(error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessages(error.message);
+      }
     }
   };
 
@@ -240,6 +249,18 @@ const LeftSearch = ({
           >
             Trouver l’itinéraire
           </Button>
+          {errorMessages && (
+            <Flex
+              w="100%"
+              bg="red.200"
+              color="red.900"
+              p={4}
+              borderRadius="15"
+              justifyContent="center"
+            >
+              {errorMessages}
+            </Flex>
+          )}
         </VStack>
       </Stack>
     </Center>

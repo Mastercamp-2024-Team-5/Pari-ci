@@ -60,7 +60,10 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       setDataPath(["", []]);
       const date_string = startAt === "" ? endAt : startAt;
       // parse date
+      console.log(date_string);
       const date = new Date(date_string);
+      // remove timezone offset
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
         `http://127.0.0.1:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}`

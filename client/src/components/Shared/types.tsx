@@ -30,12 +30,11 @@ export type TripData = [string, Trip[]];
 export interface Point {
   from: string;
   to: string;
-  line: string;
-  direction: string;
+  line: string | null;
+  direction: string | null;
   nbr: number;
   travel_time: number;
-  depart: number;
-  marche: number;
+  departure_time: number;
 }
 
 export interface TripInfo {

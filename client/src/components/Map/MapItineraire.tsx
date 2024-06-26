@@ -58,7 +58,8 @@ const MapItineraire: React.FC = React.memo(() => {
               && isSameCoordinate(shape.coordinates[0], [nextStopData.stop_lon, nextStopData.stop_lat]))
         }));
         if (part === undefined) {
-          const color = stop.route_id ? `${routes.find((r) => r.route_id === stop.route_id)?.color}` : '808080';
+          const routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
+          const color = routeColor || '808080';
           part = {
             id: "0",
             route_id: stop.route_id,
@@ -69,15 +70,14 @@ const MapItineraire: React.FC = React.memo(() => {
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
-        let routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
-        console.log(routeColor)
-        routeColor = routeColor ? `#${routes.find((r) => r.route_id === stop.route_id)?.color}` : 'grey';
-        stopData.color = routeColor;
+        const routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
+        stopData.color = routeColor ? `#${routeColor}` : 'grey';
       }
 
       const lastStopData = stops.find((s) => s.stop_id === dataPath[1][dataPath[1].length - 1].to_stop_id) || defaultStop;
       itineraire_stops.push(lastStopData);
-      lastStopData.color = `#${routes.find((r) => r.route_id === dataPath[1][dataPath[1].length - 1].route_id)?.color || 'grey'}`;
+      const routeColor = routes.find((r) => r.route_id === dataPath[1][dataPath[1].length - 1].route_id)?.color
+      lastStopData.color = routeColor ? `#${routeColor}` : 'grey';
 
       setMarkers(itineraire_stops);
 
@@ -128,7 +128,10 @@ const MapItineraire: React.FC = React.memo(() => {
           closeButton={false}
         >
           <div>
-            <Icon item={selectedStop.route_short_name} size={23} /><h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
+            {
+              selectedStop.route_short_name && <Icon item={selectedStop.route_short_name} size={23} />
+            }
+            <h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
           </div>
         </Popup>
       )}

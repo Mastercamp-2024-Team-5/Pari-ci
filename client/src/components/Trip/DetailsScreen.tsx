@@ -28,24 +28,41 @@ const DetailsScreen = () => {
                 }}
             >
                 {
-                    dataTrip.points.map((obj: Point, index: number) => (
-                        <MoreDetails
-                            key={index}
-                            ligne={obj.line}
-                            arret1={obj.from}
-                            arret2={obj.to}
-                            depart={addTime(dataTrip.departure, obj.depart)}
-                            arrive={addTime(
-                                dataTrip.departure,
-                                obj.depart + obj.travel_time
-                            )}
-                            direction={obj.direction}
-                            nbrArrets={obj.nbr}
-                            textColor={"black"}
-                            correspondance={index > 0}
-                            marche={obj.marche}
-                        />
-                    ))}
+                    dataTrip.points.map((obj: Point, index: number) => {
+                        if (obj.line && obj.direction) {
+                            return (
+                                <>
+                                    {
+                                        index === 0 && <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="4" marginLeft={"4%"}>Prenez la ligne {obj.line} à {obj.from}</Text>
+
+                                    }
+                                    <MoreDetails
+                                        key={index}
+                                        ligne={obj.line}
+                                        arret1={obj.from}
+                                        arret2={obj.to}
+                                        depart={addTime(dataTrip.departure, obj.departure_time)}
+                                        arrive={addTime(
+                                            dataTrip.departure,
+                                            obj.departure_time + obj.travel_time
+                                        )}
+                                        direction={obj.direction}
+                                        nbrArrets={obj.nbr}
+                                        textColor={"black"}
+                                    />
+                                </>
+                            )
+                        } else {
+                            return (
+                                <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="4" marginLeft={"4%"}>
+                                    {/* {correspondance ? "Correspondance" : "Prenez la ligne"} {ligne} à {arret1}{correspondance ? ", " + marche + " min de marche" : ""} */}
+                                    {index === 0 || index === dataTrip.points.length - 1 ? 'Marchez vers ' + obj.to : 'Correspondance ' + dataTrip.points.map((v, i) => {
+                                        if (i >= index && v.line) { return v.line } else { return null }
+                                    }).filter(x => x !== null)[0] + ' à ' + obj.from}, {(obj.travel_time / 60).toFixed(0)} min de marche
+                                </Text>
+                            )
+                        }
+                    })}
                 <Text
                     fontSize="xl"
                     fontWeight="550"

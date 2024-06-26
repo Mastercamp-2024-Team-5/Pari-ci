@@ -7,7 +7,7 @@ import StopDetail from "./StopDetail";
 import Icon from "../Shared/Icon";
 
 const MoreDetails = (
-  { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor, correspondance, marche }:
+  { ligne, arret1, arret2, depart, arrive, direction, nbrArrets, textColor }:
     {
       ligne: string;
       arret1: string;
@@ -17,8 +17,6 @@ const MoreDetails = (
       direction: string;
       nbrArrets: number;
       textColor: string;
-      correspondance: boolean;
-      marche: number;
     }
 
 ) => {
@@ -28,9 +26,6 @@ const MoreDetails = (
 
   return (
     <Box>
-      <Text fontSize="xl" fontWeight="550" textAlign="start" marginTop="4" marginLeft={"4%"}>
-        {correspondance ? "Correspondance" : "Prenez la ligne"} {ligne} à {arret1}{correspondance ? ", " + marche + " min de marche" : ""}
-      </Text>
       <Flex
         flex={1}
         direction={"column"}

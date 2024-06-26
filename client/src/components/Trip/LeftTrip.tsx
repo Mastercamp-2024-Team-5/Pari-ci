@@ -37,53 +37,47 @@ const LeftTrip = () => {
     }, [dataPath, startAt, endAt, setDataTrip]);
 
 
-    const translateTrip2Points = async (pointList: Trip[]): Promise<Point[]> => {
+    const translateTrip2Points = async (tripList: Trip[]): Promise<Point[]> => {
         const lst: Point[] = [];
-        let lastline = pointList[0].route_short_name;
-        let first = pointList[0];
-        let cpt = 0;
-        let travel_time = 0;
-        let depart = 0;
-        let marche = 0;
         const hash: { [key: string]: string } = {};
+        let lastTime = tripList[0].wait_time;
+        let currentPoint = {
+            from: tripList[0].from_stop_id,
+            to: tripList[0].to_stop_id,
+            line: tripList[0].route_short_name,
+            direction: tripList[0].trip_id,
+            nbr: 1,
+            travel_time: 0,
+            departure_time: 0,
+        } as Point;
 
-        for (let i = 0; i < pointList.length; i++) {
-            travel_time += pointList[i].travel_time;
-            travel_time += pointList[i].wait_time;
-            if (pointList[i].route_short_name) {
-                if (pointList[i].route_short_name === lastline) {
-                    cpt += 1;
-                } else {
-                    lst.push({
-                        line: lastline,
-                        from: first.from_stop_id,
-                        direction: first.trip_id,
-                        to: pointList[i - 1].to_stop_id,
-                        nbr: cpt - 1,
-                        travel_time: travel_time - pointList[i - 1].travel_time,
-                        depart: depart,
-                        marche: marche,
-                    });
-                    lastline = pointList[i].route_short_name;
-                    first = pointList[i];
-                    cpt = 1;
-                    depart = travel_time + depart;
-                    travel_time = 0;
-                    marche = Math.round(pointList[i - 1].travel_time / 60);
-                }
+        for (const trip of tripList) {
+            // check if the trip is on the same line and direction as the previous one
+            if (trip.route_short_name === currentPoint.line) {
+                currentPoint.to = trip.to_stop_id;
+                currentPoint.travel_time += trip.travel_time + trip.wait_time;
+                currentPoint.nbr += 1;
+            } else {
+                // add the current point to the list
+                currentPoint.departure_time = lastTime;
+                lst.push(currentPoint);
+                lastTime += currentPoint.travel_time + trip.wait_time;
+                // create a new point
+                currentPoint = {
+                    from: trip.from_stop_id,
+                    to: trip.to_stop_id,
+                    line: trip.route_short_name,
+                    direction: trip.trip_id,
+                    nbr: 1,
+                    travel_time: trip.travel_time,
+                    departure_time: lastTime + trip.wait_time,
+                } as Point;
             }
         }
 
-        lst.push({
-            line: lastline,
-            from: first.from_stop_id,
-            direction: pointList[pointList.length - 1].trip_id,
-            to: pointList[pointList.length - 1].to_stop_id,
-            nbr: cpt - 1,
-            travel_time: travel_time,
-            depart: depart,
-            marche: marche,
-        } as Point);
+        // add the last point
+        currentPoint.departure_time = lastTime;
+        lst.push(currentPoint);
 
         const fetchStopName = async (stopId: string) => {
             if (hash[stopId]) {
@@ -118,7 +112,9 @@ const LeftTrip = () => {
         for (let i = 0; i < lst.length; i++) {
             lst[i].from = await fetchStopName(lst[i].from);
             lst[i].to = await fetchStopName(lst[i].to);
-            lst[i].direction = await fetchDirection(lst[i].direction);
+            if (lst[i].direction !== null) {
+                lst[i].direction = await fetchDirection(lst[i].direction as string);
+            }
         }
 
         return lst;
@@ -203,7 +199,7 @@ const LeftTrip = () => {
                                 textColor="black"
                                 depart={addTime(
                                     dataTrip.departure,
-                                    dataTrip.points[0].depart
+                                    dataTrip.points[0].departure_time
                                 ).toLocaleTimeString()}
                                 arrive={false}
                                 direction={dataTrip.points[0].direction}
@@ -214,7 +210,7 @@ const LeftTrip = () => {
                                 textColor="black"
                                 depart={addTime(
                                     dataTrip.departure,
-                                    dataTrip.points[dataTrip.points.length - 1].depart +
+                                    dataTrip.points[dataTrip.points.length - 1].departure_time +
                                     dataTrip.points[dataTrip.points.length - 1].travel_time
                                 ).toLocaleTimeString()}
                                 arrive={true}

@@ -23,7 +23,7 @@ const MapItineraire: React.FC = React.memo(() => {
       if (dataPath === null) {
         return;
       }
-      const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
+      const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram&train`);
       const stops: Stop[] = await stops_response.json();
 
       const routes_response = await fetch(`http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`);

@@ -22,6 +22,14 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color="", onMou
     return <Text style={{ color: "red"}}>Icon {item} not found</Text>;
   }
 
+  if (item === "orlyval") {
+    return (
+      <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
+        <i className="icon-orlyval" style={{ fontSize: size, minWidth: 95, color: "#34697f" }}></i>
+      </Box>
+    );
+  }
+
   const colors_metro: { [key: string]: string[] } = {
     "1": ["rgb(255,206,0)", "rgb(37,48,59)"],
     "2": ["rgb(0,100,176)", "white"],

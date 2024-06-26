@@ -1,18 +1,41 @@
 import {
     Flex,
     Text,
+    IconButton,
 } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
 import { Point } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
+import { FaShareAlt } from 'react-icons/fa';
+import React from "react";
 
 const DetailsScreen = () => {
-    const { setActiveRightPage, dataTrip } = useHomeContext();
+    const { setActiveRightPage, dataTrip, dataPath } = useHomeContext();
+    const [shared, setShared] = React.useState(false);
 
     function addTime(date: Date, time: number): Date {
         return new Date(date.getTime() + time * 1000);
     }
+
+    async function handleShared() {
+        if (!shared) {
+            setShared(true);
+
+            // const requestOptions = {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(dataPath)
+            // };
+            // fetch('http://localhost:8000/share', requestOptions)
+            //     .then(response => response.json())
+            //     .then(data => console.log(data));
+    
+        }
+    }
+    
+    
+    
 
     const renderMoreDetails = () => {
         if (!dataTrip) return null;
@@ -46,15 +69,21 @@ const DetailsScreen = () => {
                             marche={obj.marche}
                         />
                     ))}
-                <Text
-                    fontSize="xl"
-                    fontWeight="550"
-                    textAlign="start"
-                    marginTop="5%"
-                    marginLeft={"4%"}
-                >
-                    Arrivé à {dataTrip.arrival.toLocaleTimeString()}
-                </Text>
+                <Flex marginTop="5%" marginX="4%" direction="row" alignItems={"center"} justifyContent={"space-between"}>
+                    <Text
+                        fontSize="xl"
+                        fontWeight="550"
+                        textAlign="start"
+                    >
+                        Arrivé à {dataTrip.arrival.toLocaleTimeString()}
+                    </Text>
+                    <IconButton
+                        aria-label="Share"
+                        icon={<FaShareAlt />}
+                        colorScheme="teal"
+                        onClick={handleShared}
+                        />
+                </Flex>
             </div>
         )
     }

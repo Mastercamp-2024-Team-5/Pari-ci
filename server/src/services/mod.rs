@@ -8,7 +8,9 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use rocket::get;
+use rocket::options;
 use rocket::post;
+use rocket::response::status;
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
 use serde::Serialize;
@@ -435,4 +437,9 @@ pub fn post_share_trip(
         })),
         Err(e) => Err(NotFound(format!("Error sharing trip: {}", e))),
     }
+}
+
+#[options("/share")]
+pub fn options_share<'r>() -> status::Accepted<()> {
+    status::Accepted(())
 }

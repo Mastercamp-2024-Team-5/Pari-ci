@@ -22,20 +22,25 @@ const DetailsScreen = () => {
         if (!shared) {
             setShared(true);
 
-            // const requestOptions = {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(dataPath)
-            // };
-            // fetch('http://localhost:8000/share', requestOptions)
-            //     .then(response => response.json())
-            //     .then(data => console.log(data));
+            console.log(dataPath);
+
+            const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataPath)
+            };
+            fetch('http://localhost:8000/share', requestOptions)
+                .then(response => {
+                    if (!response.ok) {
+                        console.log(response);
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => console.log(data));
 
         }
     }
-
-
-
 
     const renderMoreDetails = () => {
         if (!dataTrip) return null;

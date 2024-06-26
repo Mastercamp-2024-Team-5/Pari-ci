@@ -67,7 +67,11 @@ fn rocket() -> _ {
         .mount("/", routes![services::list_routes_trace])
         .mount(
             "/",
-            routes![services::get_share_trip, services::post_share_trip],
+            routes![
+                services::get_share_trip,
+                services::post_share_trip,
+                services::options_share
+            ],
         )
         .mount(
             "/",

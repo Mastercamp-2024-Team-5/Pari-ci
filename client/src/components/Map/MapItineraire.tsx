@@ -26,7 +26,7 @@ const MapItineraire: React.FC = React.memo(() => {
       const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram`);
       const stops: Stop[] = await stops_response.json();
 
-      const routes_response = await fetch(`http://127.0.0.1:8000/routes_trace?metro&rer&tram`);
+      const routes_response = await fetch(`http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`);
       const routes: RouteTrace[] = await routes_response.json();
 
 
@@ -69,7 +69,9 @@ const MapItineraire: React.FC = React.memo(() => {
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
-        const routeColor = stop.route_id ? `#${routes.find((r) => r.route_id === stop.route_id)?.color}` : 'grey';
+        let routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
+        console.log(routeColor)
+        routeColor = routeColor ? `#${routes.find((r) => r.route_id === stop.route_id)?.color}` : 'grey';
         stopData.color = routeColor;
       }
 

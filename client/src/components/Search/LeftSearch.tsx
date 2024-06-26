@@ -60,7 +60,7 @@ const LeftSearch = ({
       const date = new Date(date_string);
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
-        `http://127.0.0.1:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toLocaleTimeString()}${endAt === "" ? "" : "&reverse"}`
+        `http://127.0.0.1:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}`
       )
         .then((response) => {
           if (response.status === 404) {

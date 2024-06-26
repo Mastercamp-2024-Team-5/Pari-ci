@@ -19,7 +19,6 @@ import { ActiveSearchInput, Data, TripData } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 import { useLoaderData } from "react-router-dom";
 import LeftTrip from "../Trip/LeftTrip.tsx";
-import MoreDetails from "../Trip/MoreDetails.tsx";
 import DetailsScreen from "../Trip/DetailsScreen.tsx";
 
 const Home: React.FC = () => {

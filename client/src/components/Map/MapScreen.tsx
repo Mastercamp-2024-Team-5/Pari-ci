@@ -46,7 +46,7 @@ const MapScreen: React.FC = () => {
         mapStyle="mapbox://styles/mapbox/streets-v9"
       >
         {
-          activeRightPage === ActiveRightPage.Trip ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
+          activeRightPage === ActiveRightPage.Trip || activeRightPage === ActiveRightPage.TripDetails ? <MapItineraire /> : <MapElements selectedButton={selectedButton} />
         }
       </Map>
       {

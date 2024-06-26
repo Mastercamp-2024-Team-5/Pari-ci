@@ -270,9 +270,6 @@ fn main() {
             let mut min_distance = f64::MAX;
             let mut closest_trace = (0_f64, 0_f64);
             for trace in traces.iter().filter(|trace| trace.1 == stop.route_id) {
-                if stop.stop_id == "IDFM:monomodalStopPlace:415093" {
-                    println!("{:?}", trace);
-                }
                 for coord in trace.0.iter() {
                     let distance = tools::haversine_distance(stop_location, *coord);
                     if distance < min_distance {

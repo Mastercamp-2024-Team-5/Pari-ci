@@ -12,6 +12,12 @@ const MapItineraire: React.FC = React.memo(() => {
   const [geojson, setGeojson] = useState<RouteCollection[] | null>(null);
   const { dataPath } = useHomeContext();
 
+  function isSameCoordinate(coord1: [number, number], coord2: [number, number]): boolean {
+    // round to 9 decimal places to avoid floating point errors
+    const fixed = 6;
+    return coord1[0].toFixed(fixed) === coord2[0].toFixed(fixed) && coord1[1].toFixed(fixed) === coord2[1].toFixed(fixed);
+  }
+
   useEffect(() => {
     async function fetchItineraire() {
       if (dataPath === null) {
@@ -44,14 +50,21 @@ const MapItineraire: React.FC = React.memo(() => {
       for (const stop of dataPath[1]) {
         const stopData = stops.find((s) => s.stop_id === stop.from_stop_id && s.route_id === stop.route_id) || stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
         const nextStopData = stops.find((s) => s.stop_id === stop.to_stop_id) || defaultStop;
-        part = (routes.find((r) => ((JSON.parse(r.shape).coordinates[0].toString() === [stopData.stop_lon, stopData.stop_lat].toString()) && (JSON.parse(r.shape).coordinates[JSON.parse(r.shape).coordinates.length - 1].toString() === [nextStopData.stop_lon, nextStopData.stop_lat].toString())) || ((JSON.parse(r.shape).coordinates[JSON.parse(r.shape).coordinates.length - 1].toString()) === [stopData.stop_lon, stopData.stop_lat].toString() && JSON.parse(r.shape).coordinates[0].toString() === [nextStopData.stop_lon, nextStopData.stop_lat].toString())));
+        part = (routes.find((r) => {
+          const shape = JSON.parse(r.shape)
+          return (isSameCoordinate(shape.coordinates[0], [stopData.stop_lon, stopData.stop_lat])
+            && isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [nextStopData.stop_lon, nextStopData.stop_lat]))
+            || (isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [stopData.stop_lon, stopData.stop_lat])
+              && isSameCoordinate(shape.coordinates[0], [nextStopData.stop_lon, nextStopData.stop_lat]))
+        }));
         if (part === undefined) {
+          const color = stop.route_id ? `${routes.find((r) => r.route_id === stop.route_id)?.color}` : '808080';
           part = {
             id: "0",
             route_id: stop.route_id,
             shape: JSON.stringify({ coordinates: [[stopData.stop_lon, stopData.stop_lat], [nextStopData.stop_lon, nextStopData.stop_lat]] }),
             route_type: 0,
-            color: "808080",
+            color: color,
           };
         }
         route_part.push(part);

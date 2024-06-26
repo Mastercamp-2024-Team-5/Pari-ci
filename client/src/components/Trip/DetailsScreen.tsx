@@ -86,21 +86,21 @@ const DetailsScreen = () => {
                             )
                         }
                     })}
-                <Text
-                    fontSize="xl"
-                    fontWeight="550"
-                    textAlign="start"
-                    marginTop="5%"
-                    marginLeft={"4%"}
-                >
-                    Arrivé à {dataTrip.arrival.toLocaleTimeString()}
-                </Text>
-                <IconButton
-                    aria-label="Share"
-                    icon={<FaShareAlt />}
-                    colorScheme="teal"
-                    onClick={handleShared}
-                />
+                <Flex marginTop="5%" marginX="4%" direction="row" alignItems={"center"} justifyContent={"space-between"}>
+                    <Text
+                        fontSize="xl"
+                        fontWeight="550"
+                        textAlign="start"
+                    >
+                        Arrivé à {dataTrip.arrival.toLocaleTimeString()}
+                    </Text>
+                    <IconButton
+                        aria-label="Share"
+                        icon={<FaShareAlt />}
+                        colorScheme="teal"
+                        onClick={handleShared}
+                    />
+                </Flex>
             </div>
         )
     }

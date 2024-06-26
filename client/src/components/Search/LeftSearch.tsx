@@ -48,12 +48,14 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
 
   const handleClickItineraire = async () => {
     try {
-      if (
-        (startAt === "" && endAt === "") ||
-        departure === null ||
-        destination === null
-      ) {
-        throw new Error("Please fill in the date and time"); //TODO: Make it more user-friendly
+      if (startAt === "" && endAt === "") {
+        throw new Error("Please select a date and time");
+      }
+      if (departure === null) {
+        throw new Error("Please select a departure stop");
+      }
+      if (destination === null) {
+        throw new Error("Please select a destination stop");
       }
       setDataPath(["", []]);
       const date_string = startAt === "" ? endAt : startAt;

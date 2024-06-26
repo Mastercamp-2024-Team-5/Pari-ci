@@ -54,6 +54,8 @@ const Home: React.FC = () => {
     if (shared) {
       setActiveRightPage(ActiveRightPage.Trip);
       setDataPath(shared as TripData)
+      //TODO: need to set the start or end at date
+      //TODO: need to set the departure and destination
     }
   }, [shared, setActiveRightPage, setDataPath]);
 

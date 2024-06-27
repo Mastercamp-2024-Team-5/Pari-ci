@@ -28,8 +28,8 @@ export interface Trip {
 export interface SharedTripResponse {
   departure: InputStop;
   destination: InputStop;
-  start_date: string | null;
-  end_date: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   content: [string, Trip[]]
 }
 

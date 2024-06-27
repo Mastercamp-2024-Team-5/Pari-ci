@@ -196,7 +196,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                   // set default value to current date and time
                   if (startAt === "") {
                     setEndAt("");
-                    setStartAt(new Date().toISOString().slice(0, 16));
+                    setStartAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
                   } else {
                     e.target.select();
                   }
@@ -232,7 +232,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                   // set default value to current date and time
                   if (endAt === "") {
                     setStartAt("");
-                    setEndAt(new Date().toISOString().slice(0, 16));
+                    setEndAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
                   } else {
                     e.target.select();
                   }

@@ -321,9 +321,17 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             Rechercher
           </Button>
           {errorMessages && (
-            <Box color="red.500" mt={4}>
+            <Flex
+              w="100%"
+              bg="red.200"
+              color="red.900"
+              p={4}
+              borderRadius="15"
+              justifyContent="center"
+            >
               {errorMessages}
-            </Box>
+            </Flex>
+
           )}
         </VStack>
       </Stack>

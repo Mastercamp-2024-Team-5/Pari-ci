@@ -1,11 +1,21 @@
-import { Center, Stack, VStack, Input, Button, Flex } from "@chakra-ui/react";
+import {
+  Center,
+  Stack,
+  VStack,
+  Input,
+  Button,
+  Flex,
+  Box,
+  useDisclosure,
+} from "@chakra-ui/react";
 import useScreenWidth from "../Shared/useScreenWidth";
 import { useHomeContext } from "./../Home/HomeContext";
 import { HeaderTitle } from "./HeaderTitle.tsx";
 import { ActiveRightPage } from "../Shared/enum.tsx";
 import { ActiveSearchInput } from "../Shared/types.tsx";
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef, useCallback } from "react";
+import { Icon } from "@chakra-ui/react";
+import { MdExpandMore } from "react-icons/md";
 type Props = {
   fetchMeilisearchResults: (textQuery: string) => void;
   setSelectedSearch: (selectedSearch: ActiveSearchInput) => void;
@@ -26,6 +36,9 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
   const [departureInput, setDepartureInput] = useState("");
   const [destinationInput, setDestinationInput] = useState("");
   const [errorMessages, setErrorMessages] = useState<string | null>(null);
+  const [selectedDateType, setSelectedDateType] = useState("startAt");
+  const { isOpen, onToggle, onClose } = useDisclosure();
+  const selectRef = useRef(null);
 
   useEffect(() => {
     if (departure === null) {
@@ -92,6 +105,24 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       }
     }
   };
+
+  const handleSelectDateType = (value: string) => {
+    setSelectedDateType(value);
+    onClose();
+  };
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (selectRef.current && !(selectRef.current as HTMLElement).contains((event.target as Node))) {
+      onClose();
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleClickOutside]);
 
   return (
     <Center>
@@ -167,9 +198,67 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             justify="space-between"
             width="100%"
           >
-            <div style={{ minWidth: "48%", marginRight: "2%" }}>
+            <Box minWidth="48%" marginRight="2%" position="relative" ref={selectRef}>
               <Input
-                color={dateRegex.test(startAt) ? "black" : "gray.400"}
+                as="button"
+                onClick={onToggle}
+                focusBorderColor="#5eaf91"
+                fontFamily="Karla"
+                variant="outline"
+                border="2px"
+                borderColor="gray.200"
+                rounded="md"
+                fontSize={screenWidth < 700 ? "xl" : "lg"}
+                lineHeight={0.5}
+                bg="white"
+                width="100%"
+                paddingTop={6}
+                paddingBottom={8}
+                textAlign="center"
+                borderRadius="15"
+                margin={"0%"}
+                whiteSpace="nowrap"
+                overflow={"hidden"}
+              >
+                <>
+                  {selectedDateType === "startAt" ? "Départ" : "Arrivée"}
+                </>
+                <Icon as={MdExpandMore} />
+              </Input>
+              {isOpen && (
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left={0}
+                  right={0}
+                  bg="white"
+                  border="2px"
+                  borderColor="gray.200"
+                  borderRadius="15"
+                  zIndex={1}
+                >
+                  <Box
+                    p={2}
+                    onClick={() => handleSelectDateType("startAt")}
+                    _hover={{ bg: "gray.100" }}
+                    cursor="pointer"
+                  >
+                    Départ
+                  </Box>
+                  <Box
+                    p={2}
+                    onClick={() => handleSelectDateType("endAt")}
+                    _hover={{ bg: "gray.100" }}
+                    cursor="pointer"
+                  >
+                    Arrivée
+                  </Box>
+                </Box>
+              )}
+            </Box>
+            <Box minWidth="48%">
+              <Input
+                color={dateRegex.test(selectedDateType === "startAt" ? startAt : endAt) ? "black" : "gray.400"}
                 focusBorderColor="#5eaf91"
                 fontFamily="Karla"
                 variant="outline"
@@ -179,58 +268,30 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                 type="datetime-local"
                 fontSize={screenWidth < 700 ? "xl" : "xs"}
                 bg="white"
-                width="100%" // Ensuring constant width
+                width="100%"
                 paddingTop={6}
                 paddingBottom={8}
                 textAlign="center"
                 borderRadius="15"
                 margin={"0%"}
-                value={startAt}
+                value={selectedDateType === "startAt" ? startAt : endAt}
                 whiteSpace="nowrap"
                 overflow={"hidden"}
                 onChange={(e) => {
-                  setEndAt("");
-                  setStartAt(e.target.value);
-                }}
-                onFocus={(e) => {
-                  // set default value to current date and time
-                  if (startAt === "") {
+                  if (selectedDateType === "startAt") {
                     setEndAt("");
-                    setStartAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+                    setStartAt(e.target.value);
                   } else {
-                    e.target.select();
+                    setStartAt("");
+                    setEndAt(e.target.value);
                   }
                 }}
-              />
-            </div>
-            <div style={{ minWidth: "48%" }}>
-              <Input
-                color={dateRegex.test(endAt) ? "black" : "gray.400"}
-                focusBorderColor="#5eaf91"
-                fontFamily="Karla"
-                variant="outline"
-                border="2px"
-                borderColor="gray.200"
-                rounded="md"
-                type="datetime-local"
-                fontSize={screenWidth < 700 ? "xl" : "xs"}
-                bg="white"
-                width="100%" // Ensuring constant width
-                paddingTop={6}
-                paddingBottom={8}
-                textAlign="center"
-                borderRadius="15"
-                margin={"0%"}
-                value={endAt}
-                whiteSpace="nowrap"
-                overflow={"hidden"}
-                onChange={(e) => {
-                  setStartAt("");
-                  setEndAt(e.target.value);
-                }}
                 onFocus={(e) => {
                   // set default value to current date and time
-                  if (endAt === "") {
+                  if (selectedDateType === "startAt" && startAt === "") {
+                    setEndAt("");
+                    setStartAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+                  } else if (selectedDateType === "endAt" && endAt === "") {
                     setStartAt("");
                     setEndAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
                   } else {
@@ -238,7 +299,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                   }
                 }}
               />
-            </div>
+            </Box>
           </Flex>
           <Button
             fontFamily="Karla"
@@ -257,19 +318,12 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             p={screenWidth < 700 ? 10 : 8} // Added padding
             onClick={handleClickItineraire}
           >
-            Trouver l’itinéraire
+            Rechercher
           </Button>
           {errorMessages && (
-            <Flex
-              w="100%"
-              bg="red.200"
-              color="red.900"
-              p={4}
-              borderRadius="15"
-              justifyContent="center"
-            >
+            <Box color="red.500" mt={4}>
               {errorMessages}
-            </Flex>
+            </Box>
           )}
         </VStack>
       </Stack>

@@ -31,18 +31,12 @@ const LeftTrip = () => {
             if (dataPath) {
                 let startDate = new Date(dataPath[0]);
                 let endDate = new Date(dataPath[0]);
-                console.log("startDate", startDate);
-                console.log("endDate", endDate);
-                console.log("startAt", startAt);
-                console.log("endAt", endAt);
                 if (startAt === "") {
                     endDate = new Date(endAt);
                 }
                 else {
                     startDate = new Date(startAt);
                 }
-                console.log("startDate", startDate);
-                console.log("endDate", endDate);
                 const points = await translateTrip2Points(dataPath[1]);
                 setDataTrip({ departure: startDate, arrival: endDate, points });
             }
@@ -61,11 +55,14 @@ const LeftTrip = () => {
             line: tripList[0].route_short_name,
             direction: tripList[0].trip_id,
             nbr: 1,
-            travel_time: 0,
-            departure_time: 0,
+            travel_time: tripList[0].travel_time,
+            departure_time: tripList[0].wait_time,
         } as Point;
 
-        for (const trip of tripList) {
+        let total = tripList[0].travel_time + tripList[0].wait_time;
+
+        for (const trip of tripList.slice(1)) {
+            total += trip.travel_time + trip.wait_time;
             // check if the trip is on the same line and direction as the previous one
             if (trip.route_short_name === currentPoint.line) {
                 currentPoint.to = trip.to_stop_id;
@@ -75,6 +72,7 @@ const LeftTrip = () => {
                 // add the current point to the list
                 currentPoint.departure_time = lastTime;
                 lst.push(currentPoint);
+                // update the last time
                 lastTime += currentPoint.travel_time + trip.wait_time;
                 // create a new point
                 currentPoint = {
@@ -84,9 +82,11 @@ const LeftTrip = () => {
                     direction: trip.trip_id,
                     nbr: 1,
                     travel_time: trip.travel_time,
-                    departure_time: lastTime + trip.wait_time,
+                    departure_time: lastTime,
                 } as Point;
             }
+            console.log(total, "total")
+            console.log(currentPoint.travel_time + lastTime, "currentPoint.travel_time + lastTime")
         }
 
         // add the last point

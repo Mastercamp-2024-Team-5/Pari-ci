@@ -8,16 +8,16 @@ import {
 } from "@chakra-ui/react";
 import Stop from "./Stop";
 import StopDetail from "./StopDetail";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import Rating from "./Rating.tsx";
 
 const LeftTrip = () => {
-    const {  departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
-    const [ isOpen, setIsOpen] = useState(false);
-    const [ hasBeenOpened, setHasBeenOpened] = useState(false);
+    const { departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
+    const [isOpen, setIsOpen] = useState(false);
+    const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
     const handleOpen = () => {
         setIsOpen(true);
@@ -31,12 +31,18 @@ const LeftTrip = () => {
             if (dataPath) {
                 let startDate = new Date(dataPath[0]);
                 let endDate = new Date(dataPath[0]);
+                console.log("startDate", startDate);
+                console.log("endDate", endDate);
+                console.log("startAt", startAt);
+                console.log("endAt", endAt);
                 if (startAt === "") {
                     endDate = new Date(endAt);
                 }
                 else {
                     startDate = new Date(startAt);
                 }
+                console.log("startDate", startDate);
+                console.log("endDate", endDate);
                 const points = await translateTrip2Points(dataPath[1]);
                 setDataTrip({ departure: startDate, arrival: endDate, points });
             }
@@ -149,10 +155,10 @@ const LeftTrip = () => {
     }
 
     return (
-        <Center style={{justifyContent: "center", alignItems: "center"}}>
+        <Center style={{ justifyContent: "center", alignItems: "center" }}>
             <Stack spacing={0} w="100%">
 
-                    <Stack align="center" margin={0} padding={0}>
+                <Stack align="center" margin={0} padding={0}>
                     <Heading
                         fontFamily="Karla"
                         fontWeight="700"

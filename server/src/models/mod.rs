@@ -536,5 +536,9 @@ impl FromStr for RouteTrace {
 pub struct SharedTable {
     pub id: String,
     pub content: String,
+    pub departure: String,
+    pub destination: String,
+    pub start_date: Option<PrimitiveDateTime>,
+    pub end_date: Option<PrimitiveDateTime>,
     pub created_at: PrimitiveDateTime,
 }

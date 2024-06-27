@@ -70,7 +70,6 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       if (destination === null) {
         throw new Error("Please select a destination stop");
       }
-      setDataPath(["", []]);
       const date_string = startAt === "" ? endAt : startAt;
       // parse date
       console.log(date_string);

@@ -36,16 +36,18 @@ const StopDetail = ({ stop, line, textColor, depart, direction, arrive }: { stop
                     >
                         {stop}
                     </Text>
-                    {direction && <Text
-                        margin={"0"}
-                        textColor={textColor}
-                        fontSize={"sm"}
-                        fontWeight={"500"}
-                        whiteSpace={"wrap"}
-                    >
-                        Vers {direction}
-                    </Text>}
-                </Flex>
+                    {
+                        direction && <Text
+                            margin={"0"}
+                            textColor={textColor}
+                            fontSize={"sm"}
+                            fontWeight={"500"}
+                            whiteSpace={"wrap"}
+                        >
+                            Vers {direction}
+                        </Text>
+                    }
+                </Flex >
                 <Text
                     margin={"0"}
                     marginLeft={"5%"}
@@ -57,8 +59,8 @@ const StopDetail = ({ stop, line, textColor, depart, direction, arrive }: { stop
                 >
                     {arrive ? "Arrivé à" : "Départ à"} {depart}
                 </Text>
-            </Flex>
-        </Flex>
+            </Flex >
+        </Flex >
     );
 
 }

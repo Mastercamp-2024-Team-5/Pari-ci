@@ -30,6 +30,7 @@ services:
       command: ["diesel", "migration", "run"]
 
   backend:
+    restart: on-failure
     build:
       context: ./server
     ports:
@@ -41,6 +42,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
 
   frontend:
+    restart: on-failure
     build:
       context: ./client
     ports:

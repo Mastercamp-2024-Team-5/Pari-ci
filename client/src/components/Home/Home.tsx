@@ -8,9 +8,9 @@ import {
   DrawerCloseButton,
   DrawerBody,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from 'react';
-import useScreenWidth from '../Shared/useScreenWidth';
-import { useHomeContext } from './HomeContext';
+import React, { useEffect, useState } from "react";
+import useScreenWidth from "../Shared/useScreenWidth";
+import { useHomeContext } from "./HomeContext";
 import MapScreen from "../Map/MapScreen";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
@@ -23,10 +23,20 @@ import DetailsScreen from "../Trip/DetailsScreen.tsx";
 
 const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
-  const [meilisearchResults, setMeilisearchResults] = useState<Data | null>(null);
-  const { activeRightPage, setActiveRightPage, activeLeftPage, setActiveLeftPage, setDataPath } = useHomeContext();
+  const [meilisearchResults, setMeilisearchResults] = useState<Data | null>(
+    null
+  );
+  const {
+    activeRightPage,
+    setActiveRightPage,
+    activeLeftPage,
+    setActiveLeftPage,
+    setDataPath,
+  } = useHomeContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
-  const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(ActiveSearchInput.Departure);
+  const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(
+    ActiveSearchInput.Departure
+  );
   const shared = useLoaderData();
 
   async function fetchMeilisearchResults(textQuery: string) {
@@ -53,14 +63,17 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (shared) {
       setActiveRightPage(ActiveRightPage.Trip);
-      setDataPath(shared as TripData)
+      setDataPath(shared as TripData);
       //TODO: need to set the start or end at date
       //TODO: need to set the departure and destination
     }
   }, [shared, setActiveRightPage, setDataPath]);
 
   useEffect(() => {
-    if (activeRightPage === ActiveRightPage.Trip || activeRightPage === ActiveRightPage.TripDetails) {
+    if (
+      activeRightPage === ActiveRightPage.Trip ||
+      activeRightPage === ActiveRightPage.TripDetails
+    ) {
       setActiveLeftPage(ActiveLeftPage.Trip);
     } else {
       setActiveLeftPage(ActiveLeftPage.Search);
@@ -69,96 +82,102 @@ const Home: React.FC = () => {
 
   return (
     <>
-      {
-        screenWidth < 700 ? (
-          <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
-            <Box position="relative" minHeight="100vh">
-              <MapScreen />
+      {screenWidth < 700 ? (
+        <Flex flexDirection="column" w="100%" h="100%" overflow="hidden">
+          <Box position="relative" minHeight="100vh">
+            <MapScreen />
 
-              {/* Drawer Handle */}
+            {/* Drawer Handle */}
+            <Box
+              position="fixed"
+              bottom="0"
+              left="0"
+              right="0"
+              bg="white"
+              boxShadow="0px -4px 12px rgba(0, 0, 0, 0.1)"
+              zIndex="999"
+            >
               <Box
-                position="fixed"
-                bottom="0"
-                left="0"
-                right="0"
                 bg="white"
-                boxShadow="0px -4px 12px rgba(0, 0, 0, 0.1)"
-                zIndex="999"
+                p={4}
+                borderBottom="1px solid #E2E8F0"
+                cursor="pointer"
+                display={isDrawerOpen ? "none" : "flex"}
+                alignItems="center"
+                justifyContent="space-between"
+                onClick={() => setIsDrawerOpen(true)}
               >
-                <Box
-                  bg="white"
-                  p={4}
-                  borderBottom="1px solid #E2E8F0"
-                  cursor="pointer"
-                  display={isDrawerOpen ? "none" : "flex"}
-                  alignItems="center"
-                  justifyContent="space-between"
-                  onClick={() => setIsDrawerOpen(true)}
-                >
-                  <span>Search Options</span>
-                  <IconButton icon={<ArrowBackIcon />} aria-label="Open drawer" />
-                </Box>
-
-                {/* Full Drawer Content */}
-                <Drawer
-                  placement="bottom"
-                  onClose={() => setIsDrawerOpen(false)}
-                  isOpen={isDrawerOpen}
-                >
-                  <DrawerOverlay />
-                  <DrawerContent maxH={"90vh"}>
-                    <DrawerCloseButton />
-                    <DrawerBody>
-                      <LeftSearch
-                        fetchMeilisearchResults={fetchMeilisearchResults}
-                        setSelectedSearch={setSelectedSearch}
-                      />
-                    </DrawerBody>
-                  </DrawerContent>
-                </Drawer>
+                <span>Search Options</span>
+                <IconButton icon={<ArrowBackIcon />} aria-label="Open drawer" />
               </Box>
+
+              {/* Full Drawer Content */}
+              <Drawer
+                placement="bottom"
+                onClose={() => setIsDrawerOpen(false)}
+                isOpen={isDrawerOpen}
+              >
+                <DrawerOverlay />
+                <DrawerContent maxH={"90vh"}>
+                  <DrawerCloseButton />
+                  <DrawerBody>
+                    <LeftSearch
+                      fetchMeilisearchResults={fetchMeilisearchResults}
+                      setSelectedSearch={setSelectedSearch}
+                    />
+                  </DrawerBody>
+                </DrawerContent>
+              </Drawer>
             </Box>
-          </Flex>
-        ) : (
-          <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
-            <Box bg="#F6FBF9" minWidth="350px" flexBasis="33%" flexShrink={0} h="100%" p={4}>
-              {
-                activeLeftPage === ActiveLeftPage.Search &&
-                < LeftSearch
-                  fetchMeilisearchResults={fetchMeilisearchResults}
-                  setSelectedSearch={setSelectedSearch}
-                />
-              }
-              {
-                activeLeftPage === ActiveLeftPage.Trip && <LeftTrip />
-              }
-            </Box>
-            <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
-              <div style={{
-                display: activeRightPage === ActiveRightPage.Map || activeRightPage === ActiveRightPage.Trip ? "block" : "none",
+          </Box>
+        </Flex>
+      ) : (
+        <Flex flexDirection="row" w="100%" h="100%" overflow="hidden">
+          <Box
+            bg="#F6FBF9"
+            minWidth="350px"
+            flexBasis="33%"
+            flexShrink={0}
+            h="100%"
+            p={4}
+            overflowY="auto"
+            // overflowstyle
+          >
+            {activeLeftPage === ActiveLeftPage.Search && (
+              <LeftSearch
+                fetchMeilisearchResults={fetchMeilisearchResults}
+                setSelectedSearch={setSelectedSearch}
+              />
+            )}
+            {activeLeftPage === ActiveLeftPage.Trip && <LeftTrip />}
+          </Box>
+          <Box flexBasis="67%" flexShrink={1} h="100%" display="flex">
+            <div
+              style={{
+                display:
+                  activeRightPage === ActiveRightPage.Map ||
+                  activeRightPage === ActiveRightPage.Trip
+                    ? "block"
+                    : "none",
                 flex: 1,
                 width: "100%",
                 height: "100%",
-              }}>
-                <MapScreen />
-              </div>
-              {
-                activeRightPage === ActiveRightPage.MeilisearchResults && (
-                  <AutocompleteResults
-                    results={meilisearchResults}
-                    selected={selectedSearch}
-                  />
-                )
-              }
-              {
-                activeRightPage === ActiveRightPage.TripDetails && (
-                  <DetailsScreen />
-                )
-              }
-            </Box>
-          </Flex>
-        )
-      }
+              }}
+            >
+              <MapScreen />
+            </div>
+            {activeRightPage === ActiveRightPage.MeilisearchResults && (
+              <AutocompleteResults
+                results={meilisearchResults}
+                selected={selectedSearch}
+              />
+            )}
+            {activeRightPage === ActiveRightPage.TripDetails && (
+              <DetailsScreen />
+            )}
+          </Box>
+        </Flex>
+      )}
     </>
   );
 };

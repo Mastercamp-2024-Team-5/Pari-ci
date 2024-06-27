@@ -8,18 +8,22 @@ import {
 } from "@chakra-ui/react";
 import Stop from "./Stop";
 import StopDetail from "./StopDetail";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
-import Rating from "./rating.tsx";
+import Rating from "./Rating.tsx";
 
 const LeftTrip = () => {
-    const { rated, setRated, showRating, setShowRating, departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
+    const {  departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
+    const [ isOpen, setIsOpen] = useState(false);
+    const [ hasBeenOpened, setHasBeenOpened] = useState(false);
 
-    const handleTextClick = () => {
-        setShowRating(true);
-    };
+    const handleOpen = () => {
+        setIsOpen(true);
+        setHasBeenOpened(true);
+    }
+    const handleClose = () => setIsOpen(false);
 
     useEffect(() => {
         async function refreshData() {
@@ -240,8 +244,8 @@ const LeftTrip = () => {
                     color="white"
                     onClick={() => {
                         setActiveRightPage(ActiveRightPage.Map);
-                        setRated(false);
-                        setShowRating(false);
+                        // setRated(false);
+                        // setShowRating(false);
                     }}
                     padding={7}
                     fontSize={"2xl"}
@@ -259,9 +263,9 @@ const LeftTrip = () => {
                 </Button>
 
                 <>
-                    {!showRating && !rated &&
+                    {!hasBeenOpened &&
                         <Text
-                            onClick={handleTextClick}
+                            onClick={handleOpen}
                             fontSize={"md"}
                             color={"#273DFF"}
                             textDecoration={"underline"}
@@ -269,22 +273,10 @@ const LeftTrip = () => {
                             _hover={{ cursor: "pointer" }}
                         >
                             Notez votre trajet
-                        </Text>}
-                    {showRating && <Rating totalStars={5} initialRating={5} />}
+                        </Text>
+                    }
+                    <Rating totalStars={5} initialRating={5} isOpen={isOpen} onClose={handleClose} />
                 </>
-                {/* {errorWhileFetching && (
-              <Text
-                fontSize={"lg"}
-                color={"red"}
-                alignSelf={"center"}
-                _hover={{ cursor: "pointer" }}
-                textAlign={"center"}
-                margin={"5%"}
-              >
-                An error occured while computing the path, please be sure that
-                the subway stations are oppended
-              </Text>
-            )} */}
             </Stack>
         </Center >
     )

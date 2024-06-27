@@ -7,6 +7,7 @@ use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
 use crate::schema::routes_trace;
+use crate::schema::shared_table;
 use crate::schema::stop_times;
 use crate::schema::transfers;
 // use crate::tools::graph::Graph;
@@ -15,6 +16,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use time::format_description;
 use time::Date;
+use time::PrimitiveDateTime;
 use uuid::Uuid;
 
 #[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
@@ -529,104 +531,14 @@ impl FromStr for RouteTrace {
     }
 }
 
-// #[derive(Deserialize, Serialize, Debug)]
-// struct Shape {
-//     coordinates: Vec<Vec<Vec<f64>>>,
-//     type_: String,
-// }
-
-// impl Shape {
-//     fn to_graph(&self) -> Graph {
-//         let mut graph = Graph::new();
-//         for line in &self.coordinates {
-//             for point in line {
-//                 let node_id = format!("{},{}", point[0], point[1]);
-//                 graph.add_node(node_id.clone());
-//             }
-//             for i in 0..line.len() - 1 {
-//                 let node_id1 = format!("{},{}", line[i][0], line[i][1]);
-//                 let node_id2 = format!("{},{}", line[i + 1][0], line[i + 1][1]);
-//                 graph.add_edge(node_id1, node_id2, 1);
-//             }
-//         }
-//         graph
-//     }
-
-//     fn new(geojson: &str) -> Self {
-//         // Parse the shape string as JSON
-//         let shape = geojson
-//             .replace("\"\"", "\"")
-//             .replace("\"{", "{")
-//             .replace("}\"", "}")
-//             .replace("type", "type_");
-//         serde_json::from_str(&shape).unwrap()
-//     }
-// }
-
-// fn shape_to_string(shape: &str) -> String {
-//     let shape = Shape::new(shape);
-//     let graph = shape.to_graph();
-
-//     graph.draw("graph.dot", "graph.png");
-//     let mut graphs = graph.get_subgraphs();
-//     println!("{:?}", graphs.len());
-//     for graph in graphs.iter_mut() {
-//         *graph = graph.into_tree().unwrap();
-//     }
-//     // reformat the graph to a list of lines (each line is a list of points (lat, lon, stop_id))
-//     // line must be in order of the route
-//     let mut lines = Vec::new();
-//     for graph in graphs {
-//         let starts = graph.get_root().unwrap();
-//         // follow the tree to get the order of the stops
-//         // if a node as multiple children, we must split the line in two
-//         for start in starts {
-//             let mut line = Vec::new();
-//             let mut visited = Vec::new();
-//             let mut current = start;
-//             let mut unfinished_lines: Vec<(String, String)> = Vec::new();
-//             loop {
-//                 visited.push(current.clone());
-//                 line.push(current.clone());
-//                 let children = graph.get_children(&current);
-//                 if children.len() == 0 {
-//                     // we reached the end of the line
-//                     lines.push(line.clone());
-//                     line.clear();
-//                     // check if there are unfinished lines
-//                     if unfinished_lines.len() > 0 {
-//                         let (parent, child) = unfinished_lines.pop().unwrap();
-//                         line.push(parent.clone());
-//                         current = child.clone();
-//                     } else {
-//                         break;
-//                     }
-//                 } else if children.len() == 1 {
-//                     // only one child, we can continue
-//                     current = children[0].clone();
-//                 } else {
-//                     // multiple children, we must split the line
-//                     // we save the current line and continue with the first child
-//                     unfinished_lines.push((current, children[1].clone()));
-//                     current = children[0].clone();
-//                 }
-//             }
-//         }
-//     }
-//     // format the lines to a json string
-//     let mut shape = String::new();
-//     shape.push_str("{\"coordinates\":[");
-//     for line in lines {
-//         shape.push('[');
-//         for node in line {
-//             shape.push_str("\"");
-//             shape.push_str(&node);
-//             shape.push_str("\",");
-//         }
-//         shape.pop();
-//         shape.push_str("],");
-//     }
-//     shape.pop();
-//     shape.push_str("],\"type\":\"LineString\"}");
-//     shape
-// }
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = shared_table)]
+pub struct SharedTable {
+    pub id: String,
+    pub content: String,
+    pub departure: String,
+    pub destination: String,
+    pub start_date: Option<PrimitiveDateTime>,
+    pub end_date: Option<PrimitiveDateTime>,
+    pub created_at: PrimitiveDateTime,
+}

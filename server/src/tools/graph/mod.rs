@@ -80,6 +80,7 @@ impl Graph {
         start: NodeIndex,
         goal: NodeIndex,
         hour: usize,
+        reverse: bool,
     ) -> Option<(u32, Vec<NodeIndex>)> {
         let start_index = *self.node_indices.get(&start)?;
         let goal_index = *self.node_indices.get(&goal)?;
@@ -120,7 +121,11 @@ impl Graph {
             for edge in &self.nodes[position].edges {
                 // check if there is a trip between the two stops at the current hour
                 if let Some(trip_per_hour) = &edge.trip_per_hour {
-                    let current_hour = hour + (cost / 3600) as usize;
+                    let current_hour = if reverse {
+                        hour - (cost / 3600) as usize
+                    } else {
+                        hour + (cost / 3600) as usize
+                    };
                     if trip_per_hour[current_hour % 30] == 0 {
                         continue;
                     }

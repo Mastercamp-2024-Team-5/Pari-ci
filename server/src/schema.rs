@@ -74,6 +74,21 @@ diesel::table! {
 }
 
 diesel::table! {
+    shared_table (id) {
+        #[max_length = 36]
+        id -> Varchar,
+        content -> Text,
+        #[max_length = 255]
+        departure -> Varchar,
+        #[max_length = 255]
+        destination -> Varchar,
+        start_date -> Nullable<Timestamp>,
+        end_date -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     stop_times (trip_id, stop_id, stop_sequence, arrival_time, departure_time) {
         #[max_length = 255]
         trip_id -> Varchar,
@@ -165,6 +180,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     calendar_dates,
     routes,
     routes_trace,
+    shared_table,
     stop_times,
     stops,
     transfers,

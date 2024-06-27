@@ -1,7 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react";
-import Icon from "../Shared/Icon";
 
-const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; textColor: string; color: string }) => {
+const Stop = ({ name, textColor }: { name: string; textColor: string }) => {
     return (
         <Flex
             flex={1}
@@ -15,10 +14,9 @@ const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; te
             paddingY={0}
             bg={"white"}
             alignItems={"center"} // Ensure Flex container items are centered
+            minHeight={"63px"}
         >
-            <Icon item={line} size={"40px"}/>
             <Text
-                marginLeft={"5%"}
                 width={"85%"}
                 alignContent={"center"}
                 justifyContent={"center"}
@@ -26,7 +24,7 @@ const Stop = ({ stop, line, color, textColor }: { stop: string; line: string; te
                 fontSize={"lg"} // Increased font size
                 fontWeight={"500"} // Added font weight
             >
-                {stop}
+                {name}
             </Text>
         </Flex>
     );

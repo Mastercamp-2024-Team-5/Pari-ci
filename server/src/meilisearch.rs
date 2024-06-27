@@ -35,16 +35,8 @@ pub fn get_stopentries() -> Vec<StopEntry> {
             ),
         )
         .filter(schema::stops::location_type.eq(0))
-        .filter(
-            schema::agency::name
-                .eq("RATP")
-                .or(schema::agency::name.eq("SNCF")),
-        )
-        .filter(
-            schema::routes::route_type
-                .eq(1)
-                .or(schema::routes::route_type.eq(2)),
-        )
+        .filter(schema::agency::agency_id.ne("IDFM:93"))
+        .filter(schema::routes::route_type.eq_any(vec![0, 1, 2]))
         .select((
             parent_station,
             stop_name,
@@ -62,7 +54,10 @@ pub fn get_stopentries() -> Vec<StopEntry> {
     let mut output_stops: Vec<StopEntry> = Vec::new();
     for stop in result {
         // id is a base64 encoding of the stop_id
-        let id = general_purpose::URL_SAFE_NO_PAD.encode(stop.0.as_bytes());
+        let mut id = general_purpose::URL_SAFE_NO_PAD.encode(stop.0.as_bytes());
+        id += general_purpose::URL_SAFE_NO_PAD
+            .encode((stop.1).as_bytes())
+            .as_str();
         let stop_result = StopEntry {
             id,
             stop_id: stop.0.clone(),

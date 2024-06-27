@@ -1,38 +1,57 @@
 // HomeContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { ActiveLeftPage, ActiveRightPage } from "../Shared/enum.tsx";
+import { InputStop, TripData, TripInfo } from "../Shared/types";
 
 interface HomeContextType {
-  departure: string;
-  setDeparture: React.Dispatch<React.SetStateAction<string>>;
-  destination: string;
-  setDestination: React.Dispatch<React.SetStateAction<string>>;
+  departure: InputStop | null;
+  setDeparture: React.Dispatch<React.SetStateAction<InputStop | null>>;
+  destination: InputStop | null;
+  setDestination: React.Dispatch<React.SetStateAction<InputStop | null>>;
   startAt: string;
   setStartAt: React.Dispatch<React.SetStateAction<string>>;
   endAt: string;
   setEndAt: React.Dispatch<React.SetStateAction<string>>;
-  ItininerairePage: boolean;
-  setItininerairePage: React.Dispatch<React.SetStateAction<boolean>>;
-  DataPath: any;
-    setDataPath: React.Dispatch<React.SetStateAction<any>>;
+  dataPath: TripData | null;
+  setDataPath: React.Dispatch<React.SetStateAction<TripData | null>>;
+  activeRightPage: ActiveRightPage;
+  setActiveRightPage: React.Dispatch<React.SetStateAction<ActiveRightPage>>;
+  activeLeftPage: ActiveLeftPage;
+  setActiveLeftPage: React.Dispatch<React.SetStateAction<ActiveLeftPage>>;
+  dataTrip: TripInfo | null;
+  setDataTrip: React.Dispatch<React.SetStateAction<TripInfo | null>>;
+  showRating: boolean;
+  setShowRating: React.Dispatch<React.SetStateAction<boolean>>;
+  rated: boolean;
+  setRated: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defaultContext: HomeContextType = {
-  departure: '',
-  setDeparture: () => {},
-  destination: '',
-  setDestination: () => {},
-  startAt: '',
-  setStartAt: () => {},
-  endAt: '',
-  setEndAt: () => {},
-  ItininerairePage: false,
-  setItininerairePage: () => {},
-  DataPath: {},
-  setDataPath: () => {},
+  departure: null,
+  setDeparture: () => { },
+  destination: null,
+  setDestination: () => { },
+  startAt: "",
+  setStartAt: () => { },
+  endAt: "",
+  setEndAt: () => { },
+  dataPath: null,
+  setDataPath: () => { },
+  activeRightPage: ActiveRightPage.Map,
+  setActiveRightPage: () => { },
+  activeLeftPage: ActiveLeftPage.Search,
+  setActiveLeftPage: () => { },
+  dataTrip: null,
+  setDataTrip: () => { },
+  showRating: false,
+  setShowRating: () => { },
+  rated: false,
+  setRated: () => { },
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHomeContext = () => {
   return useContext(HomeContext);
 };
@@ -42,12 +61,17 @@ interface HomeProviderProps {
 }
 
 export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
-  const [departure, setDeparture] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startAt, setStartAt] = useState('');
-  const [endAt, setEndAt] = useState('');
-  const [ItininerairePage, setItininerairePage] = useState(false);
-  const [DataPath, setDataPath] = useState({});
+
+  const [departure, setDeparture] = useState<InputStop | null>(null);
+  const [destination, setDestination] = useState<InputStop | null>(null);
+  const [startAt, setStartAt] = useState("");
+  const [endAt, setEndAt] = useState("");
+  const [dataPath, setDataPath] = useState<TripData | null>(null);
+  const [activeRightPage, setActiveRightPage] = useState(ActiveRightPage.Map);
+  const [activeLeftPage, setActiveLeftPage] = useState(ActiveLeftPage.Search);
+  const [dataTrip, setDataTrip] = useState<TripInfo | null>(null);
+  const [showRating, setShowRating] = useState(false);
+  const [rated, setRated] = useState(false);
 
   const value: HomeContextType = {
     departure,
@@ -58,10 +82,18 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setStartAt,
     endAt,
     setEndAt,
-    ItininerairePage,
-    setItininerairePage,
-    DataPath,
+    dataPath,
     setDataPath,
+    activeRightPage,
+    setActiveRightPage,
+    activeLeftPage,
+    setActiveLeftPage,
+    dataTrip,
+    setDataTrip,
+    showRating,
+    setShowRating,
+    rated,
+    setRated,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

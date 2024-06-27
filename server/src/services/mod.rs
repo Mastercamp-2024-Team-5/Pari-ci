@@ -3,12 +3,22 @@ extern crate diesel;
 extern crate rocket;
 use crate::models;
 use crate::schema;
+use crate::views::services::PathNode;
+use diesel::alias;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use rocket::get;
+use rocket::options;
+use rocket::post;
+use rocket::response::status;
+use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+use serde::Deserialize;
+use serde::Serialize;
 use std::env;
+use time::OffsetDateTime;
+use time::PrimitiveDateTime;
 
 pub fn establish_connection_pg() -> PgConnection {
     dotenv().ok();
@@ -49,20 +59,21 @@ pub fn add_agencies(documents: &Vec<models::Agency>) -> Result<(), diesel::resul
 }
 
 // return a list of routes in JSON format
-#[get("/routes?<metro>&<rer>&<tram>")]
+#[get("/routes?<metro>&<rer>&<tram>&<train>")]
 pub fn list_routes(
     metro: Option<bool>,
     rer: Option<bool>,
     tram: Option<bool>,
+    train: Option<bool>,
 ) -> Json<Vec<models::Route>> {
     use schema::routes::dsl::*;
     let connection = &mut establish_connection_pg();
-    let results = routes.into_boxed();
+    let mut results = routes.into_boxed();
     let mut filters = Vec::<i32>::new();
     if metro.unwrap_or(false) {
         filters.push(1);
     }
-    if rer.unwrap_or(false) {
+    if rer.unwrap_or(false) || train.unwrap_or(false) {
         filters.push(2);
     }
     if tram.unwrap_or(false) {
@@ -75,6 +86,11 @@ pub fn list_routes(
                 .load::<models::Route>(connection)
                 .expect("Error loading routes"),
         );
+    }
+    if rer.unwrap_or(false) && !train.unwrap_or(false) {
+        results = results.filter(agency_id.ne("IDFM:1046"));
+    } else if train.unwrap_or(false) && !rer.unwrap_or(false) {
+        results = results.filter(agency_id.eq("IDFM:1046"));
     }
     let results = results
         .filter(route_type.eq_any(filters))
@@ -299,6 +315,13 @@ pub fn list_routes_trace(
     tram: Option<bool>,
     train: Option<bool>,
 ) -> Json<Vec<models::RouteTrace>> {
+    use schema::routes::dsl as r_dsl;
+    use schema::routes_trace::dsl as rt_dsl;
+    let connection = &mut establish_connection_pg();
+    let mut results = rt_dsl::routes_trace
+        .inner_join(r_dsl::routes.on(r_dsl::route_id.eq(rt_dsl::route_id)))
+        .into_boxed();
+
     let mut filter = Vec::<i32>::new();
     if metro.unwrap_or(false) {
         filter.push(1);
@@ -312,13 +335,17 @@ pub fn list_routes_trace(
     if train.unwrap_or(false) {
         filter.push(2)
     }
+    if rer.unwrap_or(false) && !train.unwrap_or(false) {
+        results = results.filter(r_dsl::agency_id.ne("IDFM:1046"));
+    } else if train.unwrap_or(false) && !rer.unwrap_or(false) {
+        results = results.filter(r_dsl::agency_id.eq("IDFM:1046"));
+    }
     if filter.is_empty() {
         return Json(Vec::<models::RouteTrace>::new());
     }
-    use schema::routes_trace::dsl::*;
-    let connection = &mut establish_connection_pg();
-    let results = routes_trace
-        .filter(route_type.eq_any(filter))
+    let results = results
+        .filter(r_dsl::route_type.eq_any(filter))
+        .select(rt_dsl::routes_trace::all_columns())
         .load::<models::RouteTrace>(connection)
         .expect("Error loading routes_trace");
     Json(results)
@@ -350,4 +377,130 @@ pub fn add_routes_trace(
         }
     }
     Ok(1)
+}
+
+fn add_shared_trip(document: models::SharedTable) -> Result<(), diesel::result::Error> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(shared_table)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+fn get_shared_trip(document_id: &str) -> Result<models::SharedTable, diesel::result::Error> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let result = shared_table
+        .filter(id.eq(document_id))
+        .first::<models::SharedTable>(connection);
+    result
+}
+
+#[get("/share/<document_id>")]
+pub fn get_share_trip(document_id: &str) -> Result<Json<SharedTrip>, NotFound<String>> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let (stop_1, stop_2) = alias!(schema::stops as stop_1, schema::stops as stop_2);
+    let result = shared_table
+        .inner_join(stop_1.on(departure.eq(stop_1.fields(schema::stops::stop_id))))
+        .inner_join(stop_2.on(destination.eq(stop_2.fields(schema::stops::stop_id))))
+        .filter(id.eq(document_id))
+        .select((
+            departure,
+            destination,
+            start_date,
+            end_date,
+            content,
+            stop_1.fields(schema::stops::stop_name),
+            stop_2.fields(schema::stops::stop_name),
+        ))
+        .first::<(
+            String,
+            String,
+            Option<PrimitiveDateTime>,
+            Option<PrimitiveDateTime>,
+            String,
+            String,
+            String,
+        )>(connection);
+    match result {
+        Ok(shared_trip) => {
+            let path_content: Result<(PrimitiveDateTime, Vec<PathNode>), serde_json::error::Error> =
+                serde_json::from_str(&shared_trip.4);
+            match path_content {
+                Ok(path) => Ok(Json(SharedTrip {
+                    departure: StopInfo {
+                        id: shared_trip.0,
+                        name: shared_trip.5,
+                    },
+                    destination: StopInfo {
+                        id: shared_trip.1,
+                        name: shared_trip.6,
+                    },
+                    start_date: shared_trip.2,
+                    end_date: shared_trip.3,
+                    content: path,
+                })),
+                Err(e) => Err(NotFound(format!(
+                    "Error parsing shared trip content: {}",
+                    e
+                ))),
+            }
+        }
+        Err(_) => Err(NotFound(format!(
+            "No shared trip found with id {}",
+            document_id
+        ))),
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct SharedTripResponse {
+    id: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct StopInfo {
+    id: String,
+    name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SharedTrip {
+    departure: StopInfo,
+    destination: StopInfo,
+    start_date: Option<PrimitiveDateTime>,
+    end_date: Option<PrimitiveDateTime>,
+    content: (PrimitiveDateTime, Vec<PathNode>),
+}
+
+#[post("/share", data = "<document>", format = "json")]
+pub fn post_share_trip(
+    document: Json<SharedTrip>,
+) -> Result<Json<SharedTripResponse>, NotFound<String>> {
+    let document_id = uuid::Uuid::new_v4().as_simple().to_string();
+    let datetime = OffsetDateTime::now_utc();
+    let document = document.into_inner();
+    let shared_trip = models::SharedTable {
+        id: document_id.clone(),
+        content: serde_json::to_string(&document.content).unwrap(),
+        departure: document.departure.id,
+        destination: document.destination.id,
+        start_date: document.start_date,
+        end_date: document.end_date,
+        created_at: PrimitiveDateTime::new(datetime.date(), datetime.time()),
+    };
+    let result = add_shared_trip(shared_trip);
+    match result {
+        Ok(_) => Ok(Json(SharedTripResponse {
+            id: document_id.clone(),
+        })),
+        Err(e) => Err(NotFound(format!("Error sharing trip: {}", e))),
+    }
+}
+
+#[options("/share")]
+pub fn options_share<'r>() -> status::Accepted<()> {
+    status::Accepted(())
 }

@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Layer, Marker, Popup, Source } from 'react-map-gl';
 import Icon from '../Shared/Icon';
-import coordinates from './coordinates/coordinates';
-import { Stop, Route, RouteCollection, RouteTrace } from './MapScreen';
+import { Route, RouteTrace, Stop, RouteCollection } from '../Shared/types';
+import { ActiveRoutes } from '../Shared/enum';
 
 interface MapElementsProps {
-  selectedButton: string;
+  selectedButton: ActiveRoutes;
 }
 
 const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
@@ -19,7 +19,7 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
     fetchGeojson(selectedButton);
   }, [selectedButton]);
 
-  const fetchStops = async (buttonType: string) => {
+  const fetchStops = async (buttonType: ActiveRoutes) => {
     try {
       const route_response = await fetch(`http://localhost:8000/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
@@ -35,13 +35,22 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
         stop.color = `#${routes.find(route => route.route_id === stop.route_id)?.color}`;
       });
 
-      setUniqueMarkers(data.filter(stop => coordinates[buttonType].flat(2).includes(stop.stop_id)));
+      const uniqueData = data.reduce((acc: Stop[], current: Stop) => {
+        const x = acc.find(item => item.parent_station === current.parent_station && item.route_id === current.route_id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+
+      setUniqueMarkers(uniqueData);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const fetchGeojson = async (buttonType: string) => {
+  const fetchGeojson = async (buttonType: ActiveRoutes) => {
     try {
       const route_response = await fetch(`http://localhost:8000/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
@@ -114,5 +123,4 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
   );
 };
 
-const MemoizedMapElements = React.memo(MapElements);
-export default MemoizedMapElements;
+export default MapElements;

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Center,
   Stack,
@@ -20,18 +19,15 @@ import Icon from "../Shared/Icon";
 import accessibility1 from "./../../assets/accessibility1.jpg";
 import accessibility2 from "./../../assets/accessibility2.jpg";
 import accessibility3 from "./../../assets/accessibility3.jpg";
+import { setCookie } from "../../manageCookies";
 
-type AccessibleScreenProps = {
-  setAccessibleScreen: (value: boolean) => void;
-  setStationAccessibleOnly: (value: boolean) => void;
-  stationAccessibleOnly: boolean;
+type Props = {
+  setAccessibleScreen: (accessibleScreen: boolean) => void;
 };
 
-const AccessibleScreen = ({
-  setAccessibleScreen,
-  setStationAccessibleOnly,
-  stationAccessibleOnly,
-}: AccessibleScreenProps) => {
+const AccessibleScreen = (
+  { setAccessibleScreen }: Props
+) => {
   const settings = {
     dots: true,
     infinite: true,
@@ -100,9 +96,10 @@ const AccessibleScreen = ({
               borderRadius="10"
               marginBottom={screenWidth < 700 ? "0" : "5%"}
               p={6}
-              onClick={() => (
-                setStationAccessibleOnly(true), setAccessibleScreen(true)
-              )}
+              onClick={() => {
+                setAccessibleScreen(false);
+                setCookie("AccessibleStationOnly", "true");
+              }}
               marginTop={screenWidth < 700 ? "10%" : "20%"}
             >
               Oui
@@ -120,9 +117,10 @@ const AccessibleScreen = ({
               alignSelf="center"
               borderRadius="10"
               p={6}
-              onClick={() => (
-                setStationAccessibleOnly(false), setAccessibleScreen(true)
-              )}
+              onClick={() => {
+                setAccessibleScreen(false);
+                setCookie("AccessibleStationOnly", "false");
+              }}
             >
               Non
             </Button>
@@ -148,64 +146,66 @@ const AccessibleScreen = ({
           margin={0}
           padding={0}
         >
-          <Slider {...settings} style={{ width: "70%", height: "100%" }}>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height="100%"
-              margin={0}
-              padding={0}
-            >
-              <Image
-                src={accessibility1}
-                alt="Image 1"
-                style={{
-                  width: width_picture,
-                  height: height_picture,
-                  objectFit: "contain", // Ensure the image fits within the container without being cut
-                  objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 700 ? "12.5%" : "4%",
-                }}
-              />
-            </Box>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height="100%"
-            >
-              <Image
-                src={accessibility2}
-                alt="Image 2"
-                style={{
-                  width: width_picture,
-                  height: height_picture,
-                  objectFit: "contain", // Ensure the image fits within the container without being cut
-                  objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 700 ? "16%" : "4%",
-                }}
-              />
-            </Box>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height="100%"
-            >
-              <Image
-                src={accessibility3}
-                alt="Image 3"
-                style={{
-                  width: width_picture,
-                  height: height_picture,
-                  objectFit: "contain", // Ensure the image fits within the container without being cut
-                  objectPosition: "center", // Center the image
-                  marginTop: screenWidth < 700 ? "16%" : "4%",
-                }}
-              />
-            </Box>
-          </Slider>
+          <Box style={{ width: "70%", height: "100%" }}>
+            <Slider {...settings}>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%"
+                margin={0}
+                padding={0}
+              >
+                <Image
+                  src={accessibility1}
+                  alt="Image 1"
+                  style={{
+                    width: width_picture,
+                    height: height_picture,
+                    objectFit: "contain", // Ensure the image fits within the container without being cut
+                    objectPosition: "center", // Center the image
+                    marginTop: screenWidth < 700 ? "12.5%" : "4%",
+                  }}
+                />
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%"
+              >
+                <Image
+                  src={accessibility2}
+                  alt="Image 2"
+                  style={{
+                    width: width_picture,
+                    height: height_picture,
+                    objectFit: "contain", // Ensure the image fits within the container without being cut
+                    objectPosition: "center", // Center the image
+                    marginTop: screenWidth < 700 ? "16%" : "4%",
+                  }}
+                />
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%"
+              >
+                <Image
+                  src={accessibility3}
+                  alt="Image 3"
+                  style={{
+                    width: width_picture,
+                    height: height_picture,
+                    objectFit: "contain", // Ensure the image fits within the container without being cut
+                    objectPosition: "center", // Center the image
+                    marginTop: screenWidth < 700 ? "16%" : "4%",
+                  }}
+                />
+              </Box>
+            </Slider>
+          </Box>
         </Box>
       </Container>
     </Flex>

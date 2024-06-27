@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: your_db_name
+      POSTGRES_DB: citymapper
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -14,10 +14,23 @@ services:
 
   meilisearch:
     image: getmeili/meilisearch:latest
+    restart: always
     ports:
       - "7700:7700"
+    volumes:
+      - ./meili_data:/meili_data
+
+  diesel:
+      build:
+        context: ./server
+      depends_on:
+        - postgres
+      environment:
+        DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+      command: ["diesel", "migration", "run"]
 
   backend:
+    restart: on-failure
     build:
       context: ./server
     ports:
@@ -26,9 +39,10 @@ services:
       - postgres
       - meilisearch
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres/your_db_name
+      DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
 
   frontend:
+    restart: on-failure
     build:
       context: ./client
     ports:
@@ -38,3 +52,4 @@ services:
 
 volumes:
   postgres_data:
+  meili_data:

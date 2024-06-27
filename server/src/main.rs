@@ -68,6 +68,14 @@ fn rocket() -> _ {
         .mount(
             "/",
             routes![
+                services::get_share_trip,
+                services::post_share_trip,
+                services::options_share
+            ],
+        )
+        .mount(
+            "/",
+            routes![
                 views::services::list_stops,
                 views::services::get_stop_details
             ],
@@ -80,9 +88,6 @@ fn rocket() -> _ {
                 views::services::list_average_stop_times
             ],
         )
-        .mount(
-            "/",
-            routes![views::services::get_path, views::services::get_fast_path],
-        )
+        .mount("/", routes![views::services::get_path])
         .register("/", catchers![not_found])
 }

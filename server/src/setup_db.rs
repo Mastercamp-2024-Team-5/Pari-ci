@@ -95,12 +95,6 @@ fn main() {
                 &chunk
                     .iter()
                     .map(|line| Agency::from_str(line).unwrap())
-                    // .filter(|agency| {
-                    //     agency.agency_id == "IDFM:Operator_100"
-                    //         || agency.agency_id == "IDFM:1046"
-                    //         || agency.agency_id == "IDFM:93"
-                    //         || agency.agency_id == "IDFM:71"
-                    // })
                     .collect::<Vec<Agency>>(),
             )
             .unwrap()
@@ -213,22 +207,20 @@ fn main() {
     }
 
     // remove all data we don't need with cascade delete
-    // remove agencies that are not in the list
-    let agencies = vec!["IDFM:Operator_100", "IDFM:1046", "IDFM:71"];
-    let conn = &mut establish_connection_pg();
-    use crate::schema::agency::dsl as agency_dsl;
-    diesel::delete(agency_dsl::agency.filter(agency_dsl::agency_id.ne_all(&agencies)))
-        .execute(conn)
-        .expect("Error deleting agencies");
-
-    println!("Agencies deleted");
-
     // remove all routes that are not in the list
+    let conn = &mut establish_connection_pg();
     let routes_types = vec![0, 1, 2];
+    let agency_ignored = "IDFM:93";
     use crate::schema::routes::dsl as routes_dsl;
-    diesel::delete(routes_dsl::routes.filter(routes_dsl::route_type.ne_all(&routes_types)))
-        .execute(conn)
-        .expect("Error deleting routes");
+    diesel::delete(
+        routes_dsl::routes.filter(
+            routes_dsl::route_type
+                .ne_all(&routes_types)
+                .or(routes_dsl::agency_id.eq(agency_ignored)),
+        ),
+    )
+    .execute(conn)
+    .expect("Error deleting routes");
 
     println!("Routes deleted");
 
@@ -278,9 +270,6 @@ fn main() {
             let mut min_distance = f64::MAX;
             let mut closest_trace = (0_f64, 0_f64);
             for trace in traces.iter().filter(|trace| trace.1 == stop.route_id) {
-                if stop.stop_id == "IDFM:monomodalStopPlace:415093" {
-                    println!("{:?}", trace);
-                }
                 for coord in trace.0.iter() {
                     let distance = tools::haversine_distance(stop_location, *coord);
                     if distance < min_distance {
@@ -307,6 +296,8 @@ fn main() {
         || task == Task::AddTrips
         || task == Task::AddStops
         || task == Task::AddStopTimes
+        || task == Task::AddRoutesTrace
+        || task == Task::CorrectStopLocationWithTrace
     {
         // refresh the materialized view
         refresh_materialized_view().unwrap();

@@ -6,6 +6,7 @@ use super::schema::calendar_dates;
 use super::schema::routes;
 use super::schema::stops;
 use super::schema::trips;
+use crate::schema::ratings;
 use crate::schema::routes_trace;
 use crate::schema::shared_table;
 use crate::schema::stop_times;
@@ -541,4 +542,12 @@ pub struct SharedTable {
     pub start_date: Option<PrimitiveDateTime>,
     pub end_date: Option<PrimitiveDateTime>,
     pub created_at: PrimitiveDateTime,
+}
+
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = ratings)]
+pub struct Rating {
+    pub id: String,
+    pub rating: i32,
+    pub trip_content: String,
 }

@@ -11,19 +11,13 @@ import StopDetail from "./StopDetail";
 import { useEffect, useState } from "react";
 import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
-import { ActiveRightPage } from "../Shared/enum";
+import { ActiveRightPage, RatingStatus } from "../Shared/enum";
 import Rating from "./Rating.tsx";
+
 
 const LeftTrip = () => {
     const { departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
-    const [isOpen, setIsOpen] = useState(false);
-    const [hasBeenOpened, setHasBeenOpened] = useState(false);
-
-    const handleOpen = () => {
-        setIsOpen(true);
-        setHasBeenOpened(true);
-    }
-    const handleClose = () => setIsOpen(false);
+    const [ratingStatus, setRatingStatus] = useState<RatingStatus>(RatingStatus.Closed);
 
     useEffect(() => {
         async function refreshData() {
@@ -250,8 +244,6 @@ const LeftTrip = () => {
                     color="white"
                     onClick={() => {
                         setActiveRightPage(ActiveRightPage.Map);
-                        // setRated(false);
-                        // setShowRating(false);
                     }}
                     padding={7}
                     fontSize={"2xl"}
@@ -269,9 +261,9 @@ const LeftTrip = () => {
                 </Button>
 
                 <>
-                    {!hasBeenOpened &&
+                    {ratingStatus === RatingStatus.Closed &&
                         <Text
-                            onClick={handleOpen}
+                            onClick={() => setRatingStatus(RatingStatus.Opened)}
                             fontSize={"md"}
                             color={"#273DFF"}
                             textDecoration={"underline"}
@@ -281,7 +273,7 @@ const LeftTrip = () => {
                             Notez votre trajet
                         </Text>
                     }
-                    <Rating totalStars={5} initialRating={5} isOpen={isOpen} onClose={handleClose} />
+                    <Rating isOpen={ratingStatus === RatingStatus.Opened} setRatingStatus={setRatingStatus} />
                 </>
             </Stack>
         </Center >

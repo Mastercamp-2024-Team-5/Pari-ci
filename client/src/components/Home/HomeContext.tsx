@@ -20,10 +20,6 @@ interface HomeContextType {
   setActiveLeftPage: React.Dispatch<React.SetStateAction<ActiveLeftPage>>;
   dataTrip: TripInfo | null;
   setDataTrip: React.Dispatch<React.SetStateAction<TripInfo | null>>;
-  showRating: boolean;
-  setShowRating: React.Dispatch<React.SetStateAction<boolean>>;
-  rated: boolean;
-  setRated: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defaultContext: HomeContextType = {
@@ -43,10 +39,6 @@ const defaultContext: HomeContextType = {
   setActiveLeftPage: () => { },
   dataTrip: null,
   setDataTrip: () => { },
-  showRating: false,
-  setShowRating: () => { },
-  rated: false,
-  setRated: () => { },
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -70,8 +62,6 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [activeRightPage, setActiveRightPage] = useState(ActiveRightPage.Map);
   const [activeLeftPage, setActiveLeftPage] = useState(ActiveLeftPage.Search);
   const [dataTrip, setDataTrip] = useState<TripInfo | null>(null);
-  const [showRating, setShowRating] = useState(false);
-  const [rated, setRated] = useState(false);
 
   const value: HomeContextType = {
     departure,
@@ -90,10 +80,6 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setActiveLeftPage,
     dataTrip,
     setDataTrip,
-    showRating,
-    setShowRating,
-    rated,
-    setRated,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

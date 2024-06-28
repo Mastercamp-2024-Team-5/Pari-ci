@@ -1,35 +1,73 @@
 import React, { useState } from 'react';
-import { Flex, Text, Icon, Textarea, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,ModalBody, ModalFooter, } from '@chakra-ui/react';
+import { Flex, Text, Icon, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, } from '@chakra-ui/react';
 import { StarIcon } from '@chakra-ui/icons';
 import { useToast } from '@chakra-ui/react';
+import { RatingStatus } from '../Shared/enum';
+import { useHomeContext } from '../Home/HomeContext';
+import { TripData } from '../Shared/types';
 
 interface RatingProps {
-    totalStars?: number;
-    initialRating?: number;
     isOpen: boolean;
-    onClose: () => void;
+    setRatingStatus: (ratingStatus: RatingStatus) => void;
 }
 
-const Rating: React.FC<RatingProps>  = ({ totalStars = 5, initialRating = 0, isOpen , onClose  }) => {
-    const [rating, setRating] = useState(initialRating);
+interface RatingRequest {
+    trip_content: TripData;
+    rating: number;
+}
+
+const NB_STARS = 5;
+
+const Rating: React.FC<RatingProps> = ({ isOpen, setRatingStatus }) => {
+    const [rating, setRating] = useState<number | null>(null);
+    const { dataPath } = useHomeContext();
     const [hover, setHover] = useState(0);
     const toast = useToast();
 
-    const handleMouseEnter = (index: number) => {
-        setHover(index);
-    };
+    async function sumbitRating() {
+        if (rating === null) {
+            toast({
+                title: `Veuillez sélectionner une note`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            });
+            return;
+        }
+        // Send the rating to the backend
+        const response = await fetch('http://localhost:8000/rate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                trip_content: dataPath,
+                rating: rating,
+            } as RatingRequest),
+        });
 
-    const handleMouseLeave = () => {
-        setHover(0);
-    };
-
-    const handleClick = (index: number) => {
-        setRating(index);
-    };
+        if (!response.ok) {
+            toast({
+                title: `Erreur lors de l'envoi du rating`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            });
+            setRatingStatus(RatingStatus.Closed);
+        } else {
+            toast({
+                title: `Envoyé avec succès !`,
+                status: 'success',
+                duration: 2000,
+                isClosable: true,
+            });
+            setRatingStatus(RatingStatus.Rated);
+        }
+    }
 
     return (
         <>
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={() => setRatingStatus(RatingStatus.Closed)}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Donnez votre avis</ModalHeader>
@@ -39,50 +77,22 @@ const Rating: React.FC<RatingProps>  = ({ totalStars = 5, initialRating = 0, isO
                             <Text marginLeft="6%" fontSize="lg" fontWeight="500" mr={2}>
                                 Note :
                             </Text>
-                            {Array.from({ length: totalStars }, (_, index) => (
+                            {Array.from({ length: NB_STARS }, (_, index) => (
                                 <Icon
                                     as={StarIcon}
                                     key={index}
-                                    color={index < (hover || rating) ? 'yellow.400' : 'gray.300'}
+                                    color={index < (hover || rating || 0) ? 'yellow.400' : 'gray.300'}
                                     cursor="pointer"
-                                    onMouseEnter={() => handleMouseEnter(index + 1)}
-                                    onMouseLeave={handleMouseLeave}
-                                    onClick={() => handleClick(index + 1)}
+                                    onMouseEnter={() => setHover(index + 1)}
+                                    onMouseLeave={() => setHover(0)}
+                                    onClick={() => setRating(index + 1)}
                                     boxSize="24px"
                                 />
                             ))}
                         </Flex>
-                        <Textarea
-                            focusBorderColor="#5eaf91"
-                            fontFamily="Karla"
-                            rounded="md"
-                            placeholder="Commentaire (optionnel)"
-                            fontSize="lg"
-                            bg="white"
-                            borderRadius="15"
-                            resize="none"
-                            marginLeft="5%"
-                            marginRight="5%"
-                            width="90%"
-                            sx={{
-                                '&::-webkit-scrollbar': {
-                                    display: 'none',
-                                },
-                                '-ms-overflow-style': 'none',
-                                'scrollbar-width': 'none',
-                            }}
-                        />
                     </ModalBody>
                     <ModalFooter>
-                        <Button colorScheme="blue" mr={3} onClick={() => {
-                            toast({
-                                title: `Envoyé avec succès !`,
-                                status: 'success',
-                                duration: 2000,
-                                isClosable: true,
-                            });
-                            onClose();
-                        }}>
+                        <Button colorScheme="blue" mr={3} onClick={sumbitRating} isActive={rating === null}>
                             Envoyer
                         </Button>
                     </ModalFooter>

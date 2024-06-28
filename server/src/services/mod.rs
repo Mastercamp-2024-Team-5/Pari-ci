@@ -12,6 +12,7 @@ use rocket::get;
 use rocket::options;
 use rocket::post;
 use rocket::response::status;
+use rocket::response::status::BadRequest;
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
 use serde::Deserialize;
@@ -502,5 +503,40 @@ pub fn post_share_trip(
 
 #[options("/share")]
 pub fn options_share<'r>() -> status::Accepted<()> {
+    status::Accepted(())
+}
+
+pub fn add_rating(document: models::Rating) -> Result<(), diesel::result::Error> {
+    use schema::ratings::dsl::*;
+    let connection = &mut establish_connection_pg();
+    diesel::insert_into(ratings)
+        .values(&document)
+        .execute(connection)?;
+    Ok(())
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RatingsRequest {
+    rating: i32,
+    trip_content: (PrimitiveDateTime, Vec<PathNode>),
+}
+
+#[post("/rate", data = "<document>", format = "json")]
+pub fn post_rate_trip(document: Json<RatingsRequest>) -> Result<(), BadRequest<String>> {
+    let document = document.into_inner();
+    let content = serde_json::to_string(&document.trip_content);
+    match content {
+        Ok(trip_content) => Ok(add_rating(models::Rating {
+            id: uuid::Uuid::new_v4().as_simple().to_string(),
+            rating: document.rating,
+            trip_content,
+        })
+        .unwrap()),
+        Err(e) => Err(BadRequest(format!("Error parsing trip content: {}", e))),
+    }
+}
+
+#[options("/rate")]
+pub fn options_rate<'r>() -> status::Accepted<()> {
     status::Accepted(())
 }

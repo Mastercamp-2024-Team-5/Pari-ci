@@ -14,3 +14,9 @@ export enum ActiveRoutes {
     Metro = "metro",
     Rer = "rer",
 }
+
+export enum RatingStatus {
+    Rated,
+    Opened,
+    Closed,
+}

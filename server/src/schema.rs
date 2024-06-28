@@ -78,6 +78,12 @@ diesel::table! {
         #[max_length = 36]
         id -> Varchar,
         content -> Text,
+        #[max_length = 255]
+        departure -> Varchar,
+        #[max_length = 255]
+        destination -> Varchar,
+        start_date -> Nullable<Timestamp>,
+        end_date -> Nullable<Timestamp>,
         created_at -> Timestamp,
     }
 }

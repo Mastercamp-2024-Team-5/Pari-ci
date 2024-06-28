@@ -8,16 +8,16 @@ import {
 } from "@chakra-ui/react";
 import Stop from "./Stop";
 import StopDetail from "./StopDetail";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import Rating from "./Rating.tsx";
 
 const LeftTrip = () => {
-    const {  departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
-    const [ isOpen, setIsOpen] = useState(false);
-    const [ hasBeenOpened, setHasBeenOpened] = useState(false);
+    const { departure, destination, dataPath, activeRightPage, setActiveRightPage, startAt, endAt, dataTrip, setDataTrip } = useHomeContext();
+    const [isOpen, setIsOpen] = useState(false);
+    const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
     const handleOpen = () => {
         setIsOpen(true);
@@ -55,11 +55,14 @@ const LeftTrip = () => {
             line: tripList[0].route_short_name,
             direction: tripList[0].trip_id,
             nbr: 1,
-            travel_time: 0,
-            departure_time: 0,
+            travel_time: tripList[0].travel_time,
+            departure_time: tripList[0].wait_time,
         } as Point;
 
-        for (const trip of tripList) {
+        let total = tripList[0].travel_time + tripList[0].wait_time;
+
+        for (const trip of tripList.slice(1)) {
+            total += trip.travel_time + trip.wait_time;
             // check if the trip is on the same line and direction as the previous one
             if (trip.route_short_name === currentPoint.line) {
                 currentPoint.to = trip.to_stop_id;
@@ -69,6 +72,7 @@ const LeftTrip = () => {
                 // add the current point to the list
                 currentPoint.departure_time = lastTime;
                 lst.push(currentPoint);
+                // update the last time
                 lastTime += currentPoint.travel_time + trip.wait_time;
                 // create a new point
                 currentPoint = {
@@ -78,9 +82,11 @@ const LeftTrip = () => {
                     direction: trip.trip_id,
                     nbr: 1,
                     travel_time: trip.travel_time,
-                    departure_time: lastTime + trip.wait_time,
+                    departure_time: lastTime,
                 } as Point;
             }
+            console.log(total, "total")
+            console.log(currentPoint.travel_time + lastTime, "currentPoint.travel_time + lastTime")
         }
 
         // add the last point
@@ -149,10 +155,10 @@ const LeftTrip = () => {
     }
 
     return (
-        <Center style={{justifyContent: "center", alignItems: "center"}}>
+        <Center style={{ justifyContent: "center", alignItems: "center" }}>
             <Stack spacing={0} w="100%">
 
-                    <Stack align="center" margin={0} padding={0}>
+                <Stack align="center" margin={0} padding={0}>
                     <Heading
                         fontFamily="Karla"
                         fontWeight="700"

@@ -4,6 +4,7 @@ extern crate rocket;
 use crate::models;
 use crate::schema;
 use crate::views::services::PathNode;
+use diesel::alias;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;
@@ -13,6 +14,7 @@ use rocket::post;
 use rocket::response::status;
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+use serde::Deserialize;
 use serde::Serialize;
 use std::env;
 use time::OffsetDateTime;
@@ -395,24 +397,61 @@ fn get_shared_trip(document_id: &str) -> Result<models::SharedTable, diesel::res
     result
 }
 
-#[get("/share/<id>")]
-pub fn get_share_trip(
-    id: &str,
-) -> Result<Json<(PrimitiveDateTime, Vec<PathNode>)>, NotFound<String>> {
-    let result = get_shared_trip(id);
+#[get("/share/<document_id>")]
+pub fn get_share_trip(document_id: &str) -> Result<Json<SharedTrip>, NotFound<String>> {
+    use schema::shared_table::dsl::*;
+    let connection = &mut establish_connection_pg();
+    let (stop_1, stop_2) = alias!(schema::stops as stop_1, schema::stops as stop_2);
+    let result = shared_table
+        .inner_join(stop_1.on(departure.eq(stop_1.fields(schema::stops::stop_id))))
+        .inner_join(stop_2.on(destination.eq(stop_2.fields(schema::stops::stop_id))))
+        .filter(id.eq(document_id))
+        .select((
+            departure,
+            destination,
+            start_date,
+            end_date,
+            content,
+            stop_1.fields(schema::stops::stop_name),
+            stop_2.fields(schema::stops::stop_name),
+        ))
+        .first::<(
+            String,
+            String,
+            Option<PrimitiveDateTime>,
+            Option<PrimitiveDateTime>,
+            String,
+            String,
+            String,
+        )>(connection);
     match result {
         Ok(shared_trip) => {
             let path_content: Result<(PrimitiveDateTime, Vec<PathNode>), serde_json::error::Error> =
-                serde_json::from_str(&shared_trip.content);
+                serde_json::from_str(&shared_trip.4);
             match path_content {
-                Ok(path) => Ok(Json(path)),
+                Ok(path) => Ok(Json(SharedTrip {
+                    departure: StopInfo {
+                        id: shared_trip.0,
+                        name: shared_trip.5,
+                    },
+                    destination: StopInfo {
+                        id: shared_trip.1,
+                        name: shared_trip.6,
+                    },
+                    start_date: shared_trip.2,
+                    end_date: shared_trip.3,
+                    content: path,
+                })),
                 Err(e) => Err(NotFound(format!(
                     "Error parsing shared trip content: {}",
                     e
                 ))),
             }
         }
-        Err(_) => Err(NotFound(format!("No shared trip found with id {}", id))),
+        Err(_) => Err(NotFound(format!(
+            "No shared trip found with id {}",
+            document_id
+        ))),
     }
 }
 
@@ -421,15 +460,35 @@ pub struct SharedTripResponse {
     id: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct StopInfo {
+    id: String,
+    name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SharedTrip {
+    departure: StopInfo,
+    destination: StopInfo,
+    start_date: Option<PrimitiveDateTime>,
+    end_date: Option<PrimitiveDateTime>,
+    content: (PrimitiveDateTime, Vec<PathNode>),
+}
+
 #[post("/share", data = "<document>", format = "json")]
 pub fn post_share_trip(
-    document: Json<(PrimitiveDateTime, Vec<PathNode>)>,
+    document: Json<SharedTrip>,
 ) -> Result<Json<SharedTripResponse>, NotFound<String>> {
     let document_id = uuid::Uuid::new_v4().as_simple().to_string();
     let datetime = OffsetDateTime::now_utc();
+    let document = document.into_inner();
     let shared_trip = models::SharedTable {
         id: document_id.clone(),
-        content: serde_json::to_string(&document.into_inner()).unwrap(),
+        content: serde_json::to_string(&document.content).unwrap(),
+        departure: document.departure.id,
+        destination: document.destination.id,
+        start_date: document.start_date,
+        end_date: document.end_date,
         created_at: PrimitiveDateTime::new(datetime.date(), datetime.time()),
     };
     let result = add_shared_trip(shared_trip);

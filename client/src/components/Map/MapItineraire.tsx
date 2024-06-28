@@ -47,10 +47,10 @@ const MapItineraire: React.FC = React.memo(() => {
 
       const route_part: RouteTrace[] = [];
       let part;
-      for (const stop of dataPath[1]) {
-        const stopData = stops.find((s) => s.stop_id === stop.from_stop_id && s.route_id === stop.route_id) || stops.find((s) => s.stop_id === stop.from_stop_id) || defaultStop;
-        const nextStopData = stops.find((s) => s.stop_id === stop.to_stop_id) || defaultStop;
-        part = (routes.find((r) => {
+      for (const edge of dataPath[1]) {
+        const stopData = stops.find((s) => s.stop_id === edge.from_stop_id && s.route_id === edge.route_id) || stops.find((s) => s.stop_id === edge.from_stop_id) || defaultStop;
+        const nextStopData = stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
+        part = (routes.filter(shape => shape.route_id === edge.route_id).find((r) => {
           const shape = JSON.parse(r.shape)
           return (isSameCoordinate(shape.coordinates[0], [stopData.stop_lon, stopData.stop_lat])
             && isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [nextStopData.stop_lon, nextStopData.stop_lat]))
@@ -58,11 +58,11 @@ const MapItineraire: React.FC = React.memo(() => {
               && isSameCoordinate(shape.coordinates[0], [nextStopData.stop_lon, nextStopData.stop_lat]))
         }));
         if (part === undefined) {
-          const routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
+          const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color
           const color = routeColor || '808080';
           part = {
             id: "0",
-            route_id: stop.route_id,
+            route_id: edge.route_id,
             shape: JSON.stringify({ coordinates: [[stopData.stop_lon, stopData.stop_lat], [nextStopData.stop_lon, nextStopData.stop_lat]] }),
             route_type: 0,
             color: color,
@@ -70,7 +70,7 @@ const MapItineraire: React.FC = React.memo(() => {
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
-        const routeColor = routes.find((r) => r.route_id === stop.route_id)?.color
+        const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color
         stopData.color = routeColor ? `#${routeColor}` : 'grey';
       }
 

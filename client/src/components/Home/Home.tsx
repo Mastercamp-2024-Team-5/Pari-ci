@@ -15,7 +15,7 @@ import MapScreen from "../Map/MapScreen";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import LeftSearch from "../Search/LeftSearch";
 import { ActiveLeftPage, ActiveRightPage } from "../Shared/enum.tsx";
-import { ActiveSearchInput, Data, TripData } from "../Shared/types";
+import { ActiveSearchInput, Data, SharedTripResponse, TripData } from "../Shared/types";
 import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 import { useLoaderData } from "react-router-dom";
 import LeftTrip from "../Trip/LeftTrip.tsx";
@@ -27,6 +27,10 @@ const Home: React.FC = () => {
     null
   );
   const {
+    setDeparture,
+    setDestination,
+    setStartAt,
+    setEndAt,
     activeRightPage,
     setActiveRightPage,
     activeLeftPage,
@@ -62,12 +66,16 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (shared) {
+      const parsed = shared as SharedTripResponse;
+      console.log(parsed);
+      setDataPath(parsed.content as TripData);
+      setStartAt(parsed.start_date || "");
+      setEndAt(parsed.end_date || "");
+      setDeparture(parsed.departure);
+      setDestination(parsed.destination);
       setActiveRightPage(ActiveRightPage.Trip);
-      setDataPath(shared as TripData);
-      //TODO: need to set the start or end at date
-      //TODO: need to set the departure and destination
     }
-  }, [shared, setActiveRightPage, setDataPath]);
+  }, [shared, setActiveRightPage, setDataPath, setDeparture, setDestination, setStartAt, setEndAt]);
 
   useEffect(() => {
     if (
@@ -141,7 +149,7 @@ const Home: React.FC = () => {
             h="100%"
             p={4}
             overflowY="auto"
-            // overflowstyle
+          // overflowstyle
           >
             {activeLeftPage === ActiveLeftPage.Search && (
               <LeftSearch
@@ -156,7 +164,7 @@ const Home: React.FC = () => {
               style={{
                 display:
                   activeRightPage === ActiveRightPage.Map ||
-                  activeRightPage === ActiveRightPage.Trip
+                    activeRightPage === ActiveRightPage.Trip
                     ? "block"
                     : "none",
                 flex: 1,

@@ -1,31 +1,43 @@
 import { Flex, Text, IconButton } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
-import { Point } from "../Shared/types";
+import { Point, SharedTripResponse } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
 import React from "react";
 
 const DetailsScreen = () => {
-  const { setActiveRightPage, dataTrip, dataPath } = useHomeContext();
-  const [shared, setShared] = React.useState(false);
+  const { setActiveRightPage, dataTrip, dataPath, departure, destination, startAt, endAt } = useHomeContext();
+  const [sharedLink, setSharedLink] = React.useState<string>("");
 
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
   }
 
   async function handleShared() {
-    if (!shared) {
-      setShared(true);
+    if (sharedLink === "") {
+      const requestData = {
+        departure: departure,
+        destination: destination,
+        content: dataPath,
+      } as SharedTripResponse;
 
-      console.log(dataPath);
+      // set the start and end date if they exist
+      if (startAt !== "") {
+        const date = new Date(startAt);
+        requestData.start_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
+      }
+      if (endAt !== "") {
+        const date = new Date(endAt);
+        requestData.end_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
+      }
 
       const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataPath),
+        body: JSON.stringify(requestData),
       };
-      fetch("http://localhost:8000/share", requestOptions)
+      const data = await fetch("http://localhost:8000/share", requestOptions)
         .then((response) => {
           if (!response.ok) {
             console.log(response);
@@ -33,7 +45,14 @@ const DetailsScreen = () => {
           }
           return response.json();
         })
-        .then((data) => console.log(data));
+
+      // make the data into a link
+      const url = new URL(window.location.href);
+      url.pathname = "/path/" + data.id;
+      navigator.clipboard.writeText(url.href);
+      setSharedLink(url.href);
+    } else {
+      navigator.clipboard.writeText(sharedLink);
     }
   }
 
@@ -94,17 +113,17 @@ const DetailsScreen = () => {
                 {index === 0 || index === dataTrip.points.length - 1
                   ? "Marchez vers " + obj.to
                   : "Correspondance " +
-                    dataTrip.points
-                      .map((v, i) => {
-                        if (i >= index && v.line) {
-                          return v.line;
-                        } else {
-                          return null;
-                        }
-                      })
-                      .filter((x) => x !== null)[0] +
-                    " à " +
-                    obj.from}
+                  dataTrip.points
+                    .map((v, i) => {
+                      if (i >= index && v.line) {
+                        return v.line;
+                      } else {
+                        return null;
+                      }
+                    })
+                    .filter((x) => x !== null)[0] +
+                  " à " +
+                  obj.from}
                 , {(obj.travel_time / 60).toFixed(0)} min de marche
               </Text>
             );

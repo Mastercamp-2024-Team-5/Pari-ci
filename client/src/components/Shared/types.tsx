@@ -25,6 +25,14 @@ export interface Trip {
   trip_id: string;
 }
 
+export interface SharedTripResponse {
+  departure: InputStop;
+  destination: InputStop;
+  start_date?: string | null;
+  end_date?: string | null;
+  content: [string, Trip[]]
+}
+
 export type TripData = [string, Trip[]];
 
 export interface Point {

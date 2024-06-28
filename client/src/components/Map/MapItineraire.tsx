@@ -4,18 +4,22 @@ import { Stop, RouteTrace, RouteCollection } from "../Shared/types";
 import Icon from "../Shared/Icon";
 import { useHomeContext } from "../Home/HomeContext";
 
-
 const MapItineraire: React.FC = React.memo(() => {
-
   const [markers, setMarkers] = useState<Stop[]>([]);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [geojson, setGeojson] = useState<RouteCollection[] | null>(null);
   const { dataPath } = useHomeContext();
 
-  function isSameCoordinate(coord1: [number, number], coord2: [number, number]): boolean {
+  function isSameCoordinate(
+    coord1: [number, number],
+    coord2: [number, number]
+  ): boolean {
     // round to 9 decimal places to avoid floating point errors
     const fixed = 6;
-    return coord1[0].toFixed(fixed) === coord2[0].toFixed(fixed) && coord1[1].toFixed(fixed) === coord2[1].toFixed(fixed);
+    return (
+      coord1[0].toFixed(fixed) === coord2[0].toFixed(fixed) &&
+      coord1[1].toFixed(fixed) === coord2[1].toFixed(fixed)
+    );
   }
 
   useEffect(() => {
@@ -23,12 +27,16 @@ const MapItineraire: React.FC = React.memo(() => {
       if (dataPath === null) {
         return;
       }
-      const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram&train`);
+      const stops_response = await fetch(
+        `http://127.0.0.1:8000/stops?metro&rer&tram&train`
+      );
       const stops: Stop[] = await stops_response.json();
 
-      const routes_response = await fetch(`http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`);
+      const routes_response = await fetch(
+        `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
+      );
       const routes: RouteTrace[] = await routes_response.json();
-
+      console.log("route trace", routes);
 
       const itineraire_stops: Stop[] = [];
       const defaultStop: Stop = {
@@ -47,37 +55,76 @@ const MapItineraire: React.FC = React.memo(() => {
 
       const route_part: RouteTrace[] = [];
       let part;
+
       for (const edge of dataPath[1]) {
-        const stopData = stops.find((s) => s.stop_id === edge.from_stop_id && s.route_id === edge.route_id) || stops.find((s) => s.stop_id === edge.from_stop_id) || defaultStop;
-        const nextStopData = stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
-        part = (routes.filter(shape => shape.route_id === edge.route_id).find((r) => {
-          const shape = JSON.parse(r.shape)
-          return (isSameCoordinate(shape.coordinates[0], [stopData.stop_lon, stopData.stop_lat])
-            && isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [nextStopData.stop_lon, nextStopData.stop_lat]))
-            || (isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [stopData.stop_lon, stopData.stop_lat])
-              && isSameCoordinate(shape.coordinates[0], [nextStopData.stop_lon, nextStopData.stop_lat]))
-        }));
+        const stopData =
+          stops.find(
+            (s) =>
+              s.stop_id === edge.from_stop_id && s.route_id === edge.route_id
+          ) ||
+          stops.find((s) => s.stop_id === edge.from_stop_id) ||
+          defaultStop;
+
+        const nextStopData =
+          stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
+        part = routes
+          .filter((shape) => shape.route_id === edge.route_id)
+          .find((r) => {
+            const shape = JSON.parse(r.shape);
+            return (
+              (isSameCoordinate(shape.coordinates[0], [
+                stopData.stop_lon,
+                stopData.stop_lat,
+              ]) &&
+                isSameCoordinate(
+                  shape.coordinates[shape.coordinates.length - 1],
+                  [nextStopData.stop_lon, nextStopData.stop_lat]
+                )) ||
+              (isSameCoordinate(
+                shape.coordinates[shape.coordinates.length - 1],
+                [stopData.stop_lon, stopData.stop_lat]
+              ) &&
+                isSameCoordinate(shape.coordinates[0], [
+                  nextStopData.stop_lon,
+                  nextStopData.stop_lat,
+                ]))
+            );
+          });
         if (part === undefined) {
-          const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color
-          const color = routeColor || '808080';
+          const routeColor = routes.find(
+            (r) => r.route_id === edge.route_id
+          )?.color;
+          const color = routeColor || "808080";
           part = {
             id: "0",
             route_id: edge.route_id,
-            shape: JSON.stringify({ coordinates: [[stopData.stop_lon, stopData.stop_lat], [nextStopData.stop_lon, nextStopData.stop_lat]] }),
+            shape: JSON.stringify({
+              coordinates: [
+                [stopData.stop_lon, stopData.stop_lat],
+                [nextStopData.stop_lon, nextStopData.stop_lat],
+              ],
+            }),
             route_type: 0,
             color: color,
           };
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
-        const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color
-        stopData.color = routeColor ? `#${routeColor}` : 'grey';
+        const routeColor = routes.find(
+          (r) => r.route_id === edge.route_id
+        )?.color;
+        stopData.color = routeColor ? `#${routeColor}` : "grey";
       }
 
-      const lastStopData = stops.find((s) => s.stop_id === dataPath[1][dataPath[1].length - 1].to_stop_id) || defaultStop;
+      const lastStopData =
+        stops.find(
+          (s) => s.stop_id === dataPath[1][dataPath[1].length - 1].to_stop_id
+        ) || defaultStop;
       itineraire_stops.push(lastStopData);
-      const routeColor = routes.find((r) => r.route_id === dataPath[1][dataPath[1].length - 1].route_id)?.color
-      lastStopData.color = routeColor ? `#${routeColor}` : 'grey';
+      const routeColor = routes.find(
+        (r) => r.route_id === dataPath[1][dataPath[1].length - 1].route_id
+      )?.color;
+      lastStopData.color = routeColor ? `#${routeColor}` : "grey";
 
       setMarkers(itineraire_stops);
 
@@ -86,7 +133,7 @@ const MapItineraire: React.FC = React.memo(() => {
         const lineCollection: RouteCollection = {
           collection: {
             type: "FeatureCollection",
-            features: [route].map(route_trace => ({
+            features: [route].map((route_trace) => ({
               type: "Feature",
               geometry: {
                 type: "LineString",
@@ -113,12 +160,13 @@ const MapItineraire: React.FC = React.memo(() => {
   return (
     <>
       {markers.map((stop, index) => (
-        <Marker
-          key={index}
-          longitude={stop.stop_lon}
-          latitude={stop.stop_lat}
-        >
-          <Icon item="marker" color={stop.color} onMouseEnter={() => setSelectedStop(stop)} onMouseLeave={() => setSelectedStop(null)} />
+        <Marker key={index} longitude={stop.stop_lon} latitude={stop.stop_lat}>
+          <Icon
+            item="marker"
+            color={stop.color}
+            onMouseEnter={() => setSelectedStop(stop)}
+            onMouseLeave={() => setSelectedStop(null)}
+          />
         </Marker>
       ))}
       {selectedStop && (
@@ -128,25 +176,30 @@ const MapItineraire: React.FC = React.memo(() => {
           closeButton={false}
         >
           <div>
-            {
-              selectedStop.route_short_name && <Icon item={selectedStop.route_short_name} size={23} />
-            }
+            {selectedStop.route_short_name && (
+              <Icon item={selectedStop.route_short_name} size={23} />
+            )}
             <h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
           </div>
         </Popup>
       )}
-      {geojson && geojson.map((line, index) => (
-        <Source key={index} id={`lineLayer${index}`} type="geojson" data={line.collection}>
-          {
-            line.route_color === "#808080" ? (
+      {geojson &&
+        geojson.map((line, index) => (
+          <Source
+            key={index}
+            id={`lineLayer${index}`}
+            type="geojson"
+            data={line.collection}
+          >
+            {line.route_color === "#808080" ? (
               <Layer
                 id={`line${index}`}
                 type="line"
                 layout={{}}
                 paint={{
-                  'line-color': line.route_color || 'red',
-                  'line-width': 5,
-                  'line-dasharray': [2, 2],
+                  "line-color": line.route_color || "red",
+                  "line-width": 5,
+                  "line-dasharray": [2, 2],
                 }}
               />
             ) : (
@@ -155,14 +208,13 @@ const MapItineraire: React.FC = React.memo(() => {
                 type="line"
                 layout={{}}
                 paint={{
-                  'line-color': line.route_color || 'red',
-                  'line-width': 5,
+                  "line-color": line.route_color || "red",
+                  "line-width": 5,
                 }}
               />
-            )
-          }
-        </Source>
-      ))}
+            )}
+          </Source>
+        ))}
     </>
   );
 });

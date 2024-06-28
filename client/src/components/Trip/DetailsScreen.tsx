@@ -1,14 +1,97 @@
 import { Flex, Text, IconButton } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
-import { Point, SharedTripResponse } from "../Shared/types";
+import { Point, SharedTripResponse, Stop } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
 import React from "react";
 
 const DetailsScreen = () => {
-  const { setActiveRightPage, dataTrip, dataPath, departure, destination, startAt, endAt } = useHomeContext();
+  const {
+    setActiveRightPage,
+    dataTrip,
+    dataPath,
+    departure,
+    destination,
+    startAt,
+    endAt,
+  } = useHomeContext();
   const [sharedLink, setSharedLink] = React.useState<string>("");
+  const [stops] = React.useState<Stop[]>([]);
+
+  React.useEffect(() => {
+    const fetchStops = async () => {
+      const stops_response = await fetch(
+        `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
+      );
+      const stops: Stop[] = await stops_response.json();
+      console.log("stops", stops);
+    };
+
+    fetchStops();
+  }, []);
+
+  const totalTravelTime = dataTrip?.points.reduce((sum, obj) => {
+    if (obj.line && obj.direction) {
+      return sum + obj.travel_time;
+    }
+    return sum;
+  }, 0);
+  const totalCO2 = Math.round((totalTravelTime ?? 0) * 0.68);
+  console.log("Public Transport totalCO2 in g of CO2", totalCO2);
+
+  // The route is `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
+  // get the Stop data from the API
+  // then, get the departure and destination localisation, stop_lat and stop_lon
+  // then, compute the distance in km between the two points
+  // then, compute the CO2 emission in g of CO2 knowing that 1 km = 171 g of CO2
+
+  const departureStop = stops.find((s) => s.stop_name === departure?.name);
+  const destinationStop = stops.find((s) => s.stop_name === destination?.name);
+  console.log("departureStop", departureStop);
+  console.log("destinationStop", destinationStop);
+
+  const departureCoord = [departureStop?.stop_lat, departureStop?.stop_lon];
+  const destinationCoord = [
+    destinationStop?.stop_lat,
+    destinationStop?.stop_lon,
+  ];
+  console.log("departureCoord", departureCoord);
+  console.log("destinationCoord", destinationCoord);
+
+  function distance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1); // deg2rad below
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+  }
+
+  function deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
+  }
+
+  const distanceInKm = distance(
+    departureCoord[0] ?? 0,
+    departureCoord[1] ?? 0,
+    destinationCoord[0] ?? 0,
+    destinationCoord[1] ?? 0
+  );
+
+  const co2Emission = Math.round(distanceInKm * 171);
+  console.log("Car co2Emission in g of CO2", co2Emission);
 
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
@@ -25,11 +108,15 @@ const DetailsScreen = () => {
       // set the start and end date if they exist
       if (startAt !== "") {
         const date = new Date(startAt);
-        requestData.start_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
+        requestData.start_date = `${date.toISOString().slice(0, 10)} ${date
+          .toISOString()
+          .slice(11, 19)}.0`;
       }
       if (endAt !== "") {
         const date = new Date(endAt);
-        requestData.end_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
+        requestData.end_date = `${date.toISOString().slice(0, 10)} ${date
+          .toISOString()
+          .slice(11, 19)}.0`;
       }
 
       const requestOptions = {
@@ -37,14 +124,16 @@ const DetailsScreen = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       };
-      const data = await fetch("http://localhost:8000/share", requestOptions)
-        .then((response) => {
-          if (!response.ok) {
-            console.log(response);
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
+      const data = await fetch(
+        "http://localhost:8000/share",
+        requestOptions
+      ).then((response) => {
+        if (!response.ok) {
+          console.log(response);
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      });
 
       // make the data into a link
       const url = new URL(window.location.href);
@@ -113,17 +202,17 @@ const DetailsScreen = () => {
                 {index === 0 || index === dataTrip.points.length - 1
                   ? "Marchez vers " + obj.to
                   : "Correspondance " +
-                  dataTrip.points
-                    .map((v, i) => {
-                      if (i >= index && v.line) {
-                        return v.line;
-                      } else {
-                        return null;
-                      }
-                    })
-                    .filter((x) => x !== null)[0] +
-                  " à " +
-                  obj.from}
+                    dataTrip.points
+                      .map((v, i) => {
+                        if (i >= index && v.line) {
+                          return v.line;
+                        } else {
+                          return null;
+                        }
+                      })
+                      .filter((x) => x !== null)[0] +
+                    " à " +
+                    obj.from}
                 , {(obj.travel_time / 60).toFixed(0)} min de marche
               </Text>
             );
@@ -191,5 +280,4 @@ const DetailsScreen = () => {
     </Flex>
   );
 };
-
 export default DetailsScreen;

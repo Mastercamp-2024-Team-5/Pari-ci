@@ -7,7 +7,7 @@ export function HeaderTitle(): React.ReactElement {
     const screenWidth = useScreenWidth();
 
     return (
-        <div>
+        <center>
             <Image
                 margin={0}
                 marginTop={screenWidth < 700 ? "10%" : "15%"}
@@ -16,10 +16,11 @@ export function HeaderTitle(): React.ReactElement {
                 width="100px"
                 height="100px"
                 padding={0}
+                marginBottom="5%"
             />
             <Text fontSize={screenWidth < 700 ? "xl" : "lg"} marginBottom="5%">
-                Trouvez votre itinéraire
+                C'est Par'Où ?
             </Text>
-        </div>
+        </center>
     );
 }

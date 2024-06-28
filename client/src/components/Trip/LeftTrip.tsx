@@ -5,6 +5,7 @@ import {
     Button,
     Flex,
     Text,
+    Image
 } from "@chakra-ui/react";
 import Stop from "./Stop";
 import StopDetail from "./StopDetail";
@@ -13,6 +14,7 @@ import { Point, Trip } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage, RatingStatus } from "../Shared/enum";
 import Rating from "./Rating.tsx";
+import logo from "../../assets/logo.svg";
 
 
 const LeftTrip = () => {
@@ -153,15 +155,15 @@ const LeftTrip = () => {
             <Stack spacing={0} w="100%">
 
                 <Stack align="center" margin={0} padding={0}>
-                    <Heading
-                        fontFamily="Karla"
-                        fontWeight="700"
-                        marginTop={"5%"}
-                        fontSize={"4xl"}
-                        marginBottom={"5%"}
-                    >
-                        Pari'ci
-                    </Heading>
+                    <Image
+                        margin={0}
+                        marginY={"5%"}
+                        src={logo}
+                        alt="logo"
+                        width="100px"
+                        height="100px"
+                        padding={0}
+                    />
                 </Stack>
                 <Stack spacing={5}>
                     <Stack marginX={"0%"} maxW={"100%"}>
@@ -240,7 +242,7 @@ const LeftTrip = () => {
                 </Stack>
 
                 <Button
-                    bg="#C78484"
+                    bg="#84C7AE"
                     color="white"
                     onClick={() => {
                         setActiveRightPage(ActiveRightPage.Map);

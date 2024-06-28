@@ -20,6 +20,7 @@ import accessibility1 from "./../../assets/accessibility1.jpg";
 import accessibility2 from "./../../assets/accessibility2.jpg";
 import accessibility3 from "./../../assets/accessibility3.jpg";
 import { setCookie } from "../../manageCookies";
+import logo from "../../assets/logo.svg";
 
 type Props = {
   setAccessibleScreen: (accessibleScreen: boolean) => void;
@@ -61,15 +62,16 @@ const AccessibleScreen = (
         <Center>
           <Stack spacing={8} w="100%">
             <Stack align="center">
-              <Heading
-                textAlign={"center"}
-                fontFamily="Karla"
-                marginTop="15%"
-                fontSize="4xl"
+              <Image
+                margin={0}
+                marginTop={"10%"}
                 marginBottom={"5%"}
-              >
-                Pari'ci
-              </Heading>
+                src={logo}
+                alt="logo"
+                width="100px"
+                height="100px"
+                padding={0}
+            />
               <Text
                 textAlign={"center"}
                 fontFamily="Karla"
@@ -80,7 +82,6 @@ const AccessibleScreen = (
               >
                 Proposer seulement les stations accessibles ?
               </Text>
-              <Icon item="barre" color="a" />
             </Stack>
             <Button
               fontFamily="Karla"

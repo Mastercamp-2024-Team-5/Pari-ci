@@ -1,6 +1,6 @@
-# Citymapper
+# Pari'ci
 
-Citymapper is an application designed to optimize travel times within the Parisian transport network. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
+Pari'ci is an application designed to optimize travel times within the Parisian transport network. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
 
 ## TODO
 

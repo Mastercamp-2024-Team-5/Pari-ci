@@ -160,7 +160,7 @@ const LeftTrip = () => {
                         fontSize={"4xl"}
                         marginBottom={"5%"}
                     >
-                        CITYMAPPER
+                        Pari'ci
                     </Heading>
                 </Stack>
                 <Stack spacing={5}>

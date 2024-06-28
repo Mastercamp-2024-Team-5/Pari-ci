@@ -14,7 +14,7 @@ export function HeaderTitle(): React.ReactElement {
                 marginTop={screenWidth < 700 ? "10%" : "15%"}
                 fontSize={screenWidth < 700 ? "5xl" : "4xl"}
             >
-                CITYMAPPER
+                Pari'ci
             </Heading>
             <Text fontSize={screenWidth < 700 ? "xl" : "lg"} marginBottom="5%">
                 Trouvez votre itinéraire

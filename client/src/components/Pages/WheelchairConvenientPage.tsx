@@ -68,7 +68,7 @@ const AccessibleScreen = (
                 fontSize="4xl"
                 marginBottom={"5%"}
               >
-                Citymapper
+                Pari'ci
               </Heading>
               <Text
                 textAlign={"center"}

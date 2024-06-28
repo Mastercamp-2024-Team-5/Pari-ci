@@ -16,6 +16,7 @@ import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Icon } from "@chakra-ui/react";
 import { MdExpandMore } from "react-icons/md";
+import { getCookie } from "../../manageCookies.tsx";
 type Props = {
   fetchMeilisearchResults: (textQuery: string) => void;
   setSelectedSearch: (selectedSearch: ActiveSearchInput) => void;
@@ -78,7 +79,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
-        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}`
+        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}${getCookie("AccessibleStationOnly") === "true" ? "&pmr" : ""}`
       )
         .then((response) => {
           if (response.status === 404) {

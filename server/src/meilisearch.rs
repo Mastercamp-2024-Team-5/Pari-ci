@@ -23,9 +23,15 @@ pub struct StopEntry {
     route_short_names: String,
 }
 
-pub fn get_stopentries() -> Vec<StopEntry> {
+pub fn get_stopentries(accessible_only: bool) -> Vec<StopEntry> {
     let conn = &mut establish_connection_pg();
     use schema::stops::dsl::*;
+
+    let wheelchair_boarding_filter = if accessible_only {
+        vec![1]
+    } else {
+        vec![0, 1, 2]
+    };
 
     let result = stops
         .inner_join(
@@ -34,6 +40,7 @@ pub fn get_stopentries() -> Vec<StopEntry> {
                     .inner_join(schema::routes::table.inner_join(schema::agency::table)),
             ),
         )
+        .filter(schema::stops::wheelchair_boarding.eq_any(wheelchair_boarding_filter))
         .filter(schema::stops::location_type.eq(0))
         .filter(schema::agency::agency_id.ne("IDFM:93"))
         .filter(schema::routes::route_type.eq_any(vec![0, 1, 2]))
@@ -81,9 +88,10 @@ async fn main() {
 
     // Delete existing indexes
     let _ = client.delete_index("stops").await;
+    let _ = client.delete_index("stops_pmr").await;
 
     // read from the database to retrieve the stops and routes
-    let stops = get_stopentries();
+    let stops = get_stopentries(false);
 
     // adding documents
     let res = client
@@ -97,14 +105,14 @@ async fn main() {
 
     println!("{:?}", res);
 
-    // make a search query
-    let query = "Montparnasse";
-    let res: meilisearch_sdk::search::SearchResults<StopEntry> = client
-        .index("stops")
-        .search()
-        .with_query(query)
-        .with_limit(10)
-        .execute()
+    let stops_pmr = get_stopentries(true);
+
+    let res = client
+        .index("stops_pmr")
+        .add_documents(&stops_pmr, Some("id"))
+        .await
+        .unwrap()
+        .wait_for_completion(&client, None, None)
         .await
         .unwrap();
 

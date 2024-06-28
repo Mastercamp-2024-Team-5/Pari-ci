@@ -16,7 +16,7 @@ import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Icon } from "@chakra-ui/react";
 import { MdExpandMore } from "react-icons/md";
-import { getCookie } from "../../manageCookies.tsx";
+
 type Props = {
   fetchMeilisearchResults: (textQuery: string) => void;
   setSelectedSearch: (selectedSearch: ActiveSearchInput) => void;
@@ -31,7 +31,8 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
     endAt,
     setEndAt,
     setDataPath,
-    setActiveRightPage: setRightactiveRightPage,
+    setActiveRightPage,
+    accessible_only
   } = useHomeContext();
 
   const [departureInput, setDepartureInput] = useState("");
@@ -79,7 +80,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
-        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}${getCookie("AccessibleStationOnly") === "true" ? "&pmr" : ""}`
+        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}${accessible_only ? "&pmr" : ""}`
       )
         .then((response) => {
           if (response.status === 404) {
@@ -94,7 +95,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
         })
         .then((data) => {
           setDataPath(data);
-          setRightactiveRightPage(ActiveRightPage.Trip);
+          setActiveRightPage(ActiveRightPage.Trip);
         })
         .catch((error) => {
           setErrorMessages(error.message);
@@ -139,13 +140,13 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
               setDepartureInput(e.target.value);
             }}
             onFocus={(e) => {
-              setRightactiveRightPage(ActiveRightPage.MeilisearchResults);
+              setActiveRightPage(ActiveRightPage.MeilisearchResults);
               setSelectedSearch(ActiveSearchInput.Departure);
               fetchMeilisearchResults(e.target.value);
               e.target.select();
             }}
             onBlur={() => {
-              setRightactiveRightPage(ActiveRightPage.Map);
+              setActiveRightPage(ActiveRightPage.Map);
             }}
             focusBorderColor="#5eaf91"
             fontFamily="Karla"
@@ -177,13 +178,13 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
               setDestinationInput(e.target.value);
             }}
             onFocus={(e) => {
-              setRightactiveRightPage(ActiveRightPage.MeilisearchResults);
+              setActiveRightPage(ActiveRightPage.MeilisearchResults);
               setSelectedSearch(ActiveSearchInput.Destination);
               fetchMeilisearchResults(e.target.value);
               e.target.select();
             }}
             onBlur={() => {
-              setRightactiveRightPage(ActiveRightPage.Map);
+              setActiveRightPage(ActiveRightPage.Map);
             }}
             value={destinationInput}
           />

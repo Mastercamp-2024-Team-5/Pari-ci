@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ActiveLeftPage, ActiveRightPage } from "../Shared/enum.tsx";
 import { InputStop, TripData, TripInfo } from "../Shared/types";
+import { getCookie } from "../../manageCookies.tsx";
 
 interface HomeContextType {
   departure: InputStop | null;
@@ -20,6 +21,7 @@ interface HomeContextType {
   setActiveLeftPage: React.Dispatch<React.SetStateAction<ActiveLeftPage>>;
   dataTrip: TripInfo | null;
   setDataTrip: React.Dispatch<React.SetStateAction<TripInfo | null>>;
+  accessible_only: boolean;
 }
 
 const defaultContext: HomeContextType = {
@@ -39,6 +41,7 @@ const defaultContext: HomeContextType = {
   setActiveLeftPage: () => { },
   dataTrip: null,
   setDataTrip: () => { },
+  accessible_only: false,
 };
 
 const HomeContext = createContext<HomeContextType>(defaultContext);
@@ -63,6 +66,8 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
   const [activeLeftPage, setActiveLeftPage] = useState(ActiveLeftPage.Search);
   const [dataTrip, setDataTrip] = useState<TripInfo | null>(null);
 
+  const accessible_only = getCookie("AccessibleStationOnly") === "true";
+
   const value: HomeContextType = {
     departure,
     setDeparture,
@@ -80,6 +85,7 @@ export const HomeProvider: React.FC<HomeProviderProps> = ({ children }) => {
     setActiveLeftPage,
     dataTrip,
     setDataTrip,
+    accessible_only,
   };
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;

@@ -3,6 +3,7 @@ extern crate diesel;
 extern crate rocket;
 use crate::models;
 use crate::schema;
+use crate::tools::graph::Graph;
 use crate::views::services::PathNode;
 use diesel::alias;
 use diesel::pg::PgConnection;
@@ -15,6 +16,7 @@ use rocket::response::status;
 use rocket::response::status::BadRequest;
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+use rocket::State;
 use serde::Deserialize;
 use serde::Serialize;
 use std::env;
@@ -539,4 +541,19 @@ pub fn post_rate_trip(document: Json<RatingsRequest>) -> Result<(), BadRequest<S
 #[options("/rate")]
 pub fn options_rate<'r>() -> status::Accepted<()> {
     status::Accepted(())
+}
+
+#[derive(Debug, Serialize)]
+pub struct GraphConnectivityResponse {
+    is_connected: bool,
+    number_of_subgraphs: usize,
+}
+
+#[get("/graph_connectivity")]
+pub fn get_graph_connectivity(g: &State<Graph>) -> Json<GraphConnectivityResponse> {
+    let subgraphs = g.get_subgraphs();
+    Json(GraphConnectivityResponse {
+        is_connected: subgraphs.len() == 1,
+        number_of_subgraphs: subgraphs.len(),
+    })
 }

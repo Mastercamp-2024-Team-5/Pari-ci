@@ -409,7 +409,7 @@ pub fn real_time_path(
 
     let current_time = start_date.clone();
     let time = current_time.time().as_hms();
-    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.0 as i32);
+    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.2 as i32);
 
     let mut current_stop = path.1[0].clone();
 
@@ -508,7 +508,7 @@ pub fn real_time_path_reverse(
 
     let current_time = end_date.clone();
     let time = current_time.time().as_hms();
-    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.0 as i32);
+    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.2 as i32);
 
     let mut current_stop = path.1[path.1.len() - 1].clone();
 

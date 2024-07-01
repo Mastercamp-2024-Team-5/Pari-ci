@@ -1,14 +1,21 @@
-import { Flex, Text, IconButton } from "@chakra-ui/react";
+import { Flex, Text, IconButton, useToast } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
 import { Point, SharedTripResponse } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
-import React from "react";
+import { useState } from "react";
+
+enum AnimationState {
+  Idle,
+  Loading,
+}
 
 const DetailsScreen = () => {
   const { setActiveRightPage, dataTrip, dataPath, departure, destination, startAt, endAt } = useHomeContext();
-  const [sharedLink, setSharedLink] = React.useState<string>("");
+  const [sharedLink, setSharedLink] = useState<string>("");
+  const [animateShare, setAnimateShare] = useState(AnimationState.Idle);
+  const toast = useToast();
 
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
@@ -16,6 +23,7 @@ const DetailsScreen = () => {
 
   async function handleShared() {
     if (sharedLink === "") {
+      setAnimateShare(AnimationState.Loading);
       const requestData = {
         departure: departure,
         destination: destination,
@@ -37,7 +45,8 @@ const DetailsScreen = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       };
-      const data = await fetch("http://localhost:8000/share", requestOptions)
+
+      fetch("http://localhost:8000/share", requestOptions)
         .then((response) => {
           if (!response.ok) {
             console.log(response);
@@ -45,14 +54,41 @@ const DetailsScreen = () => {
           }
           return response.json();
         })
-
-      // make the data into a link
-      const url = new URL(window.location.href);
-      url.pathname = "/path/" + data.id;
-      navigator.clipboard.writeText(url.href);
-      setSharedLink(url.href);
+        .then(async (data) => {
+          // make the data into a link
+          const url = new URL(window.location.href);
+          url.pathname = "/path/" + data.id;
+          await navigator.clipboard.writeText(url.href);
+          setSharedLink(url.href);
+          toast({
+            title: `Lien copié dans le presse-papier`,
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          console.error("There was an error!", error);
+          toast({
+            title: `Erreur lors de la création du lien`,
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+          });
+        })
+        .finally(async () => {
+          setAnimateShare(AnimationState.Idle);
+        });
     } else {
-      navigator.clipboard.writeText(sharedLink);
+      navigator.clipboard.writeText(sharedLink).then(() => {
+        setAnimateShare(AnimationState.Idle);
+        toast({
+          title: `Lien copié dans le presse-papier`,
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        });
+      });
     }
   }
 
@@ -144,6 +180,7 @@ const DetailsScreen = () => {
             icon={<FaShareAlt />}
             colorScheme="teal"
             onClick={handleShared}
+            isLoading={animateShare === AnimationState.Loading}
           />
         </Flex>
       </div>
@@ -163,10 +200,6 @@ const DetailsScreen = () => {
     >
       <Text
         onClick={() => setActiveRightPage(ActiveRightPage.Trip)}
-        // fontSize={"md"}
-        // color={"#273DFF"}
-        // textDecoration={"underline"}
-        // alignSelf={"start"}
         _hover={{ cursor: "pointer" }}
       >
         <svg

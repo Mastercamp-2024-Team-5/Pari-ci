@@ -24,6 +24,12 @@ const ControlButton: React.FC<{ selectedButton: ActiveRoutes; onSelectButton: (b
       >
         <Icon item="rer" />
       </div>
+      <div
+        className={`icon-container ${selectedButton === ActiveRoutes.Train ? 'selected' : ''}`}
+        onClick={() => onSelectButton(ActiveRoutes.Train)}
+      >
+        <Icon item="train" />
+      </div>
     </div>
   );
 };

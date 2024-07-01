@@ -13,4 +13,5 @@ export enum ActiveLeftPage {
 export enum ActiveRoutes {
     Metro = "metro",
     Rer = "rer",
+    Train = "train",
 }

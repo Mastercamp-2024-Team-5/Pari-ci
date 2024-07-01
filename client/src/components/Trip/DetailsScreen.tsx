@@ -41,13 +41,8 @@ const DetailsScreen = () => {
         return sum;
       }, 0);
 
-      console.log("Total Travel Time in seconds", totalTravelTime);
       const publicTransportCo2Emission = Math.round(
         (totalTravelTime || 0) * 0.68
-      );
-      console.log(
-        "Public Transport totalCO2 in g of CO2",
-        publicTransportCo2Emission
       );
 
       const distanceInKm = distance(
@@ -58,7 +53,6 @@ const DetailsScreen = () => {
       );
 
       const carCo2Emission = Math.round(distanceInKm * 192);
-      console.log("Car co2Emission in g of CO2", carCo2Emission);
 
       setCo2Car(carCo2Emission);
       setCo2PublicTransport(publicTransportCo2Emission);
@@ -127,7 +121,6 @@ const DetailsScreen = () => {
         requestOptions
       ).then((response) => {
         if (!response.ok) {
-          console.log(response);
           throw new Error("Network response was not ok");
         }
         return response.json();

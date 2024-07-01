@@ -72,7 +72,6 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (shared) {
       const parsed = shared as SharedTripResponse;
-      console.log(parsed);
       setDataPath(parsed.content as TripData);
       setStartAt(parsed.start_date || "");
       setEndAt(parsed.end_date || "");

@@ -36,7 +36,6 @@ const MapItineraire: React.FC = React.memo(() => {
         `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
       );
       const routes: RouteTrace[] = await routes_response.json();
-      console.log("route trace", routes);
 
       const itineraire_stops: Stop[] = [];
       const defaultStop: Stop = {
@@ -64,8 +63,6 @@ const MapItineraire: React.FC = React.memo(() => {
           ) ||
           stops.find((s) => s.stop_id === edge.from_stop_id) ||
           defaultStop;
-
-        console.log("stopData", stopData);
 
         const nextStopData =
           stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
@@ -112,7 +109,6 @@ const MapItineraire: React.FC = React.memo(() => {
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
-        console.log("itineraire_stops", itineraire_stops);
         const routeColor = routes.find(
           (r) => r.route_id === edge.route_id
         )?.color;

@@ -72,13 +72,16 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       }
       const date_string = startAt === "" ? endAt : startAt;
       // parse date
-      console.log(date_string);
       const date = new Date(date_string);
       // remove timezone offset
       date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
-        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}`
+        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${
+          destination.id
+        }&date=${date.toISOString().slice(0, 10)}&time=${date
+          .toISOString()
+          .slice(11, 19)}${endAt === "" ? "" : "&reverse"}`
       )
         .then((response) => {
           if (response.status === 404) {
@@ -110,11 +113,17 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
     onClose();
   };
 
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (selectRef.current && !(selectRef.current as HTMLElement).contains((event.target as Node))) {
-      onClose();
-    }
-  }, [onClose]);
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        selectRef.current &&
+        !(selectRef.current as HTMLElement).contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -197,7 +206,12 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             justify="space-between"
             width="100%"
           >
-            <Box minWidth="48%" marginRight="2%" position="relative" ref={selectRef}>
+            <Box
+              minWidth="48%"
+              marginRight="2%"
+              position="relative"
+              ref={selectRef}
+            >
               <Input
                 as="button"
                 onClick={onToggle}
@@ -219,9 +233,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                 whiteSpace="nowrap"
                 overflow={"hidden"}
               >
-                <>
-                  {selectedDateType === "startAt" ? "Départ" : "Arrivée"}
-                </>
+                <>{selectedDateType === "startAt" ? "Départ" : "Arrivée"}</>
                 <Icon as={MdExpandMore} />
               </Input>
               {isOpen && (
@@ -257,7 +269,13 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             </Box>
             <Box minWidth="48%">
               <Input
-                color={dateRegex.test(selectedDateType === "startAt" ? startAt : endAt) ? "black" : "gray.400"}
+                color={
+                  dateRegex.test(
+                    selectedDateType === "startAt" ? startAt : endAt
+                  )
+                    ? "black"
+                    : "gray.400"
+                }
                 focusBorderColor="#5eaf91"
                 fontFamily="Karla"
                 variant="outline"
@@ -289,10 +307,24 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
                   // set default value to current date and time
                   if (selectedDateType === "startAt" && startAt === "") {
                     setEndAt("");
-                    setStartAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+                    setStartAt(
+                      new Date(
+                        new Date().getTime() -
+                          new Date().getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .slice(0, 16)
+                    );
                   } else if (selectedDateType === "endAt" && endAt === "") {
                     setStartAt("");
-                    setEndAt(new Date((new Date().getTime() - new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+                    setEndAt(
+                      new Date(
+                        new Date().getTime() -
+                          new Date().getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .slice(0, 16)
+                    );
                   } else {
                     e.target.select();
                   }
@@ -330,7 +362,6 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
             >
               {errorMessages}
             </Flex>
-
           )}
         </VStack>
       </Stack>

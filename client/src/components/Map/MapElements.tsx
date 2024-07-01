@@ -28,7 +28,6 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
 
       const response = await fetch(`http://127.0.0.1:8000/stops?${buttonType}`);
       const data: Stop[] = await response.json();
-      console.log("data", data[0].stop_lat, data[0].stop_lon);
 
       if (!Array.isArray(data) || !data.length) {
         throw new Error("API response is not valid");

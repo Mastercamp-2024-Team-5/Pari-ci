@@ -14,6 +14,7 @@ pub struct Edge {
     pub weight: u32,
     pub wait_time: u32,
     pub trip_per_hour: Option<[i32; 30]>,
+    pub pmr_access: bool,
 }
 
 #[allow(dead_code)]
@@ -63,6 +64,7 @@ impl Graph {
         wait_time: u32,
         route: String,
         trip_per_hour: Option<[i32; 30]>,
+        pmr_access: bool,
     ) {
         let from_index = self.node_indices[&from];
         let to_index = self.node_indices[&to];
@@ -72,6 +74,7 @@ impl Graph {
             weight,
             wait_time,
             trip_per_hour,
+            pmr_access,
         });
     }
 
@@ -81,6 +84,7 @@ impl Graph {
         goal: NodeIndex,
         hour: usize,
         reverse: bool,
+        pmr: bool,
     ) -> Option<(u32, Vec<NodeIndex>)> {
         let start_index = *self.node_indices.get(&start)?;
         let goal_index = *self.node_indices.get(&goal)?;
@@ -119,6 +123,16 @@ impl Graph {
             }
 
             for edge in &self.nodes[position].edges {
+                // check if we are using a parent transfer for fast traveling
+                if (edge.wait_time == 0 && edge.weight == 0)
+                    && (edge.destination != goal_index && position != start_index)
+                {
+                    continue;
+                }
+                // check if the edge is pmr compatible
+                if pmr && !edge.pmr_access {
+                    continue;
+                }
                 // check if there is a trip between the two stops at the current hour
                 if let Some(trip_per_hour) = &edge.trip_per_hour {
                     let current_hour = if reverse {
@@ -164,6 +178,7 @@ impl Graph {
                 i.avg_wait_time as u32,
                 i.route_id.clone(),
                 i.trip_per_hour,
+                i.pmr_compatible,
             );
         }
         graph
@@ -233,6 +248,7 @@ impl Graph {
                             edge.wait_time,
                             edge.route.clone(),
                             edge.trip_per_hour.clone(),
+                            edge.pmr_access,
                         );
                     }
                 }
@@ -404,7 +420,7 @@ impl Graph {
         let start = "start".to_string();
         tree.add_node(start.clone());
         for node in starts {
-            tree.add_edge(start.clone(), node, 0, 0, "start".to_string(), None);
+            tree.add_edge(start.clone(), node, 0, 0, "start".to_string(), None, true);
         }
 
         let mut stack = vec![start.clone()];

@@ -75,6 +75,11 @@ fn rocket() -> _ {
         )
         .mount(
             "/",
+            routes![services::post_rate_trip, services::options_rate],
+        )
+        .mount("/", routes![services::get_graph_connectivity])
+        .mount(
+            "/",
             routes![
                 views::services::list_stops,
                 views::services::get_stop_details

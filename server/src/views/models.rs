@@ -23,6 +23,7 @@ pub struct AverageStopTime {
     pub next_stop_id: String,
     pub route_id: String,
     pub avg_travel_time: i32,
+    pub wheelchair_accessible: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,6 +34,7 @@ pub struct AverageStopTimeWithWait {
     pub avg_travel_time: i32,
     pub avg_wait_time: i32,
     pub trip_per_hour: Option<[i32; 30]>,
+    pub pmr_compatible: bool,
 }
 
 #[derive(Queryable, Debug, Serialize, Deserialize)]

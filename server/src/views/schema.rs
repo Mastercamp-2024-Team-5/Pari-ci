@@ -23,6 +23,7 @@ diesel::table! {
         next_stop_id -> Varchar,
         route_id -> Varchar,
         avg_travel_time -> Int4,
+        wheelchair_accessible -> Int4,
     }
 }
 

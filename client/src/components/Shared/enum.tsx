@@ -15,3 +15,9 @@ export enum ActiveRoutes {
     Rer = "rer",
     Train = "train",
 }
+
+export enum RatingStatus {
+    Rated,
+    Opened,
+    Closed,
+}

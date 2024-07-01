@@ -1,11 +1,17 @@
-import { Flex, Text, IconButton, Button } from "@chakra-ui/react";
+import { Flex, Text, IconButton, Button,useToast } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
 import { Point, SharedTripResponse, Stop } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
-import React from "react";
 import Icon from "../Shared/Icon";
+import { useState } from "react";
+
+enum AnimationState {
+  Idle,
+  Loading,
+}
+
 
 const DetailsScreen = () => {
   const {
@@ -20,6 +26,8 @@ const DetailsScreen = () => {
   const [sharedLink, setSharedLink] = React.useState<string>("");
   const [co2Car, setCo2Car] = React.useState<number>(0);
   const [co2PublicTransport, setCo2PublicTransport] = React.useState<number>(0);
+  const [animateShare, setAnimateShare] = useState(AnimationState.Idle);
+  const toast = useToast();
 
   React.useEffect(() => {
     const fetchStops = async () => {
@@ -84,13 +92,14 @@ const DetailsScreen = () => {
   function deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
-
+    
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
   }
 
   async function handleShared() {
     if (sharedLink === "") {
+      setAnimateShare(AnimationState.Loading);
       const requestData = {
         departure: departure,
         destination: destination,
@@ -100,15 +109,11 @@ const DetailsScreen = () => {
       // set the start and end date if they exist
       if (startAt !== "") {
         const date = new Date(startAt);
-        requestData.start_date = `${date.toISOString().slice(0, 10)} ${date
-          .toISOString()
-          .slice(11, 19)}.0`;
+        requestData.start_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
       }
       if (endAt !== "") {
         const date = new Date(endAt);
-        requestData.end_date = `${date.toISOString().slice(0, 10)} ${date
-          .toISOString()
-          .slice(11, 19)}.0`;
+        requestData.end_date = `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 19)}.0`
       }
 
       const requestOptions = {
@@ -116,23 +121,50 @@ const DetailsScreen = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       };
-      const data = await fetch(
-        "http://localhost:8000/share",
-        requestOptions
-      ).then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      });
 
-      // make the data into a link
-      const url = new URL(window.location.href);
-      url.pathname = "/path/" + data.id;
-      navigator.clipboard.writeText(url.href);
-      setSharedLink(url.href);
+      fetch("http://localhost:8000/share", requestOptions)
+        .then((response) => {
+          if (!response.ok) {
+            console.log(response);
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(async (data) => {
+          // make the data into a link
+          const url = new URL(window.location.href);
+          url.pathname = "/path/" + data.id;
+          await navigator.clipboard.writeText(url.href);
+          setSharedLink(url.href);
+          toast({
+            title: `Lien copié dans le presse-papier`,
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          console.error("There was an error!", error);
+          toast({
+            title: `Erreur lors de la création du lien`,
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+          });
+        })
+        .finally(async () => {
+          setAnimateShare(AnimationState.Idle);
+        });
     } else {
-      navigator.clipboard.writeText(sharedLink);
+      navigator.clipboard.writeText(sharedLink).then(() => {
+        setAnimateShare(AnimationState.Idle);
+        toast({
+          title: `Lien copié dans le presse-papier`,
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        });
+      });
     }
   }
 
@@ -184,17 +216,17 @@ const DetailsScreen = () => {
                 {index === 0 || index === dataTrip.points.length - 1
                   ? "Marchez vers " + obj.to
                   : "Correspondance " +
-                    dataTrip.points
-                      .map((v, i) => {
-                        if (i >= index && v.line) {
-                          return v.line;
-                        } else {
-                          return null;
-                        }
-                      })
-                      .filter((x) => x !== null)[0] +
-                    " à " +
-                    obj.from}
+                  dataTrip.points
+                    .map((v, i) => {
+                      if (i >= index && v.line) {
+                        return v.line;
+                      } else {
+                        return null;
+                      }
+                    })
+                    .filter((x) => x !== null)[0] +
+                  " à " +
+                  obj.from}
                 , {(obj.travel_time / 60).toFixed(0)} min de marche
               </Text>
             );
@@ -217,10 +249,6 @@ const DetailsScreen = () => {
     >
       <Text
         onClick={() => setActiveRightPage(ActiveRightPage.Trip)}
-        // fontSize={"md"}
-        // color={"#273DFF"}
-        // textDecoration={"underline"}
-        // alignSelf={"start"}
         _hover={{ cursor: "pointer" }}
       >
         <svg

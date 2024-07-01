@@ -41,6 +41,7 @@ const Home: React.FC = () => {
     activeLeftPage,
     setActiveLeftPage,
     setDataPath,
+    accessible_only,
   } = useHomeContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [selectedSearch, setSelectedSearch] = useState<ActiveSearchInput>(
@@ -53,7 +54,9 @@ const Home: React.FC = () => {
       q: textQuery,
     };
 
-    const response = await fetch("http://localhost:7700/indexes/stops/search", {
+    const link = accessible_only ? "http://localhost:7700/indexes/stops_pmr/search" : "http://localhost:7700/indexes/stops/search";
+
+    const response = await fetch(link, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

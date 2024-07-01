@@ -1,7 +1,6 @@
 import {
   Center,
   Stack,
-  Heading,
   Button,
   Container,
   Image,
@@ -13,7 +12,6 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import useScreenWidth from "../Shared/useScreenWidth";
-import Icon from "../Shared/Icon";
 
 // Import images
 import accessibility1 from "./../../assets/accessibility1.jpg";
@@ -71,7 +69,7 @@ const AccessibleScreen = (
                 width="100px"
                 height="100px"
                 padding={0}
-            />
+              />
               <Text
                 textAlign={"center"}
                 fontFamily="Karla"

@@ -253,6 +253,7 @@ pub fn get_average_times() -> Vec<models::AverageStopTimeWithWait> {
             avg_travel_time: i.avg_travel_time,
             avg_wait_time: (20 * 3600 / count) as i32,
             trip_per_hour: Some(trip_per_hour_array),
+            pmr_compatible: i.wheelchair_accessible == 1,
         };
         average_times.push(average_time);
     }
@@ -271,20 +272,25 @@ pub fn get_average_transfert_times() -> Vec<models::AverageStopTimeWithWait> {
     let results = transfers
         .inner_join(stop1.on(from_stop_id.eq(stop1.fields(schema::stop_route_details::stop_id))))
         .inner_join(stop2.on(to_stop_id.eq(stop2.fields(schema::stop_route_details::stop_id))))
-        .select(transfers::all_columns())
-        .load::<crate::models::Transfer>(connection)
+        .select((
+            transfers::all_columns(),
+            stop1.fields(schema::stop_route_details::wheelchair_boarding),
+            stop2.fields(schema::stop_route_details::wheelchair_boarding),
+        ))
+        .load::<(crate::models::Transfer, i32, i32)>(connection)
         .expect("Error loading stops");
 
     let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
 
     for i in results {
         let average_time = models::AverageStopTimeWithWait {
-            stop_id: i.from_stop_id.clone(),
-            next_stop_id: i.to_stop_id.clone(),
+            stop_id: i.0.from_stop_id.clone(),
+            next_stop_id: i.0.to_stop_id.clone(),
             route_id: "".to_string(),
-            avg_travel_time: i.min_transfer_time,
+            avg_travel_time: i.0.min_transfer_time,
             avg_wait_time: 0,
             trip_per_hour: None,
+            pmr_compatible: i.1 == 1 && i.2 == 1,
         };
         average_times.push(average_time);
     }
@@ -297,9 +303,9 @@ pub fn get_parent_transfers_times() -> Vec<models::AverageStopTimeWithWait> {
     let connection = &mut establish_connection_pg();
     let results = stop_route_details
         .filter(location_type.eq(0))
-        .select((parent_station, stop_id))
+        .select((parent_station, stop_id, wheelchair_boarding))
         .distinct()
-        .load::<(String, String)>(connection)
+        .load::<(String, String, i32)>(connection)
         .expect("Error loading stops");
 
     let mut average_times = Vec::<models::AverageStopTimeWithWait>::new();
@@ -312,6 +318,18 @@ pub fn get_parent_transfers_times() -> Vec<models::AverageStopTimeWithWait> {
             avg_travel_time: 0,
             avg_wait_time: 0,
             trip_per_hour: None,
+            pmr_compatible: i.2 == 1,
+        };
+        average_times.push(average_time);
+        // add the reverse transfer
+        let average_time = models::AverageStopTimeWithWait {
+            stop_id: i.0.clone(),
+            next_stop_id: i.1.clone(),
+            route_id: "".to_string(),
+            avg_travel_time: 0,
+            avg_wait_time: 0,
+            trip_per_hour: None,
+            pmr_compatible: i.2 == 1,
         };
         average_times.push(average_time);
     }
@@ -319,49 +337,39 @@ pub fn get_parent_transfers_times() -> Vec<models::AverageStopTimeWithWait> {
     average_times
 }
 
-pub fn get_first_child_stop(parent_station_filter: &str) -> String {
+pub fn get_child_stops(parent_station_filter: &str) -> Vec<String> {
     use schema::stop_route_details::dsl::*;
     let connection = &mut establish_connection_pg();
     let results = stop_route_details
         .filter(parent_station.eq(parent_station_filter))
         .filter(location_type.eq(0))
         .select(stop_id)
-        .limit(1)
         .load::<String>(connection)
         .expect("Error loading stops");
-    results.first().unwrap().to_string()
+    results
 }
 
 pub fn remove_trailing_stops(path: Vec<String>) -> Vec<String> {
+    use crate::schema::stops::dsl as stops_dsl;
+    let connection = &mut establish_connection_pg();
+    let mut path = path;
+
     if path.len() < 2 {
         return path;
     }
-    // remove stops with same parent_station at start and end
-    let mut path = path;
-    let connection = &mut establish_connection_pg();
-    use schema::stop_route_details::dsl::*;
-    let start = stop_route_details
-        .filter(stop_id.eq(&path[0]))
-        .select(parent_station)
-        .first::<String>(connection)
+
+    // remove first node if it is a parent station
+    let start = stops_dsl::stops
+        .filter(stops_dsl::stop_id.eq(&path[0]))
+        .select(stops_dsl::location_type)
+        .first::<i32>(&mut establish_connection_pg())
         .expect("Error loading stops");
 
-    // remove stops with same parent_station at start
-    while path.len() > 1 {
-        let current = stop_route_details
-            .filter(stop_id.eq(&path[1]))
-            .select(parent_station)
-            .first::<String>(connection)
-            .expect("Error loading stops");
-        if current == start {
-            path.remove(0);
-        } else {
-            break;
-        }
+    if start == 1 {
+        path.remove(0);
     }
 
     // remove last node if it is a parent station
-    use crate::schema::stops::dsl as stops_dsl;
     let end = stops_dsl::stops
         .filter(stops_dsl::stop_id.eq(&path[path.len() - 1]))
         .select(stops_dsl::location_type)
@@ -401,7 +409,7 @@ pub fn real_time_path(
 
     let current_time = start_date.clone();
     let time = current_time.time().as_hms();
-    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.0 as i32);
+    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.2 as i32);
 
     let mut current_stop = path.1[0].clone();
 
@@ -500,7 +508,7 @@ pub fn real_time_path_reverse(
 
     let current_time = end_date.clone();
     let time = current_time.time().as_hms();
-    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.0 as i32);
+    let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.2 as i32);
 
     let mut current_stop = path.1[path.1.len() - 1].clone();
 
@@ -609,26 +617,26 @@ pub fn real_time_path_reverse(
     Ok((cost, new_path))
 }
 
-#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>")]
+#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>&<pmr>")]
 pub fn get_path(
     start_stop: &str,
     end_stop: &str,
     date: &str,
     time: &str,
     reverse: Option<bool>,
+    pmr: Option<bool>,
     g: &State<Graph>,
 ) -> Result<Json<(PrimitiveDateTime, Vec<PathNode>)>, NotFound<String>> {
     let format_date = format_description!("[year]-[month]-[day]");
     let format_time = format_description!("[hour]:[minute]:[second]");
     let time = Time::parse(time, &format_time).unwrap();
 
-    // get the first child stop (we don't need to do it for the end stop because there is link from child to parent (not the other way around because else the graph would skip transfers))
-    let start = get_first_child_stop(&start_stop);
     let shortest_path = g.shortest_path(
-        start,
+        start_stop.to_string(),
         end_stop.to_string(),
         time.hour() as usize,
         reverse.unwrap_or(false),
+        pmr.unwrap_or(false),
     );
 
     let shortest_path = match shortest_path {

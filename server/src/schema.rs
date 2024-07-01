@@ -40,6 +40,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    ratings (id) {
+        #[max_length = 255]
+        id -> Varchar,
+        rating -> Int4,
+        trip_content -> Text,
+    }
+}
+
+diesel::table! {
     routes (route_id) {
         #[max_length = 255]
         route_id -> Varchar,
@@ -178,6 +187,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     agency,
     calendar,
     calendar_dates,
+    ratings,
     routes,
     routes_trace,
     shared_table,

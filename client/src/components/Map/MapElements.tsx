@@ -120,10 +120,9 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
           closeButton={false}
           onClose={() => setSelectedStop(null)}
         >
-          <div>
-            <Icon item={selectedStop.route_short_name} size={23} />
-            <h2 style={{ margin: "0px" }}>{selectedStop.stop_name}</h2>
-          </div>
+          <center>
+            <Icon item={selectedStop.route_short_name} size={23} /><h2 style={{ margin: "0px", textAlign: "center" }}>{selectedStop.stop_name}</h2>
+          </center>
         </Popup>
       )}
       {geojson.map((line, index) => (

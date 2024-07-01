@@ -14,6 +14,14 @@ interface IconProps {
 
 const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onMouseEnter, onMouseLeave }) => {
 
+  let parse_size = 0;
+  if (typeof size === "string") {
+    parse_size = parseInt(size.replace("px", ""));
+  }
+  else {
+    parse_size = size;
+  }
+
   item = item?.toLowerCase();
   //Check if icon is in the css component of config.json data in the glyphs[].css
   if (item == "7b" || item == "3b") {
@@ -24,9 +32,10 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
   }
 
   if (item === "orlyval") {
+    const minWidth = ((95 / 24) * parse_size).toFixed(0) + "px";
     return (
       <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
-        <i className="icon-orlyval" style={{ fontSize: size, minWidth: 95, color: "#34697f" }}></i>
+        <i className="icon-orlyval" style={{ fontSize: size, minWidth, color: "#34697f" }}></i>
       </Box>
     );
   }

@@ -65,6 +65,8 @@ const MapItineraire: React.FC = React.memo(() => {
           stops.find((s) => s.stop_id === edge.from_stop_id) ||
           defaultStop;
 
+        console.log("stopData", stopData);
+
         const nextStopData =
           stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
         part = routes
@@ -110,6 +112,7 @@ const MapItineraire: React.FC = React.memo(() => {
         }
         route_part.push(part);
         itineraire_stops.push(stopData);
+        console.log("itineraire_stops", itineraire_stops);
         const routeColor = routes.find(
           (r) => r.route_id === edge.route_id
         )?.color;

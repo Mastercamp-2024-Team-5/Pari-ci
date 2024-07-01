@@ -1,10 +1,11 @@
-import { Flex, Text, IconButton } from "@chakra-ui/react";
+import { Flex, Text, IconButton, Button } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
 import { Point, SharedTripResponse, Stop } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
 import React from "react";
+import Icon from "../Shared/Icon";
 
 const DetailsScreen = () => {
   const {
@@ -17,47 +18,54 @@ const DetailsScreen = () => {
     endAt,
   } = useHomeContext();
   const [sharedLink, setSharedLink] = React.useState<string>("");
-  const [stops] = React.useState<Stop[]>([]);
+  const [co2Car, setCo2Car] = React.useState<number>(0);
+  const [co2PublicTransport, setCo2PublicTransport] = React.useState<number>(0);
 
   React.useEffect(() => {
     const fetchStops = async () => {
-      const stops_response = await fetch(
-        `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
+      // fetch by id the departure and destination stops
+      const departureResponse = await fetch(
+        `http://127.0.0.1:8000/stop/${departure?.id}`
       );
-      const stops: Stop[] = await stops_response.json();
-      console.log("stops", stops);
+      const departureStop: Stop = await departureResponse.json();
+
+      const destinationResponse = await fetch(
+        `http://127.0.0.1:8000/stop/${destination?.id}`
+      );
+      const destinationStop: Stop = await destinationResponse.json();
+
+      const totalTravelTime = dataTrip?.points.reduce((sum, obj) => {
+        if (obj.line && obj.direction) {
+          return sum + obj.travel_time;
+        }
+        return sum;
+      }, 0);
+
+      console.log("Total Travel Time in seconds", totalTravelTime);
+      const publicTransportCo2Emission = Math.round(
+        (totalTravelTime || 0) * 0.68
+      );
+      console.log(
+        "Public Transport totalCO2 in g of CO2",
+        publicTransportCo2Emission
+      );
+
+      const distanceInKm = distance(
+        departureStop[0].stop_lat,
+        departureStop[0].stop_lon,
+        destinationStop[0].stop_lat,
+        destinationStop[0].stop_lon
+      );
+
+      const carCo2Emission = Math.round(distanceInKm * 192);
+      console.log("Car co2Emission in g of CO2", carCo2Emission);
+
+      setCo2Car(carCo2Emission);
+      setCo2PublicTransport(publicTransportCo2Emission);
     };
 
     fetchStops();
-  }, []);
-
-  const totalTravelTime = dataTrip?.points.reduce((sum, obj) => {
-    if (obj.line && obj.direction) {
-      return sum + obj.travel_time;
-    }
-    return sum;
-  }, 0);
-  const totalCO2 = Math.round((totalTravelTime ?? 0) * 0.68);
-  console.log("Public Transport totalCO2 in g of CO2", totalCO2);
-
-  // The route is `http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`
-  // get the Stop data from the API
-  // then, get the departure and destination localisation, stop_lat and stop_lon
-  // then, compute the distance in km between the two points
-  // then, compute the CO2 emission in g of CO2 knowing that 1 km = 171 g of CO2
-
-  const departureStop = stops.find((s) => s.stop_name === departure?.name);
-  const destinationStop = stops.find((s) => s.stop_name === destination?.name);
-  console.log("departureStop", departureStop);
-  console.log("destinationStop", destinationStop);
-
-  const departureCoord = [departureStop?.stop_lat, departureStop?.stop_lon];
-  const destinationCoord = [
-    destinationStop?.stop_lat,
-    destinationStop?.stop_lon,
-  ];
-  console.log("departureCoord", departureCoord);
-  console.log("destinationCoord", destinationCoord);
+  }, [departure, destination]);
 
   function distance(
     lat1: number,
@@ -82,16 +90,6 @@ const DetailsScreen = () => {
   function deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
-
-  const distanceInKm = distance(
-    departureCoord[0] ?? 0,
-    departureCoord[1] ?? 0,
-    destinationCoord[0] ?? 0,
-    destinationCoord[1] ?? 0
-  );
-
-  const co2Emission = Math.round(distanceInKm * 171);
-  console.log("Car co2Emission in g of CO2", co2Emission);
 
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
@@ -148,16 +146,7 @@ const DetailsScreen = () => {
   const renderMoreDetails = () => {
     if (!dataTrip) return null;
     return (
-      <div
-        style={{
-          overflowY: "auto",
-          maxHeight: "100%",
-          maxWidth: "100%",
-          borderRadius: "10px",
-          padding: "5px",
-          marginTop: "10px",
-        }}
-      >
+      <>
         {dataTrip.points.map((obj: Point, index: number) => {
           if (obj.line && obj.direction) {
             return (
@@ -218,24 +207,7 @@ const DetailsScreen = () => {
             );
           }
         })}
-        <Flex
-          marginTop="5%"
-          marginX="4%"
-          direction="row"
-          alignItems={"center"}
-          justifyContent={"space-between"}
-        >
-          <Text fontSize="xl" fontWeight="550" textAlign="start">
-            Arrivé à {dataTrip.arrival.toLocaleTimeString()}
-          </Text>
-          <IconButton
-            aria-label="Share"
-            icon={<FaShareAlt />}
-            colorScheme="teal"
-            onClick={handleShared}
-          />
-        </Flex>
-      </div>
+      </>
     );
   };
 
@@ -276,7 +248,71 @@ const DetailsScreen = () => {
       <Text fontSize="4xl" fontWeight="700" textAlign="start">
         Votre trajet :
       </Text>
-      {renderMoreDetails()}
+      <div
+        style={{
+          overflowY: "auto",
+          maxHeight: "100%",
+          maxWidth: "100%",
+          borderRadius: "10px",
+          padding: "5px",
+          marginTop: "10px",
+        }}
+      >
+        {renderMoreDetails()}
+        <Flex
+          marginTop="5%"
+          marginX="4%"
+          direction="row"
+          alignItems={"center"}
+          justifyContent={"space-between"}
+        >
+          <Text fontSize="xl" fontWeight="550" textAlign="start">
+            Arrivé à {dataTrip?.arrival.toLocaleTimeString()}
+          </Text>
+          <IconButton
+            aria-label="Share"
+            icon={<FaShareAlt />}
+            colorScheme="teal"
+            onClick={handleShared}
+          />
+        </Flex>
+        <Text
+          fontSize="l"
+          fontWeight="550"
+          textAlign="start"
+          border={"2px"}
+          borderRadius={"10px"}
+          borderColor={"gray.300"}
+          padding={"5px"}
+          paddingX={"10px"}
+          marginTop={"2%"}
+        >
+          <Flex
+            direction="row"
+            alignItems={"center"}
+            justifyContent={"center"}
+            gap={2}
+          >
+            <Icon item="voiture" size={20} color="teal" />
+            {co2Car}g
+            <span
+              style={{
+                color: "teal",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+              }}
+            >
+              VS
+            </span>
+            {co2PublicTransport}g
+            <Icon item="parici" size={20} color="teal" />
+          </Flex>
+          Félicitations ! En choisissant les transports en commun, vous avez
+          réduit votre empreinte carbone de{" "}
+          <strong>{co2Car - co2PublicTransport}g </strong>
+          de CO2.
+        </Text>
+      </div>
     </Flex>
   );
 };

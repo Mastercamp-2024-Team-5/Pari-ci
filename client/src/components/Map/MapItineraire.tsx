@@ -18,6 +18,38 @@ const MapItineraire: React.FC = React.memo(() => {
     return coord1[0].toFixed(fixed) === coord2[0].toFixed(fixed) && coord1[1].toFixed(fixed) === coord2[1].toFixed(fixed);
   }
 
+  function buildLineFromRouteParts(route_parts: RouteTrace[], start: [number, number], end: [number, number]): RouteTrace | undefined {
+    // recursively build the line from the route parts
+    console.log("Building line from route parts between", start + " and " + end)
+    const route_parts_f = route_parts.filter((r) => {
+      const shape = JSON.parse(r.shape);
+      return isSameCoordinate(shape.coordinates[0], start) || isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], start);
+    });
+    for (const route_part of route_parts_f) {
+      const shape = JSON.parse(route_part.shape);
+      if (isSameCoordinate(shape.coordinates[0], end) || isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], end)) {
+        return route_part;
+      }
+      const next_start = isSameCoordinate(shape.coordinates[0], start) ? shape.coordinates[shape.coordinates.length - 1] : shape.coordinates[0];
+      const next_route_parts = route_parts.filter((r) => r.route_id !== route_part.route_id);
+      const next = buildLineFromRouteParts(next_route_parts, next_start, end);
+      if (next === undefined) {
+        continue;
+      }
+      else {
+        console.log("Next route part found");
+        return {
+          id: route_part.id,
+          route_id: route_part.route_id,
+          shape: JSON.stringify({ coordinates: [...shape.coordinates, ...JSON.parse(next.shape).coordinates] }),
+          route_type: route_part.route_type,
+          color: route_part.color,
+        };
+      }
+    }
+    return undefined;
+  }
+
   useEffect(() => {
     async function fetchItineraire() {
       if (dataPath === null) {
@@ -50,13 +82,10 @@ const MapItineraire: React.FC = React.memo(() => {
       for (const edge of dataPath[1]) {
         const stopData = stops.find((s) => s.stop_id === edge.from_stop_id && s.route_id === edge.route_id) || stops.find((s) => s.stop_id === edge.from_stop_id) || defaultStop;
         const nextStopData = stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
-        part = (routes.filter(shape => shape.route_id === edge.route_id).find((r) => {
-          const shape = JSON.parse(r.shape)
-          return (isSameCoordinate(shape.coordinates[0], [stopData.stop_lon, stopData.stop_lat])
-            && isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [nextStopData.stop_lon, nextStopData.stop_lat]))
-            || (isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], [stopData.stop_lon, stopData.stop_lat])
-              && isSameCoordinate(shape.coordinates[0], [nextStopData.stop_lon, nextStopData.stop_lat]))
-        }));
+        const routeParts = routes.filter(shape => shape.route_id === edge.route_id);
+        console.log("Building line from route parts between", stopData.stop_name + " and " + nextStopData.stop_name)
+        console.log(routeParts)
+        part = buildLineFromRouteParts(routeParts, [stopData.stop_lon, stopData.stop_lat], [nextStopData.stop_lon, nextStopData.stop_lat]);
         if (part === undefined) {
           const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color
           const color = routeColor || '808080';

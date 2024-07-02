@@ -1,55 +1,80 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citymapper
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: citymapper
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  meilisearch:
-    image: getmeili/meilisearch:latest
-    restart: always
-    ports:
-      - "7700:7700"
-    volumes:
-      - ./meili_data:/meili_data
+    meilisearch:
+        image: getmeili/meilisearch:latest
+        restart: always
+        ports:
+            - "7700:7700"
+        volumes:
+            - ./meili_data:/meili_data
+        healthcheck:
+            test: ["CMD-SHELL", "curl -s http://localhost:7700/health"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  diesel:
-      build:
-        context: ./server
-      depends_on:
-        - postgres
-      environment:
-        DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
-      command: ["diesel", "migration", "run"]
+    migration:
+        restart: on-failure
+        build:
+            context: ./server
+            dockerfile: Dockerfile.migration
+        ports:
+            - "8000:8000"
+        depends_on:
+            postgres:
+                condition: service_healthy
+            meilisearch:
+                condition: service_healthy
+        environment:
+            DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+        command: >
+            /bin/sh -c "
+            until pg_isready -h postgres -p 5432; do
+                sleep 1;
+            done;
+            diesel migration run &&
+            ./target/release/setup_db AddAll &&
+            ./target/release/setup_meilisearch &&
+            ./target/release/setup_db CorrectStops
+            "
 
-  backend:
-    restart: on-failure
-    build:
-      context: ./server
-    ports:
-      - "8000:8000"
-    depends_on:
-      - postgres
-      - meilisearch
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+    backend:
+        restart: on-failure
+        build:
+            context: ./server
+        ports:
+            - "127.0.0.1:8000:8000"
+        depends_on:
+            - postgres
+            - meilisearch
+        environment:
+            DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+        command: ["./target/release/citymapper-server"]
 
-  frontend:
-    restart: on-failure
-    build:
-      context: ./client
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+    frontend:
+        restart: on-failure
+        build:
+            context: ./client
+        ports:
+            - "5173:5173"
+        depends_on:
+            - backend
 
 volumes:
-  postgres_data:
-  meili_data:
+    postgres_data:
+    meili_data:

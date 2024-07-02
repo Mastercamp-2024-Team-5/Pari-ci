@@ -5,6 +5,7 @@ import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
 import { useState } from "react";
+import { BASE_API_LINK } from "../Shared/links";
 
 enum AnimationState {
   Idle,
@@ -46,7 +47,7 @@ const DetailsScreen = () => {
         body: JSON.stringify(requestData),
       };
 
-      fetch("http://localhost:8000/share", requestOptions)
+      fetch(`${BASE_API_LINK}/share`, requestOptions)
         .then((response) => {
           if (!response.ok) {
             console.log(response);

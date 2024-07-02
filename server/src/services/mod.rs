@@ -552,7 +552,6 @@ pub struct GraphConnectivityResponse {
 #[get("/graph_connectivity")]
 pub fn get_graph_connectivity(g: &State<Graph>) -> Json<GraphConnectivityResponse> {
     let subgraphs = g.get_subgraphs();
-    println!("{:#?}", subgraphs[1]);
     Json(GraphConnectivityResponse {
         is_connected: subgraphs.len() == 1,
         number_of_subgraphs: subgraphs.len(),

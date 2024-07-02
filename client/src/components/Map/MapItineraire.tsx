@@ -3,6 +3,7 @@ import { Marker, Popup, Source, Layer } from "react-map-gl";
 import { Stop, RouteTrace, RouteCollection } from "../Shared/types";
 import Icon from "../Shared/Icon";
 import { useHomeContext } from "../Home/HomeContext";
+import { BASE_API_LINK } from "../Shared/links";
 
 
 const MapItineraire: React.FC = React.memo(() => {
@@ -55,10 +56,10 @@ const MapItineraire: React.FC = React.memo(() => {
       if (dataPath === null) {
         return;
       }
-      const stops_response = await fetch(`http://127.0.0.1:8000/stops?metro&rer&tram&train`);
+      const stops_response = await fetch(`${BASE_API_LINK}/stops?metro&rer&tram&train`);
       const stops: Stop[] = await stops_response.json();
 
-      const routes_response = await fetch(`http://127.0.0.1:8000/routes_trace?metro&rer&tram&train`);
+      const routes_response = await fetch(`${BASE_API_LINK}/routes_trace?metro&rer&tram&train`);
       const routes: RouteTrace[] = await routes_response.json();
 
 

@@ -1,4 +1,3 @@
-# Rust base image
 FROM rustlang/rust:nightly-slim as builder
 
 RUN apt update && apt install -y libpq-dev postgresql-client
@@ -6,16 +5,12 @@ RUN apt update && apt install -y libpq-dev postgresql-client
 # Install Diesel CLI
 RUN cargo install diesel_cli --no-default-features --features postgres
 
-# Working directory
+# Set the working directory
 WORKDIR /usr/src/app
 
 # Copy the code
 COPY . .
 
-# Install application dependencies and build
-RUN cargo install --path .
-
-EXPOSE 8000:8000
-
-# Default command for this image
-CMD ["./target/release/citymapper-server"]
+# Install application dependencies
+RUN cargo build --bin setup_db --release
+RUN cargo build --bin setup_meilisearch --release

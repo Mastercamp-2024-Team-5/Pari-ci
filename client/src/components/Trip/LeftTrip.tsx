@@ -15,6 +15,7 @@ import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage, RatingStatus } from "../Shared/enum";
 import Rating from "./Rating.tsx";
 import logo from "../../assets/logo.svg";
+import { BASE_API_LINK } from "../Shared/links.ts";
 
 
 const LeftTrip = () => {
@@ -94,7 +95,7 @@ const LeftTrip = () => {
                 return hash[stopId];
             }
             try {
-                const response = await fetch(`http://localhost:8000/stop/${stopId}`);
+                const response = await fetch(`${BASE_API_LINK}/stop/${stopId}`);
                 const data = await response.json();
                 hash[stopId] = data[0].stop_name;
                 return hash[stopId];
@@ -109,7 +110,7 @@ const LeftTrip = () => {
                 return hash[tripIp];
             }
             try {
-                const response = await fetch(`http://localhost:8000/trip/${tripIp}`);
+                const response = await fetch(`${BASE_API_LINK}/trip/${tripIp}`);
                 const data = await response.json();
                 hash[tripIp] = data[0].headsign;
                 return hash[tripIp];

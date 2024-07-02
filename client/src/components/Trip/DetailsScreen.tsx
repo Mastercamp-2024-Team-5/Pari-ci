@@ -173,7 +173,12 @@ const DetailsScreen = () => {
           justifyContent={"space-between"}
         >
           <Text fontSize="xl" fontWeight="550" textAlign="start">
-            Arrivé à {dataTrip.arrival.toLocaleTimeString()}
+            Arrivé à {
+              addTime(
+                dataTrip.departure,
+                dataTrip.points[dataTrip.points.length - 1].departure_time + dataTrip.points[dataTrip.points.length - 1].travel_time
+              ).toLocaleTimeString()
+            }
           </Text>
           <IconButton
             aria-label="Share"

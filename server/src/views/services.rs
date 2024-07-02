@@ -509,6 +509,7 @@ pub fn real_time_path_reverse(
     let current_time = end_date.clone();
     let time = current_time.time().as_hms();
     let mut time = (time.0 as i32 * 3600) + (time.1 as i32 * 60) + (time.2 as i32);
+    println!("max time: {:?}", time);
 
     let mut current_stop = path.1[path.1.len() - 1].clone();
 
@@ -528,22 +529,43 @@ pub fn real_time_path_reverse(
                     .eq(stop_id.clone())
                     .and(stop_times_dsl::stop_id2.eq(&current_stop)),
             )
-            .filter(stop_times_dsl::arrival_time2.le(time))
-            .order(stop_times_dsl::arrival_time2.desc())
+            .filter(stop_times_dsl::arrival_time2.le(time + 3600 * 24))
             .select((
                 stop_times_dsl::departure_time1,
                 stop_times_dsl::arrival_time2,
                 trips_dsl::route_id,
                 routes_dsl::short_name,
                 stop_times_dsl::trip_id,
+                // computed column true if le than time
+                diesel::dsl::sql::<diesel::sql_types::Bool>(
+                    format!("arrival_time2 <= {} as is_before", time).as_str(),
+                ),
             ))
-            .first::<(i32, i32, String, String, String)>(connection);
+            .order((
+                diesel::dsl::sql::<diesel::sql_types::Bool>("is_before desc"),
+                stop_times_dsl::arrival_time2.desc(),
+            ))
+            .first::<(i32, i32, String, String, String, bool)>(connection);
 
         match stop_time {
-            Ok((departure_time, arrival_time, route_id, route_short_name, trip_id)) => {
+            Ok((departure_time, arrival_time, route_id, route_short_name, trip_id, _is_before)) => {
+                println!(
+                    "Found trip: {:?} -> {:?} at time {:?}:{:?}:{:?}({:?}) -> {:?}:{:?}:{:?}({:?})",
+                    stop_id,
+                    current_stop,
+                    departure_time / 3600,
+                    (departure_time % 3600) / 60,
+                    departure_time % 60,
+                    departure_time,
+                    arrival_time / 3600,
+                    (arrival_time % 3600) / 60,
+                    arrival_time % 60,
+                    arrival_time
+                );
                 if prev_departure_time.is_some() {
                     // update the wait time of the previous node
-                    let new_wait_time = prev_departure_time.unwrap() - arrival_time as u32;
+                    let new_wait_time = (prev_departure_time.unwrap() as i32 - arrival_time as i32)
+                        .rem_euclid(3600 * 24) as u32;
                     new_path[counter].wait_time = new_wait_time;
                 }
 
@@ -611,9 +633,10 @@ pub fn real_time_path_reverse(
 
     println!("Path: {:#?}", new_path);
 
-    let cost = new_path
-        .iter()
-        .fold(0, |acc, x| acc + x.wait_time + x.travel_time);
+    let og_time = end_date.time().as_hms();
+    let og_time = (og_time.0 as i32 * 3600) + (og_time.1 as i32 * 60) + (og_time.2 as i32);
+    let cost = (og_time as i32 - time as i32).rem_euclid(3600 * 24) as u32;
+    println!("Total time of travel (cost + offset): {:?}", cost);
     Ok((cost, new_path))
 }
 

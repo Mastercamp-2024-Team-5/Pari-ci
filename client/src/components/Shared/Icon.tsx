@@ -22,7 +22,9 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
     parse_size = size;
   }
 
+  // pass the item and color to lowercase
   item = item?.toLowerCase();
+  color = color?.toLowerCase();
   //Check if icon is in the css component of config.json data in the glyphs[].css
   if (item == "7b" || item == "3b") {
     item = item.replace('b', 'bis');
@@ -138,6 +140,9 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
   }
   if (color in colors_metro === true) {
     color_chosen = colors_metro[color][0];
+  }
+  if (color in colors_tram === true) {
+    color_chosen = colors_tram[color];
   }
 
   return (

@@ -199,7 +199,13 @@ const LeftTrip = () => {
                             fontSize="2xl"
                             marginBottom="2%"
                         >
-                            Arrivé à {dataTrip.arrival.toLocaleTimeString()}{" "}
+                            Arrivé à {
+                                addTime(
+                                    dataTrip.departure,
+                                    dataTrip.points[dataTrip.points.length - 1].departure_time +
+                                    dataTrip.points[dataTrip.points.length - 1].travel_time
+                                ).toLocaleTimeString()
+                            }{" "}
                         </Heading>
                         <Stack spacing={0}>
                             <StopDetail

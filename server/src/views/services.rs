@@ -394,15 +394,21 @@ pub struct PathNode {
     trip_id: Option<String>,
 }
 
+pub struct ErrorNotFound {
+    pub forbiden_edge: Option<(String, String)>,
+}
+
 pub fn real_time_path(
     path: (u32, Vec<String>),
     start_date: PrimitiveDateTime,
-) -> Result<(u32, Vec<PathNode>), diesel::result::Error> {
+) -> Result<(u32, Vec<PathNode>), ErrorNotFound> {
     // for every pair of stops in the path, we need to check the stop times or the transfers
     let mut new_path: Vec<PathNode> = Vec::new();
 
     if path.1.len() < 2 {
-        return Err(diesel::result::Error::NotFound);
+        return Err(ErrorNotFound {
+            forbiden_edge: None,
+        });
     }
 
     let connection = &mut establish_connection_pg();
@@ -475,12 +481,9 @@ pub fn real_time_path(
                         time += walk_time;
                     }
                     Err(_) => {
-                        println!(
-                            "No transfer or trip found for {:?} -> {:?} at time {:?}",
-                            current_stop, stop_id, time
-                        );
-                        println!("Actual path: {:#?}", new_path);
-                        return Err(diesel::result::Error::NotFound);
+                        return Err(ErrorNotFound {
+                            forbiden_edge: Some((current_stop.clone(), stop_id.clone())),
+                        });
                     }
                 }
             }
@@ -496,12 +499,14 @@ pub fn real_time_path(
 pub fn real_time_path_reverse(
     path: (u32, Vec<String>),
     end_date: PrimitiveDateTime,
-) -> Result<(u32, Vec<PathNode>), diesel::result::Error> {
+) -> Result<(u32, Vec<PathNode>), ErrorNotFound> {
     // for every pair of stops in the path, we need to check the stop times or the transfers
     let mut new_path: Vec<PathNode> = Vec::new();
 
     if path.1.len() < 2 {
-        return Err(diesel::result::Error::NotFound);
+        return Err(ErrorNotFound {
+            forbiden_edge: None,
+        });
     }
 
     let connection = &mut establish_connection_pg();
@@ -618,20 +623,15 @@ pub fn real_time_path_reverse(
                         counter += 1;
                     }
                     Err(_) => {
-                        println!(
-                            "No transfer or trip found for {:?} -> {:?} at time {:?}",
-                            stop_id, current_stop, time
-                        );
-                        println!("Actual path: {:#?}", new_path);
-                        return Err(diesel::result::Error::NotFound);
+                        return Err(ErrorNotFound {
+                            forbiden_edge: Some((stop_id.clone(), current_stop.clone())),
+                        });
                     }
                 }
             }
         };
         current_stop = stop_id.clone();
     }
-
-    println!("Path: {:#?}", new_path);
 
     let og_time = end_date.time().as_hms();
     let og_time = (og_time.0 as i32 * 3600) + (og_time.1 as i32 * 60) + (og_time.2 as i32);
@@ -640,7 +640,7 @@ pub fn real_time_path_reverse(
     Ok((cost, new_path))
 }
 
-#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>&<pmr>")]
+#[get("/path?<start_stop>&<end_stop>&<date>&<time>&<reverse>&<pmr>&<forbiden_edges>")]
 pub fn get_path(
     start_stop: &str,
     end_stop: &str,
@@ -649,17 +649,19 @@ pub fn get_path(
     reverse: Option<bool>,
     pmr: Option<bool>,
     g: &State<Graph>,
+    forbiden_edges: Option<Vec<(String, String)>>,
 ) -> Result<Json<(PrimitiveDateTime, Vec<PathNode>)>, NotFound<String>> {
     let format_date = format_description!("[year]-[month]-[day]");
     let format_time = format_description!("[hour]:[minute]:[second]");
-    let time = Time::parse(time, &format_time).unwrap();
+    let _time = Time::parse(time, &format_time).unwrap();
 
     let shortest_path = g.shortest_path(
         start_stop.to_string(),
         end_stop.to_string(),
-        time.hour() as usize,
+        _time.hour() as usize,
         reverse.unwrap_or(false),
         pmr.unwrap_or(false),
+        forbiden_edges.clone().unwrap_or(Vec::new()),
     );
 
     let shortest_path = match shortest_path {
@@ -669,7 +671,7 @@ pub fn get_path(
         }
         None => {
             println!("No path found");
-            (0, vec![])
+            return Err(NotFound("No path found".to_string()));
         }
     };
     let shortest_path = (shortest_path.0, remove_trailing_stops(shortest_path.1));
@@ -677,19 +679,19 @@ pub fn get_path(
     let path = if reverse == Some(true) {
         real_time_path_reverse(
             shortest_path,
-            PrimitiveDateTime::new(Date::parse(&date, &format_date).unwrap(), time),
+            PrimitiveDateTime::new(Date::parse(&date, &format_date).unwrap(), _time),
         )
     } else {
         real_time_path(
             shortest_path,
-            PrimitiveDateTime::new(Date::parse(&date, &format_date).unwrap(), time),
+            PrimitiveDateTime::new(Date::parse(&date, &format_date).unwrap(), _time),
         )
     };
 
     match path {
         Ok((cost, path)) => {
             let mut endtime =
-                PrimitiveDateTime::new(Date::parse(date, &format_date).unwrap(), time);
+                PrimitiveDateTime::new(Date::parse(date, &format_date).unwrap(), _time);
             if reverse == Some(true) {
                 endtime = endtime.sub(Duration::seconds(cost as i64));
             } else {
@@ -697,9 +699,28 @@ pub fn get_path(
             }
             Ok(Json((endtime, path)))
         }
-        Err(_) => {
-            // return status 404
-            Err(NotFound("No path found".to_string()))
+        Err(error) => {
+            // recursive call to find a path without the forbiden edges
+            if let Some(forbiden_edge) = error.forbiden_edge {
+                let mut forbiden_edges = forbiden_edges.unwrap_or(Vec::new());
+                forbiden_edges.push(forbiden_edge);
+                // check that the list is not too long to avoid infinite loops
+                if forbiden_edges.len() > 10 {
+                    return Err(NotFound("No path found".to_string()));
+                }
+                return get_path(
+                    start_stop,
+                    end_stop,
+                    date,
+                    time,
+                    reverse,
+                    pmr,
+                    g,
+                    Some(forbiden_edges),
+                );
+            } else {
+                return Err(NotFound("No path found".to_string()));
+            }
         }
     }
 }

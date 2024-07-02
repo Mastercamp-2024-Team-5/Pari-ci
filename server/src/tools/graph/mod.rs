@@ -85,6 +85,7 @@ impl Graph {
         hour: usize,
         reverse: bool,
         pmr: bool,
+        forbiden_edges: Vec<(NodeIndex, NodeIndex)>,
     ) -> Option<(u32, Vec<NodeIndex>)> {
         let start_index = *self.node_indices.get(&start)?;
         let goal_index = *self.node_indices.get(&goal)?;
@@ -124,6 +125,13 @@ impl Graph {
             }
 
             for edge in &self.nodes[position].edges {
+                // check if the edge is forbidden
+                if forbiden_edges.contains(&(
+                    self.nodes[position].id.clone(),
+                    self.nodes[edge.destination].id.clone(),
+                )) {
+                    continue;
+                }
                 // check if we are using a parent transfer for fast traveling
                 if (edge.wait_time == 0 && edge.weight == 0)
                     && (edge.destination != goal_index && position != start_index)

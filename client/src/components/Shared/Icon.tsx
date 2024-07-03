@@ -25,6 +25,8 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
   // pass the item and color to lowercase
   item = item?.toLowerCase();
   color = color?.toLowerCase();
+  // remove spaces
+  item = item.replace(/\s/g, "");
   //Check if icon is in the css component of config.json data in the glyphs[].css
   if (item == "7b" || item == "3b") {
     item = item.replace('b', 'bis');
@@ -42,7 +44,12 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
     );
   }
   if (item === "cdg val") {
-    item = "parici";
+    const minWidth = ((95 / 24) * parse_size).toFixed(0) + "px";
+    return (
+      <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
+        <i className="icon-cdgval" style={{ fontSize: size }}></i>
+      </Box>
+    );
   }
 
   const colors_metro: { [key: string]: string[] } = {

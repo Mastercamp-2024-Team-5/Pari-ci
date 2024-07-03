@@ -56,10 +56,7 @@ const LeftTrip = () => {
             departure_time: tripList[0].wait_time,
         } as Point;
 
-        let total = tripList[0].travel_time + tripList[0].wait_time;
-
         for (const trip of tripList.slice(1)) {
-            total += trip.travel_time + trip.wait_time;
             // check if the trip is on the same line and direction as the previous one
             if (trip.route_short_name === currentPoint.line) {
                 currentPoint.to = trip.to_stop_id;
@@ -82,8 +79,6 @@ const LeftTrip = () => {
                     departure_time: lastTime,
                 } as Point;
             }
-            console.log(total, "total")
-            console.log(currentPoint.travel_time + lastTime, "currentPoint.travel_time + lastTime")
         }
 
         // add the last point

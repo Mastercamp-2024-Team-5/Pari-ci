@@ -64,6 +64,7 @@ services:
             - meilisearch
         environment:
             DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+            ROCKET_STAGE: production
         command: ["./target/release/citymapper-server"]
 
     frontend:

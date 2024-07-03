@@ -41,6 +41,9 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
       </Box>
     );
   }
+  if (item === "cdg val") {
+    item = "parici";
+  }
 
   const colors_metro: { [key: string]: string[] } = {
     "1": ["rgb(255,206,0)", "rgb(37,48,59)"],

@@ -50,7 +50,6 @@ const DetailsScreen = () => {
       fetch(`${BASE_API_LINK}/share`, requestOptions)
         .then((response) => {
           if (!response.ok) {
-            console.log(response);
             throw new Error("Network response was not ok");
           }
           return response.json();

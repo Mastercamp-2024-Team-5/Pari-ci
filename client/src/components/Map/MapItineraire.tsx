@@ -21,7 +21,6 @@ const MapItineraire: React.FC = React.memo(() => {
 
   function buildLineFromRouteParts(route_parts: RouteTrace[], start: [number, number], end: [number, number]): RouteTrace | undefined {
     // recursively build the line from the route parts
-    console.log("Building line from route parts between", start + " and " + end)
     const route_parts_f = route_parts.filter((r) => {
       const shape = JSON.parse(r.shape);
       return isSameCoordinate(shape.coordinates[0], start) || isSameCoordinate(shape.coordinates[shape.coordinates.length - 1], start);
@@ -38,7 +37,6 @@ const MapItineraire: React.FC = React.memo(() => {
         continue;
       }
       else {
-        console.log("Next route part found");
         return {
           id: route_part.id,
           route_id: route_part.route_id,
@@ -84,8 +82,6 @@ const MapItineraire: React.FC = React.memo(() => {
         const stopData = stops.find((s) => s.stop_id === edge.from_stop_id && s.route_id === edge.route_id) || stops.find((s) => s.stop_id === edge.from_stop_id) || defaultStop;
         const nextStopData = stops.find((s) => s.stop_id === edge.to_stop_id) || defaultStop;
         const routeParts = routes.filter(shape => shape.route_id === edge.route_id);
-        console.log("Building line from route parts between", stopData.stop_name + " and " + nextStopData.stop_name)
-        console.log(routeParts)
         part = buildLineFromRouteParts(routeParts, [stopData.stop_lon, stopData.stop_lat], [nextStopData.stop_lon, nextStopData.stop_lat]);
         if (part === undefined) {
           const routeColor = routes.find((r) => r.route_id === edge.route_id)?.color

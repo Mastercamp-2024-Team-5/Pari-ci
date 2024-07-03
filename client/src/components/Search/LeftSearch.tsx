@@ -59,6 +59,15 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
     }
   }, [destination]);
 
+  useEffect(() => {
+    if (startAt !== "") {
+      setSelectedDateType("startAt");
+    } else if (endAt !== "") {
+      setSelectedDateType("endAt");
+    }
+  }, [startAt, endAt, setSelectedDateType]);
+
+
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -75,7 +84,6 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       }
       const date_string = startAt === "" ? endAt : startAt;
       // parse date
-      console.log(date_string);
       const date = new Date(date_string);
       // remove timezone offset
       date.setMinutes(date.getMinutes() - date.getTimezoneOffset());

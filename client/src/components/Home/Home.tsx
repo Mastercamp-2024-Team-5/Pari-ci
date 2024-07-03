@@ -25,6 +25,7 @@ import { AutocompleteResults } from "../Search/AutocompleteResults.tsx";
 import { useLoaderData } from "react-router-dom";
 import LeftTrip from "../Trip/LeftTrip.tsx";
 import DetailsScreen from "../Trip/DetailsScreen.tsx";
+import { MEILISEARCH_API_LINK } from "../Shared/links.ts";
 
 const Home: React.FC = () => {
   const screenWidth = useScreenWidth();
@@ -54,7 +55,7 @@ const Home: React.FC = () => {
       q: textQuery,
     };
 
-    const link = accessible_only ? "http://localhost:7700/indexes/stops_pmr/search" : "http://localhost:7700/indexes/stops/search";
+    const link = `${MEILISEARCH_API_LINK}/indexes/${accessible_only ? "stops_pmr" : "stops"}/search`;
 
     const response = await fetch(link, {
       method: "POST",

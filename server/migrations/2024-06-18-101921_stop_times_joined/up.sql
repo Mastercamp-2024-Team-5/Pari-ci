@@ -21,4 +21,8 @@ CREATE INDEX stop_times_joined_stop_id2_idx ON stop_times_joined (stop_id2);
 
 CREATE INDEX stop_times_joined_trip_id_idx ON stop_times_joined (trip_id);
 
+CREATE INDEX stop_times_joined_arrival_time2_idx ON stop_times_joined (arrival_time2);
+
+CREATE INDEX stop_times_joined_departure_time1_idx ON stop_times_joined (departure_time1);
+
 -- No distinct because some trips go to the same stop twice

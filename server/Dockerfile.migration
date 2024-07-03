@@ -1,0 +1,16 @@
+FROM rustlang/rust:nightly-slim as builder
+
+RUN apt update && apt install -y libpq-dev postgresql-client
+
+# Install Diesel CLI
+RUN cargo install diesel_cli --no-default-features --features postgres
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy the code
+COPY . .
+
+# Install application dependencies
+RUN cargo build --bin setup_db --release
+RUN cargo build --bin setup_meilisearch --release

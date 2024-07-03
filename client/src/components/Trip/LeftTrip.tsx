@@ -15,6 +15,7 @@ import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage, RatingStatus } from "../Shared/enum";
 import Rating from "./Rating.tsx";
 import logo from "../../assets/logo.svg";
+import { BASE_API_LINK } from "../Shared/links.ts";
 
 
 const LeftTrip = () => {
@@ -53,17 +54,32 @@ const LeftTrip = () => {
       departure_time: tripList[0].wait_time,
     } as Point;
 
-    let total = tripList[0].travel_time + tripList[0].wait_time;
+        for (const trip of tripList.slice(1)) {
+            // check if the trip is on the same line and direction as the previous one
+            if (trip.route_short_name === currentPoint.line) {
+                currentPoint.to = trip.to_stop_id;
+                currentPoint.travel_time += trip.travel_time + trip.wait_time;
+                currentPoint.nbr += 1;
+            } else {
+                // add the current point to the list
+                currentPoint.departure_time = lastTime;
+                lst.push(currentPoint);
+                // update the last time
+                lastTime += currentPoint.travel_time + trip.wait_time;
+                // create a new point
+                currentPoint = {
+                    from: trip.from_stop_id,
+                    to: trip.to_stop_id,
+                    line: trip.route_short_name,
+                    direction: trip.trip_id,
+                    nbr: 1,
+                    travel_time: trip.travel_time,
+                    departure_time: lastTime,
+                } as Point;
+            }
+        }
 
-    for (const trip of tripList.slice(1)) {
-      total += trip.travel_time + trip.wait_time;
-      // check if the trip is on the same line and direction as the previous one
-      if (trip.route_short_name === currentPoint.line) {
-        currentPoint.to = trip.to_stop_id;
-        currentPoint.travel_time += trip.travel_time + trip.wait_time;
-        currentPoint.nbr += 1;
-      } else {
-        // add the current point to the list
+        // add the last point
         currentPoint.departure_time = lastTime;
         lst.push(currentPoint);
         // update the last time
@@ -80,10 +96,35 @@ const LeftTrip = () => {
         } as Point;
       }
     }
+        const fetchStopName = async (stopId: string) => {
+            if (hash[stopId]) {
+                return hash[stopId];
+            }
+            try {
+                const response = await fetch(`${BASE_API_LINK}/stop/${stopId}`);
+                const data = await response.json();
+                hash[stopId] = data[0].stop_name;
+                return hash[stopId];
+            } catch (error) {
+                console.error(error);
+                return stopId; // Fallback to stopId in case of error
+            }
+        };
 
-    // add the last point
-    currentPoint.departure_time = lastTime;
-    lst.push(currentPoint);
+        const fetchDirection = async (tripIp: string) => {
+            if (hash[tripIp]) {
+                return hash[tripIp];
+            }
+            try {
+                const response = await fetch(`${BASE_API_LINK}/trip/${tripIp}`);
+                const data = await response.json();
+                hash[tripIp] = data[0].headsign;
+                return hash[tripIp];
+            } catch (error) {
+                console.error(error);
+                return tripIp; // Fallback to stopId in case of error
+            }
+        };
 
     const fetchStopName = async (stopId: string) => {
       if (hash[stopId]) {
@@ -191,7 +232,13 @@ const LeftTrip = () => {
                             fontSize="2xl"
                             marginBottom="2%"
                         >
-                            Arrivé à {dataTrip.arrival.toLocaleTimeString()}{" "}
+                            Arrivé à {
+                                addTime(
+                                    dataTrip.departure,
+                                    dataTrip.points[dataTrip.points.length - 1].departure_time +
+                                    dataTrip.points[dataTrip.points.length - 1].travel_time
+                                ).toLocaleTimeString()
+                            }{" "}
                         </Heading>
                         <Stack spacing={0}>
                             <StopDetail

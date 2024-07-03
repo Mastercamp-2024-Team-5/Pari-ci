@@ -6,6 +6,7 @@ import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
 import Icon from "../Shared/Icon";
 import { useState } from "react";
+import { BASE_API_LINK } from "../Shared/links";
 
 enum AnimationState {
   Idle,
@@ -122,10 +123,9 @@ const DetailsScreen = () => {
         body: JSON.stringify(requestData),
       };
 
-      fetch("http://localhost:8000/share", requestOptions)
+      fetch(`${BASE_API_LINK}/share`, requestOptions)
         .then((response) => {
           if (!response.ok) {
-            console.log(response);
             throw new Error("Network response was not ok");
           }
           return response.json();

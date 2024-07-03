@@ -5,6 +5,7 @@ import { useToast } from '@chakra-ui/react';
 import { RatingStatus } from '../Shared/enum';
 import { useHomeContext } from '../Home/HomeContext';
 import { TripData } from '../Shared/types';
+import { BASE_API_LINK } from '../Shared/links';
 
 interface RatingProps {
     isOpen: boolean;
@@ -35,7 +36,7 @@ const Rating: React.FC<RatingProps> = ({ isOpen, setRatingStatus }) => {
             return;
         }
         // Send the rating to the backend
-        const response = await fetch('http://localhost:8000/rate', {
+        const response = await fetch(`${BASE_API_LINK}/rate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

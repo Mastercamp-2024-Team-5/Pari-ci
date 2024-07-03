@@ -1,9 +1,10 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
-import { Layer, Marker, Popup, Source } from "react-map-gl";
-import Icon from "../Shared/Icon";
-import { Route, RouteTrace, Stop, RouteCollection } from "../Shared/types";
-import { ActiveRoutes } from "../Shared/enum";
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { Layer, Marker, Popup, Source } from 'react-map-gl';
+import Icon from '../Shared/Icon';
+import { Route, RouteTrace, Stop, RouteCollection } from '../Shared/types';
+import { ActiveRoutes } from '../Shared/enum';
+import { BASE_API_LINK } from '../Shared/links';
 
 interface MapElementsProps {
   selectedButton: ActiveRoutes;
@@ -21,12 +22,10 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
 
   const fetchStops = async (buttonType: ActiveRoutes) => {
     try {
-      const route_response = await fetch(
-        `http://localhost:8000/routes?${buttonType}`
-      );
+      const route_response = await fetch(`${BASE_API_LINK}/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
 
-      const response = await fetch(`http://127.0.0.1:8000/stops?${buttonType}`);
+      const response = await fetch(`${BASE_API_LINK}/stops?${buttonType}`);
       const data: Stop[] = await response.json();
 
       if (!Array.isArray(data) || !data.length) {
@@ -60,14 +59,10 @@ const MapElements: React.FC<MapElementsProps> = ({ selectedButton }) => {
 
   const fetchGeojson = async (buttonType: ActiveRoutes) => {
     try {
-      const route_response = await fetch(
-        `http://localhost:8000/routes?${buttonType}`
-      );
+      const route_response = await fetch(`${BASE_API_LINK}/routes?${buttonType}`);
       const routes: Route[] = await route_response.json();
 
-      const response = await fetch(
-        `http://localhost:8000/routes_trace?${buttonType}`
-      );
+      const response = await fetch(`${BASE_API_LINK}/routes_trace?${buttonType}`);
       const data: RouteTrace[] = await response.json();
 
       const geojson_output: RouteCollection[] = [];

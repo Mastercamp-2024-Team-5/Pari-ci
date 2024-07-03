@@ -85,6 +85,7 @@ impl Graph {
         hour: usize,
         reverse: bool,
         pmr: bool,
+        forbiden_edges: Vec<(NodeIndex, NodeIndex)>,
     ) -> Option<(u32, Vec<NodeIndex>)> {
         let start_index = *self.node_indices.get(&start)?;
         let goal_index = *self.node_indices.get(&goal)?;
@@ -115,6 +116,7 @@ impl Graph {
                 }
                 path.push(self.nodes[start_index].id.clone());
                 path.reverse();
+                println!("{:?},{:?}", cost, path);
                 return Some((cost, path));
             }
 
@@ -123,6 +125,13 @@ impl Graph {
             }
 
             for edge in &self.nodes[position].edges {
+                // check if the edge is forbidden
+                if forbiden_edges.contains(&(
+                    self.nodes[position].id.clone(),
+                    self.nodes[edge.destination].id.clone(),
+                )) {
+                    continue;
+                }
                 // check if we are using a parent transfer for fast traveling
                 if (edge.wait_time == 0 && edge.weight == 0)
                     && (edge.destination != goal_index && position != start_index)
@@ -134,21 +143,37 @@ impl Graph {
                     continue;
                 }
                 // check if there is a trip between the two stops at the current hour
-                if let Some(trip_per_hour) = &edge.trip_per_hour {
+                let hour_offset = if let Some(mut trip_per_hour) = &edge.trip_per_hour {
                     let current_hour = if reverse {
-                        hour - (cost / 3600) as usize
+                        hour as i32 - (cost / 3600) as i32
                     } else {
-                        hour + (cost / 3600) as usize
+                        hour as i32 + (cost / 3600) as i32
                     };
-                    if trip_per_hour[current_hour % 30] == 0 {
-                        continue;
+                    let current_hour = current_hour.rem_euclid(30);
+                    // find the number of hours until the next trip
+                    let slice = trip_per_hour.as_mut_slice();
+                    slice.rotate_left(current_hour as usize);
+                    let position = if reverse {
+                        slice.iter().rev().position(|&x| x > 0)
+                    } else {
+                        slice.iter().position(|&x| x > 0)
+                    };
+                    match position {
+                        Some(next_hour) => Some(next_hour as u32 * 3600),
+                        None => None,
                     }
+                } else {
+                    Some(0)
+                };
+                if hour_offset.is_none() {
+                    continue;
                 }
                 let next = State {
                     cost: if prev_route == Some(edge.route.clone()) {
-                        cost + edge.weight
+                        cost + edge.weight + hour_offset.unwrap()
                     } else {
-                        cost + edge.weight + edge.wait_time + 180 // add 3 minutes for augmenting the cost of changing routes
+                        cost + edge.weight + edge.wait_time + 180 + hour_offset.unwrap()
+                        // add 3 minutes for augmenting the cost of changing routes
                     },
                     prev_route: Some(edge.route.clone()),
                     position: edge.destination,

@@ -6,6 +6,7 @@ import { getCookie } from "./manageCookies";
 import { useEffect, useState } from "react";
 import { HomeProvider } from "./components/Home/HomeContext";
 import AccessibleScreen from "./components/Pages/WheelchairConvenientPage";
+import { BASE_API_LINK } from "./components/Shared/links";
 
 const router = createBrowserRouter(
   [
@@ -23,7 +24,7 @@ const router = createBrowserRouter(
       path: "/path/:id?",
       element: <Home />,
       loader: async ({ params }) => {
-        return fetch("http://localhost:8000/share/" + params.id).then((response) => {
+        return fetch(BASE_API_LINK + "/share/" + params.id).then((response) => {
           if (!response.ok) {
             return null;
           }

@@ -16,6 +16,7 @@ import { ActiveSearchInput } from "../Shared/types.tsx";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Icon } from "@chakra-ui/react";
 import { MdExpandMore } from "react-icons/md";
+import { BASE_API_LINK } from "../Shared/links.ts";
 
 type Props = {
   fetchMeilisearchResults: (textQuery: string) => void;
@@ -58,6 +59,15 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
     }
   }, [destination]);
 
+  useEffect(() => {
+    if (startAt !== "") {
+      setSelectedDateType("startAt");
+    } else if (endAt !== "") {
+      setSelectedDateType("endAt");
+    }
+  }, [startAt, endAt, setSelectedDateType]);
+
+
   const screenWidth = useScreenWidth();
   const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -79,7 +89,7 @@ const LeftSearch = ({ fetchMeilisearchResults, setSelectedSearch }: Props) => {
       date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
       // custom format YYYYMMDD and HH:MM:SS
       fetch(
-        `http://localhost:8000/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}${accessible_only ? "&pmr" : ""}`
+        `${BASE_API_LINK}/path?start_stop=${departure.id}&end_stop=${destination.id}&date=${date.toISOString().slice(0, 10)}&time=${date.toISOString().slice(11, 19)}${endAt === "" ? "" : "&reverse"}${accessible_only ? "&pmr" : ""}`
       )
         .then((response) => {
           if (response.status === 404) {

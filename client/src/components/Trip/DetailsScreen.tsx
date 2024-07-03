@@ -1,22 +1,90 @@
 import { Flex, Text, IconButton, useToast } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
-import { Point, SharedTripResponse } from "../Shared/types";
+import { Point, SharedTripResponse, Stop } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BASE_API_LINK } from "../Shared/links";
-
-enum AnimationState {
-  Idle,
-  Loading,
-}
+import Icon from "../Shared/Icon";
 
 const DetailsScreen = () => {
   const { setActiveRightPage, dataTrip, dataPath, departure, destination, startAt, endAt } = useHomeContext();
   const [sharedLink, setSharedLink] = useState<string>("");
-  const [animateShare, setAnimateShare] = useState(AnimationState.Idle);
   const toast = useToast();
+  const [co2Car, setCo2Car] = useState<number>(0);
+  const [co2PublicTransport, setCo2PublicTransport] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchStops = async () => {
+      console.log(departure, destination);
+      // fetch by id the departure and destination stops
+      const departureResponse = await fetch(
+        `${BASE_API_LINK}/stop/${departure?.id}`
+      );
+      const departureStop: Stop[] = await departureResponse.json();
+
+      const destinationResponse = await fetch(
+        `${BASE_API_LINK}/stop/${destination?.id}`
+      );
+      const destinationStop: Stop[] = await destinationResponse.json();
+      console.log(departureStop, destinationStop);
+
+      const totalTravelTime = dataTrip?.points.reduce((sum, obj) => {
+        if (obj.line && obj.direction) {
+          return sum + obj.travel_time;
+        }
+        return sum;
+      }, 0);
+
+      const publicTransportCo2Emission = Math.round(
+        (totalTravelTime || 0) * 0.68
+      );
+
+      if (departureStop.length === 0 || destinationStop.length === 0) {
+        return;
+      }
+
+      const distanceInKm = distance(
+        departureStop[0].stop_lat,
+        departureStop[0].stop_lon,
+        destinationStop[0].stop_lat,
+        destinationStop[0].stop_lon
+      );
+
+      const carCo2Emission = Math.round(distanceInKm * 192);
+
+      setCo2Car(carCo2Emission);
+      setCo2PublicTransport(publicTransportCo2Emission);
+    };
+
+    fetchStops();
+  }, [departure, destination]);
+
+  function distance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1); // deg2rad below
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+  }
+
+  function deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
+  }
+
 
   function addTime(date: Date, time: number): Date {
     return new Date(date.getTime() + time * 1000);
@@ -24,7 +92,6 @@ const DetailsScreen = () => {
 
   async function handleShared() {
     if (sharedLink === "") {
-      setAnimateShare(AnimationState.Loading);
       const requestData = {
         departure: departure,
         destination: destination,
@@ -76,12 +143,8 @@ const DetailsScreen = () => {
             isClosable: true,
           });
         })
-        .finally(async () => {
-          setAnimateShare(AnimationState.Idle);
-        });
     } else {
       navigator.clipboard.writeText(sharedLink).then(() => {
-        setAnimateShare(AnimationState.Idle);
         toast({
           title: `Lien copié dans le presse-papier`,
           status: 'success',
@@ -95,16 +158,7 @@ const DetailsScreen = () => {
   const renderMoreDetails = () => {
     if (!dataTrip) return null;
     return (
-      <div
-        style={{
-          overflowY: "auto",
-          maxHeight: "100%",
-          maxWidth: "100%",
-          borderRadius: "10px",
-          padding: "5px",
-          marginTop: "10px",
-        }}
-      >
+      <>
         {dataTrip.points.map((obj: Point, index: number) => {
           if (obj.line && obj.direction) {
             return (
@@ -165,30 +219,7 @@ const DetailsScreen = () => {
             );
           }
         })}
-        <Flex
-          marginTop="5%"
-          marginX="4%"
-          direction="row"
-          alignItems={"center"}
-          justifyContent={"space-between"}
-        >
-          <Text fontSize="xl" fontWeight="550" textAlign="start">
-            Arrivé à {
-              addTime(
-                dataTrip.departure,
-                dataTrip.points[dataTrip.points.length - 1].departure_time + dataTrip.points[dataTrip.points.length - 1].travel_time
-              ).toLocaleTimeString()
-            }
-          </Text>
-          <IconButton
-            aria-label="Share"
-            icon={<FaShareAlt />}
-            colorScheme="teal"
-            onClick={handleShared}
-            isLoading={animateShare === AnimationState.Loading}
-          />
-        </Flex>
-      </div>
+      </>
     );
   };
 
@@ -225,8 +256,72 @@ const DetailsScreen = () => {
       <Text fontSize="4xl" fontWeight="700" textAlign="start">
         Votre trajet :
       </Text>
-      {renderMoreDetails()}
-    </Flex>
+      <div
+        style={{
+          overflowY: "auto",
+          maxHeight: "100%",
+          maxWidth: "100%",
+          borderRadius: "10px",
+          padding: "5px",
+          marginTop: "10px",
+        }}
+      >
+        {renderMoreDetails()}
+        <Flex
+          marginTop="5%"
+          marginX="4%"
+          direction="row"
+          alignItems={"center"}
+          justifyContent={"space-between"}
+        >
+          <Text fontSize="xl" fontWeight="550" textAlign="start">
+            Arrivé à {dataTrip?.arrival.toLocaleTimeString()}
+          </Text>
+          <IconButton
+            aria-label="Share"
+            icon={<FaShareAlt />}
+            colorScheme="teal"
+            onClick={handleShared}
+          />
+        </Flex>
+        <Text
+          fontSize="l"
+          fontWeight="550"
+          textAlign="start"
+          border={"2px"}
+          borderRadius={"10px"}
+          borderColor={"gray.300"}
+          padding={"5px"}
+          paddingX={"10px"}
+          marginTop={"2%"}
+        >
+          <Flex
+            direction="row"
+            alignItems={"center"}
+            justifyContent={"center"}
+            gap={2}
+          >
+            <Icon item="voiture" size={20} color="teal" />
+            {co2Car}g
+            <span
+              style={{
+                color: "teal",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+              }}
+            >
+              VS
+            </span>
+            {co2PublicTransport}g
+            <Icon item="parici" size={20} color="teal" />
+          </Flex>
+          Félicitations ! En choisissant les transports en commun, vous avez
+          réduit votre empreinte carbone de{" "}
+          <strong>{co2Car - co2PublicTransport}g </strong>
+          de CO2.
+        </Text>
+      </div>
+    </Flex >
   );
 };
 

@@ -2,6 +2,10 @@
 
 Pari'ci is an application designed to optimize travel times within the Parisian transport network. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
 
+
+https://github.com/Mastercamp-2024-Team-5/Citymapper-Clone/assets/74359642/3a0a7b10-9965-453b-bf57-fbdc42b290f3
+
+
 ## Table of Contents
 
 - [Pari'ci](#parici)

@@ -4,7 +4,7 @@ import { Point, SharedTripResponse, Stop } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BASE_API_LINK } from "../Shared/links";
 import Icon from "../Shared/Icon";
 
@@ -15,71 +15,60 @@ const DetailsScreen = () => {
   const [co2Car, setCo2Car] = useState<number>(0);
   const [co2PublicTransport, setCo2PublicTransport] = useState<number>(0);
 
+  const distance = useCallback(
+    (
+      lat1: number,
+      lon1: number,
+      lat2: number,
+      lon2: number
+    ) => {
+      const R = 6371; // Radius of the earth in km
+      const dLat = deg2rad(lat2 - lat1); // deg2rad below
+      const dLon = deg2rad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const d = R * c; // Distance in km
+      return d;
+    },
+    []
+  );
+
   useEffect(() => {
     const fetchStops = async () => {
-      console.log(departure, destination);
-      // fetch by id the departure and destination stops
-      const departureResponse = await fetch(
-        `${BASE_API_LINK}/stop/${departure?.id}`
-      );
-      const departureStop: Stop[] = await departureResponse.json();
+      if (!departure || !destination) return;
 
-      const destinationResponse = await fetch(
-        `${BASE_API_LINK}/stop/${destination?.id}`
-      );
-      const destinationStop: Stop[] = await destinationResponse.json();
-      console.log(departureStop, destinationStop);
-
-      const totalTravelTime = dataTrip?.points.reduce((sum, obj) => {
-        if (obj.line && obj.direction) {
-          return sum + obj.travel_time;
-        }
-        return sum;
-      }, 0);
-
-      const publicTransportCo2Emission = Math.round(
-        (totalTravelTime || 0) * 0.68
-      );
-
-      if (departureStop.length === 0 || destinationStop.length === 0) {
-        return;
+      function fetchStopsCoords(stopId: string): Promise<[number, number]> {
+        return fetch(`${BASE_API_LINK}/stop/${stopId}`).then(async (response) =>
+          await response.json().then((data) => [data[0].stop_lat, data[0].stop_lon]))
       }
 
+      // fetch by id the departure and destination stops
+      const departureResponse = await fetchStopsCoords(departure.id);
+
+      const destinationResponse = await fetchStopsCoords(destination.id);
+
       const distanceInKm = distance(
-        departureStop[0].stop_lat,
-        departureStop[0].stop_lon,
-        destinationStop[0].stop_lat,
-        destinationStop[0].stop_lon
+        departureResponse[0],
+        departureResponse[1],
+        destinationResponse[0],
+        destinationResponse[1]
       );
 
-      const carCo2Emission = Math.round(distanceInKm * 192);
+
+      const carCo2Emission = Math.round(distanceInKm * 1.2 * 206);
+      const publicTransportCo2Emission = Math.round(distanceInKm * 3.8);
 
       setCo2Car(carCo2Emission);
       setCo2PublicTransport(publicTransportCo2Emission);
     };
 
     fetchStops();
-  }, [departure, destination]);
-
-  function distance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number {
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1); // deg2rad below
-    const dLon = deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
-    return d;
-  }
+  }, [departure, destination, distance]);
 
   function deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
@@ -302,7 +291,9 @@ const DetailsScreen = () => {
             gap={2}
           >
             <Icon item="voiture" size={20} color="teal" />
-            {co2Car}g
+            {
+              Math.round((co2Car / 10)) / 100
+            }kg
             <span
               style={{
                 color: "teal",
@@ -312,12 +303,14 @@ const DetailsScreen = () => {
             >
               VS
             </span>
-            {co2PublicTransport}g
+            {
+              Math.round((co2PublicTransport / 10)) / 100
+            }kg
             <Icon item="parici" size={20} color="teal" />
           </Flex>
           Félicitations ! En choisissant les transports en commun, vous avez
           réduit votre empreinte carbone de{" "}
-          <strong>{co2Car - co2PublicTransport}g </strong>
+          <strong>{Math.round((co2Car - co2PublicTransport) / 10) / 100}kg </strong>
           de CO2.
         </Text>
       </div>

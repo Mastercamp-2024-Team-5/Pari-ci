@@ -16,6 +16,7 @@ import { ActiveRightPage, RatingStatus } from "../Shared/enum";
 import Rating from "./Rating.tsx";
 import logo from "../../assets/logo.svg";
 import { BASE_API_LINK } from "../Shared/links.ts";
+import moment from "moment";
 
 
 const LeftTrip = () => {
@@ -193,15 +194,14 @@ const LeftTrip = () => {
                             fontFamily="Karla"
                             fontWeight="550"
                             fontSize="2xl"
-                            marginBottom="2%"
+                            marginTop="2%"
                         >
-                            Arrivée à {
-                                addTime(
-                                    dataTrip.departure,
-                                    dataTrip.points[dataTrip.points.length - 1].departure_time +
-                                    dataTrip.points[dataTrip.points.length - 1].travel_time
-                                ).toLocaleTimeString()
-                            }{" "}
+                            Durée : {
+                                moment(dataTrip.arrival).subtract(dataTrip.departure.getHours(), 'hours').subtract(
+                                    dataTrip.departure.getMinutes(), 'minutes').subtract(
+                                        dataTrip.points[0].departure_time, 'seconds'
+                                    ).format("HH \\h mm \\min")
+                            }
                         </Heading>
                         <Stack spacing={0}>
                             <StopDetail
@@ -234,9 +234,15 @@ const LeftTrip = () => {
                             fontFamily="Karla"
                             fontWeight="550"
                             fontSize="2xl"
-                            marginTop="2%"
+                            marginBottom="2%"
                         >
-                            Durée : {Math.floor((dataTrip.points[dataTrip.points.length - 1].departure_time + dataTrip.points[dataTrip.points.length - 1].travel_time - dataTrip.points[0].departure_time) / 60)} minutes
+                            Arrivée à {
+                                addTime(
+                                    dataTrip.departure,
+                                    dataTrip.points[dataTrip.points.length - 1].departure_time +
+                                    dataTrip.points[dataTrip.points.length - 1].travel_time
+                                ).toLocaleTimeString()
+                            }{" "}
                         </Heading>
                         <Text
                             onClick={toggleMoreDetails}

@@ -2,26 +2,24 @@
 
 Pari'ci is an application designed to optimize travel times within the Parisian transport network. By optimizing travel times, the application helps reduce the carbon footprint associated with daily commutes.
 
-## TODO
-
-- [ ] Implement route calculation algorithm
-- [ ] Write Models
-- [ ] Write Controllers
-- [ ] Write Services
-- [ ] Write Repositories
-- [ ] Write records / dtos / mappers
-- [ ] Finish MVP
-- [ ] Implement Mobile First Frontend w/ React or Angular
-- [ ] Use Axios
-- [ ] Improve UI/UX design
-
 ## Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup and Installation](#setup-and-installation)
-- [Contributing](#contributing)
-- [License](#license)
+- [Pari'ci](#parici)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+    - [Version 1](#version-1)
+    - [Version 2](#version-2)
+    - [Version 3](#version-3)
+    - [Version 3 + Bonus](#version-3--bonus)
+  - [Tech Stack](#tech-stack)
+    - [Frontend](#frontend)
+    - [Backend](#backend)
+  - [Setup and Installation](#setup-and-installation)
+    - [Prerequisites](#prerequisites)
+    - [Backend Setup](#backend-setup)
+    - [Frontend Setup](#frontend-setup)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 
@@ -53,12 +51,10 @@ Pari'ci is an application designed to optimize travel times within the Parisian 
 - Vite
 - React
 - TypeScript
-- TailwindCSS
 
 ### Backend
 
-- Java 22
-- Spring Boot 3.3.0
+- Rust
 - PostgreSQL
 - Docker
 
@@ -67,7 +63,7 @@ Pari'ci is an application designed to optimize travel times within the Parisian 
 ### Prerequisites
 
 - Node.js
-- Java 22
+- Rust
 - Docker
 - PostgreSQL
 
@@ -80,18 +76,19 @@ Pari'ci is an application designed to optimize travel times within the Parisian 
    cd server
    ```
 
-2. Configure the database in `src/main/resources/application.properties`:
+2. Configure the database with Rust Diesel:
 
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/citymapper
-   spring.datasource.username=yourusername
-   spring.datasource.password=yourpassword
-   spring.jpa.hibernate.ddl-auto=update
+   ```sh
+   diesel setup
+   diesel migration run
+   cargo run --bin setup_db AddAll
+   cargo run --bin setup_meilisearch
    ```
 
 3. Build and run the backend:
    ```sh
-   ./mvn spring-boot:run
+   bash meilisearch.sh
+   cargo run
    ```
 
 ### Frontend Setup

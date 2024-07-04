@@ -35,19 +35,11 @@ const Icon: React.FC<IconProps> = ({ item, size = "30px", style, color = "", onM
     return <Text style={{ color: "red" }}>Icon {item} not found</Text>;
   }
 
-  if (item === "orlyval") {
+  if (item === "orlyval" || item === "cdgval") {
     const minWidth = ((95 / 24) * parse_size).toFixed(0) + "px";
     return (
       <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
-        <i className="icon-orlyval" style={{ fontSize: size, minWidth, color: "#34697f" }}></i>
-      </Box>
-    );
-  }
-  if (item === "cdg val") {
-    const minWidth = ((95 / 24) * parse_size).toFixed(0) + "px";
-    return (
-      <Box position="relative" display="flex" alignItems="center" justifyContent="center" style={style}>
-        <i className="icon-cdgval" style={{ fontSize: size }}></i>
+        <i className={`icon-${item}`} style={{ fontSize: size, minWidth, color: "#34697f" }}></i>
       </Box>
     );
   }

@@ -57,7 +57,7 @@ const StopDetail = ({ stop, line, textColor, depart, direction, arrive }: { stop
                     fontWeight={"500"}
                     whiteSpace={"nowrap"}
                 >
-                    {arrive ? "Arrivé à" : "Départ à"} {depart}
+                    {arrive ? "Arrivée à" : "Départ à"} {depart}
                 </Text>
             </Flex >
         </Flex >

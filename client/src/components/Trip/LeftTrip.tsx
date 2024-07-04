@@ -195,7 +195,7 @@ const LeftTrip = () => {
                             fontSize="2xl"
                             marginBottom="2%"
                         >
-                            Arrivé à {
+                            Arrivée à {
                                 addTime(
                                     dataTrip.departure,
                                     dataTrip.points[dataTrip.points.length - 1].departure_time +
@@ -230,6 +230,14 @@ const LeftTrip = () => {
                                 }
                             />
                         </Stack>
+                        <Heading
+                            fontFamily="Karla"
+                            fontWeight="550"
+                            fontSize="2xl"
+                            marginTop="2%"
+                        >
+                            Durée : {Math.floor((dataTrip.points[dataTrip.points.length - 1].departure_time + dataTrip.points[dataTrip.points.length - 1].travel_time - dataTrip.points[0].departure_time) / 60)} minutes
+                        </Heading>
                         <Text
                             onClick={toggleMoreDetails}
                             fontSize={"md"}

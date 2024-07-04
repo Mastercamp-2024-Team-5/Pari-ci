@@ -275,7 +275,7 @@ const DetailsScreen = () => {
           justifyContent={"space-between"}
         >
           <Text fontSize="xl" fontWeight="550" textAlign="start">
-            Arrivé à {dataTrip?.arrival.toLocaleTimeString()}
+            Arrivée à {dataTrip?.arrival.toLocaleTimeString()}
           </Text>
           <IconButton
             aria-label="Share"

@@ -76,6 +76,11 @@ services:
             - "5173:5173"
         depends_on:
             - backend
+        environment:
+            VITE_REACT_APP_MAPBOX_TOKEN: "REACT_APP_MAPBOX_TOKEN"
+            VITE_REACT_MEILISEARCH_TOKEN: disregard-shingle-steadier-nuclear
+            VITE_BASE_API_LINK: http://localhost:8000
+            VITE_MEILISEARCH_API_LINK: http://localhost:7700
 
 volumes:
     postgres_data:

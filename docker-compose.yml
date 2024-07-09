@@ -42,6 +42,7 @@ services:
                 condition: service_healthy
         environment:
             DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
+            MEILI_HOST: http://meilisearch:7700
         command: >
             /bin/sh -c "
             until pg_isready -h postgres -p 5432; do

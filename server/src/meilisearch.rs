@@ -1,3 +1,5 @@
+use std::env;
+
 use crate::diesel::*;
 use base64::{engine::general_purpose, Engine as _};
 use diesel::RunQueryDsl;
@@ -80,8 +82,9 @@ pub fn get_stopentries(accessible_only: bool) -> Vec<StopEntry> {
 
 #[tokio::main]
 async fn main() {
+    println!("env : {:?}", env::var("MEILI_HOST"));
     let client = Client::new(
-        "http://localhost:7700",
+        env::var("MEILI_HOST").unwrap_or("http://localhost:7700".to_string()),
         Some("disregard-shingle-steadier-nuclear"),
     )
     .unwrap();

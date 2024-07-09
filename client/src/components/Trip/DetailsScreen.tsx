@@ -1,6 +1,6 @@
 import { Flex, Text, IconButton, useToast } from "@chakra-ui/react";
 import MoreDetails from "./MoreDetails";
-import { Point, SharedTripResponse, Stop } from "../Shared/types";
+import { Point, SharedTripResponse } from "../Shared/types";
 import { useHomeContext } from "../Home/HomeContext";
 import { ActiveRightPage } from "../Shared/enum";
 import { FaShareAlt } from "react-icons/fa";

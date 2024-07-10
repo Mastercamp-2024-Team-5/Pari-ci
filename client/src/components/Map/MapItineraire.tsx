@@ -19,7 +19,7 @@ const MapItineraire: React.FC = React.memo(() => {
     return coord1[0].toFixed(fixed) === coord2[0].toFixed(fixed) && coord1[1].toFixed(fixed) === coord2[1].toFixed(fixed);
   }
 
-  function buildLineFromRouteParts(route_parts: RouteTrace[], start: [number, number], end: [number, number]): RouteTrace | undefined {
+  function buildLineFromRoutePartsFunc(route_parts: RouteTrace[], start: [number, number], end: [number, number]): RouteTrace | undefined {
     // recursively build the line from the route parts
     const route_parts_f = route_parts.filter((r) => {
       const shape = JSON.parse(r.shape);
@@ -32,7 +32,7 @@ const MapItineraire: React.FC = React.memo(() => {
       }
       const next_start = isSameCoordinate(shape.coordinates[0], start) ? shape.coordinates[shape.coordinates.length - 1] : shape.coordinates[0];
       const next_route_parts = route_parts.filter((r) => r.route_id !== route_part.route_id);
-      const next = buildLineFromRouteParts(next_route_parts, next_start, end);
+      const next = buildLineFromRoutePartsFunc(next_route_parts, next_start, end);
       if (next === undefined) {
         continue;
       }
@@ -48,6 +48,8 @@ const MapItineraire: React.FC = React.memo(() => {
     }
     return undefined;
   }
+
+  const buildLineFromRouteParts = React.useCallback(buildLineFromRoutePartsFunc, [buildLineFromRoutePartsFunc]);
 
   useEffect(() => {
     async function fetchItineraire() {
@@ -134,7 +136,7 @@ const MapItineraire: React.FC = React.memo(() => {
     if (dataPath?.[1][0] != undefined && dataPath !== null) {
       fetchItineraire();
     }
-  }, [dataPath]);
+  }, [dataPath, buildLineFromRouteParts]);
 
   return (
     <>

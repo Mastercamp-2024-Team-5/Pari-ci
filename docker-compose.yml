@@ -22,6 +22,8 @@ services:
             - "7700:7700"
         volumes:
             - ./meili_data:/meili_data
+        environment:
+            MEILI_MASTER_KEY: YOUR_MEILISEARCH_TOKEN
         healthcheck:
             test: ["CMD-SHELL", "curl -s http://localhost:7700/health"]
             interval: 10s
@@ -65,7 +67,8 @@ services:
             - meilisearch
         environment:
             DATABASE_URL: postgres://postgres:postgres@postgres/citymapper
-            ROCKET_STAGE: production
+            ROCKET_PORT: 8000
+            ROCKET_ADDRESS: "0.0.0.0"
         command: ["./target/release/citymapper-server"]
 
     frontend:
@@ -73,14 +76,16 @@ services:
         build:
             context: ./client
         ports:
-            - "5173:5173"
+            - "4173:4173"
         depends_on:
             - backend
         environment:
-            VITE_REACT_APP_MAPBOX_TOKEN: "REACT_APP_MAPBOX_TOKEN"
-            VITE_REACT_MEILISEARCH_TOKEN: disregard-shingle-steadier-nuclear
-            VITE_BASE_API_LINK: http://localhost:8000
-            VITE_MEILISEARCH_API_LINK: http://localhost:7700
+            VITE_REACT_APP_MAPBOX_URL: YOUR_MAPBOX_URL
+            VITE_REACT_APP_MAPBOX_URL_DARK: YOUR_MAPBOX_URL
+            VITE_REACT_APP_MAPBOX_TOKEN: YOUR_MAPBOX_TOKEN
+            VITE_REACT_MEILISEARCH_TOKEN: YOUR_MEILISEARCH_TOKEN
+            VITE_BASE_API_LINK: YOUR_API_LINK
+            VITE_MEILISEARCH_API_LINK: YOUR_MEILISEARCH_API_LINK
 
 volumes:
     postgres_data:
